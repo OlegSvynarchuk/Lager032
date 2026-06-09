@@ -154,6 +154,9 @@ every upload. Price formula confirmed: **VP cena + marža kategorije + 20% PDV =
   does NOT want direct-from-program integration. The Excel upload tool is the whole solution.
 - **Cadence / scale:** product types are stable; new categories appear ~once a year. Client
   uploads the Excel themselves; it must be a simple **2–3 minute** self-service procedure.
+- **File format:** accept **.xlsx directly** (no CSV step). Use a single-file reader
+  (**SimpleXLSX** by shuchkin, MIT) bundled in the plugin — no Composer needed.
+- **New products:** **publish immediately** on upload (client wants upload-and-done).
 
 ### Tool spec (to build)
 
@@ -165,10 +168,25 @@ A small mu-plugin admin page ("Lager → Upload") that, on one .xlsx upload:
 4. **Discontinued → out-of-stock** (SKUs in WP but not in this file).
 5. Show a summary: created / updated / new-categories-needing-marža / set-out-of-stock.
 
-### Open questions before building
+### Resolved / remaining
 
-- **xlsx parsing in PHP:** WordPress has no built-in reader. Either bundle PhpSpreadsheet
-  (heavier) or accept **CSV** (client does "Save As CSV" — trivial, no dependency). DECIDE.
-- Does the Excel have a header row? (export_products.py skips row 0 → assumes yes.)
-- New-product status on upload: draft (stage) or publish directly?
-- Get the client's actual example file to lock column order / number locale.
+- xlsx parsing — RESOLVED: accept .xlsx via SimpleXLSX (single file, MIT).
+- New-product status — RESOLVED: publish immediately.
+- Header row — assume present (export_products.py skips row 0). Confirm vs real file.
+- Number locale — VP/stock may use comma decimals; reader must normalize "," → "."
+  (export_products.py already does this).
+- STILL WANTED: the client's actual example .xlsx to lock exact column order + sheet name
+  before/while building. Existing `Lager za WEB 13-Maj-26.xlsx` is assumed same format.
+
+### Build plan (ready to start)
+
+mu-plugin `lager-upload.php` + bundled `SimpleXLSX.php`:
+1. Admin page **WooCommerce → Lager Upload** (or top-level) with a file field (cap: `manage_woocommerce`).
+2. On submit: parse .xlsx → rows of {sku, code, catname, name, stock, vp}.
+3. Categories: match by `sifra` (code); create-if-new (name from col 3), **preserve marža**,
+   collect new-without-marža for the summary.
+4. Products: upsert by SKU — set name, category, stock, vp; recompute net via
+   `lager_reprice_product()`; **publish** (new + existing).
+5. Discontinued: SKUs in WP (product_cat tree) not in this file → set out-of-stock.
+6. Summary screen: created / updated / published / out-of-stock / categories-needing-marža.
+7. Safety: dry-run preview toggle; chunked processing for ~5k rows; nonce + cap checks.
