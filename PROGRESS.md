@@ -150,10 +150,10 @@ every upload. Price formula confirmed: **VP cena + marža kategorije + 20% PDV =
 - **New category** appearing in a future upload (no marža yet): **create + flag** — create
   the category so products attach, leave marža empty, and list it in the upload summary as
   "needs marža". Operator sets it in WP before those products go live.
-- **Accounting program:** not identified yet → direct accounting↔Woo sync is a possible
-  later phase (only if the software has an API/scheduled export). The upload tool's engine
-  (upsert categories/products, preserve marža, reprice, discontinued→out-of-stock) is
-  reusable for an API sync — only the data source would change.
+- **Accounting↔Woo API sync: DROPPED.** Client (2026-06-09) confirmed low turnover and
+  does NOT want direct-from-program integration. The Excel upload tool is the whole solution.
+- **Cadence / scale:** product types are stable; new categories appear ~once a year. Client
+  uploads the Excel themselves; it must be a simple **2–3 minute** self-service procedure.
 
 ### Tool spec (to build)
 
