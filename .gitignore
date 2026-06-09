@@ -1,0 +1,20 @@
+# Secrets / SSH keys — never commit these
+*.pem
+*.key
+id_rsa*
+devkey*
+*.ppk
+
+# Database dumps / backups
+*.sql
+remote-backup.sql
+
+# Temp / scratch files
+_*.php
+*.tmp
+*.log
+
+# OS noise
+Thumbs.db
+desktop.ini
+.DS_Store
