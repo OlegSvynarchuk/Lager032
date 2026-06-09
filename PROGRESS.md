@@ -145,9 +145,15 @@ every upload. Price formula confirmed: **VP cena + marža kategorije + 20% PDV =
   over CLI-only or full accounting sync.
 - **Discontinued products** (in WP but absent from the new Excel): **set out-of-stock**
   (keep page + URL, stanje = 0). Not deleted, not drafted.
+- **Marža source:** maintained **in WP** (per-category term meta) — already set for the
+  current categories. Upload **preserves** it; never overwritten from a product file.
+- **New category** appearing in a future upload (no marža yet): **create + flag** — create
+  the category so products attach, leave marža empty, and list it in the upload summary as
+  "needs marža". Operator sets it in WP before those products go live.
 - **Accounting program:** not identified yet → direct accounting↔Woo sync is a possible
-  later phase, pending whether that software has an API/scheduled export. For now the
-  upload tool is the path.
+  later phase (only if the software has an API/scheduled export). The upload tool's engine
+  (upsert categories/products, preserve marža, reprice, discontinued→out-of-stock) is
+  reusable for an API sync — only the data source would change.
 
 ### Tool spec (to build)
 
