@@ -114,3 +114,55 @@ ssh -i "$env:USERPROFILE\.ssh\devkey" -p 22222 pixelspi@162.55.0.170 `
   (old laptop was `C:\Users\Harmonity\Local Sites\lager`). [workflow.md](workflow.md) paths are
   set to the current laptop.
 - This folder holds the migration scripts only — there is no local WordPress/`wp-content` tree.
+
+---
+
+## 9. Planned: Excel upload tool (client workflow) — design + decisions
+
+Client clarification (2026-06-09): the catalog is refreshed by uploading an Excel file
+exported from their accounting (knjigovodstveni) program. Categories are (re)formed on
+every upload. Price formula confirmed: **VP cena + marža kategorije + 20% PDV = prodajna cena**
+— this already matches the built model exactly.
+
+### Excel format (6 columns, confirmed against export_products.py)
+
+| Col | Excel (client) | Field | Notes |
+|---|---|---|---|
+| 1 | Šifra artikla | SKU | **match key** for upsert |
+| 2 | Šifra kategorije | category `sifra` (code) | links product → category |
+| 3 | Naziv kategorije | category name | drives category create/update |
+| 4 | Naziv artikla | product title | |
+| 5 | Količina (stanje) | stock | decimal allowed |
+| 6 | VP cena | base price (`vp`) | |
+
+> **No marža column.** Marža lives only in WP (per category). The upload must
+> **preserve existing marža** and only flag NEW categories as needing a margin.
+> Never overwrite marža from an upload.
+
+### Decisions (2026-06-09)
+
+- **Mechanism:** custom **WordPress admin upload tool** (self-service in wp-admin) — chosen
+  over CLI-only or full accounting sync.
+- **Discontinued products** (in WP but absent from the new Excel): **set out-of-stock**
+  (keep page + URL, stanje = 0). Not deleted, not drafted.
+- **Accounting program:** not identified yet → direct accounting↔Woo sync is a possible
+  later phase, pending whether that software has an API/scheduled export. For now the
+  upload tool is the path.
+
+### Tool spec (to build)
+
+A small mu-plugin admin page ("Lager → Upload") that, on one .xlsx upload:
+1. Upsert **categories** from cols 2–3 (create missing; **preserve marža**; mark new ones
+   marža-empty for manual entry).
+2. Upsert **products** by SKU (cols 1,3→cat,4,5,6): update name, category, stock, VP.
+3. Recompute net price via existing reprice logic (`lager_reprice_product`).
+4. **Discontinued → out-of-stock** (SKUs in WP but not in this file).
+5. Show a summary: created / updated / new-categories-needing-marža / set-out-of-stock.
+
+### Open questions before building
+
+- **xlsx parsing in PHP:** WordPress has no built-in reader. Either bundle PhpSpreadsheet
+  (heavier) or accept **CSV** (client does "Save As CSV" — trivial, no dependency). DECIDE.
+- Does the Excel have a header row? (export_products.py skips row 0 → assumes yes.)
+- New-product status on upload: draft (stage) or publish directly?
+- Get the client's actual example file to lock column order / number locale.
