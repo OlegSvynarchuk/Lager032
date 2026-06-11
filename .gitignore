@@ -5,9 +5,20 @@ id_rsa*
 devkey*
 *.ppk
 
+# Figma access token — keep secret, never commit (see FIGMA.md)
+.figma-token
+
 # Database dumps / backups
 *.sql
 remote-backup.sql
+
+# Source data exports & derived data (not code)
+*.xlsx
+products.json
+
+# Reference screenshots / design renders (re-fetchable from Figma — see FIGMA.md)
+screenshots/
+categories*.jpg
 
 # Temp / scratch files
 _*.php

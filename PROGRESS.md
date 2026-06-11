@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-09.
+> Last updated: 2026-06-11.
 
 ---
 
@@ -190,3 +190,36 @@ mu-plugin `lager-upload.php` + bundled `SimpleXLSX.php`:
 5. Discontinued: SKUs in WP (product_cat tree) not in this file → set out-of-stock.
 6. Summary screen: created / updated / published / out-of-stock / categories-needing-marža.
 7. Safety: dry-run preview toggle; chunked processing for ~5k rows; nonce + cap checks.
+
+---
+
+## 10. Theme: custom `lager032` (2026-06-11)
+
+Custom **classic** WordPress theme built from the Figma "Home" design (file key
+`rkOC41hpF2Dx1HR93xt0Fb`; see [FIGMA.md](FIGMA.md) for nodes / tokens / fetch helpers).
+Minimal, no page builder; WooCommerce + ACF only.
+
+**Structure:** `lager032/` — `style.css`, `functions.php`, `inc/{setup,icons,enqueue}.php`,
+`header.php`, `front-page.php`, `footer.php`, `index.php`, `assets/{css,img}`. Tokens: navy
+`#112955`, red `#D60000`, nav ink `#1C290D`; fonts Lato / Inter / Roboto Condensed.
+
+**Homepage sections:**
+- ✅ Utility bar, header/nav, hero, brand strip (SKF/Würth/NTN/SNR), "Naša ponuda" 4×3 category grid.
+- ⏳ About ("Vaš partner u industrijskoj nabavci"), Contact ("Za sva pitanja kontaktirajte nas" + forma), full footer (simple version live for now).
+
+**Deployed & live:** scp to `wp-content/themes/lager032/`, then `wp theme activate lager032`.
+Created page **Početna** (ID 4947), set as static front page (`show_on_front=page`,
+`page_on_front=4947`).
+
+**Deploy gotchas (important — see also memory):**
+1. scp from Windows makes server dirs `0700` → LiteSpeed returns **404 for every theme
+   asset** (CSS/img). Fix after each scp:
+   `find <theme> -type d -exec chmod 755 {} \;` and `… -type f -exec chmod 644 {} \;`.
+2. Site is in **WooCommerce "Coming soon"** mode (`woocommerce_coming_soon=yes`,
+   `store_pages_only=no`) — it replaces the whole front end with the coming-soon block, so
+   the theme looks blank/broken but is fine. Preview privately via
+   `?woo-share=<woocommerce_share_key>` after `woocommerce_private_link=yes`.
+   Do **not** disable coming-soon without the client's OK (it exposes the live site).
+
+**Next:** About + Contact + full footer; then product archive + single product
+(Figma nodes `47:2256` / `47:2291`).

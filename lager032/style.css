@@ -1,0 +1,17 @@
+/*
+Theme Name: Lager032
+Theme URI: https://lager032.pixels2pixels.ch
+Author: Pixels2Pixels
+Author URI: https://pixels2pixels.com
+Description: Custom WooCommerce theme for Lager032 — industrial bearings & power-transmission catalog. Minimal, no page builder.
+Version: 0.1.0
+Requires at least: 6.4
+Tested up to: 7.0
+Requires PHP: 7.4
+Text Domain: lager032
+WC requires at least: 8.0
+WC tested up to: 10.8
+*/
+
+/* Actual styles live in /assets/css/main.css (enqueued in inc/enqueue.php).
+   This file only carries the theme header WordPress requires. */
