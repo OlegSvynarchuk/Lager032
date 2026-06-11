@@ -223,3 +223,40 @@ Created page **Početna** (ID 4947), set as static front page (`show_on_front=pa
 
 **Next:** About + Contact + full footer; then product archive + single product
 (Figma nodes `47:2256` / `47:2291`).
+
+---
+
+## 11. Catalog / shop UX direction (DECIDED 2026-06-11)
+
+**Model: search-first, faceted, dense-list catalog** — the Digi-Key / Mouser / RS Components /
+Misumi pattern for parts/MRO sites. NOT a photo-grid consumer storefront.
+
+**Why (not just "modern for modern's sake"):** ~4,934 industrial parts identified by codes/specs,
+no real photos; buyers already know the part (e.g. `6204 2RS`, `02872/02820 SKF`) and want to
+find → check stock+price → order fast. Photos don't sell commodity parts; speed + accuracy do.
+The competitors' "outdated" text-list paradigm is actually *fit-for-purpose* — they just execute
+it poorly. The win is doing search-first **excellently**, not adding image-grid archives.
+
+**Primary experience — search + filter + dense list:**
+- **Instant/typeahead search** by name AND SKU (stock + price inline).
+- **Smart matching:** partial codes, spacing/diacritics, brand synonyms/cross-refs (SKF↔FAG).
+- **Facets/filters:** brand, in-stock-only, category (later: dimensions ID/OD/width).
+- **Dense scannable results:** code · name · brand · stock · price · qty · add-to-cart;
+  responsive (rows → cards on mobile). Small thumbnail optional/later — layout independent of photos.
+
+**Secondary — category archives (browse fallback + SEO):**
+- Hierarchical drill-down kept but NOT the centerpiece: Shop → parent category cards →
+  child-category cards (if children) → product list (leaf). For users who don't know the code,
+  and because category pages rank for "ležaj …" queries (real SEO traffic).
+- `taxonomy-product_cat.php`: if term has children → child cards; else → product list.
+
+**B2B conveniences (sales levers > imagery):** quick reorder, bulk/paste-list order,
+downloadable price list, live stock qty, "list updated" date.
+
+**Home:** a few visual category cards (existing `cat-grid`) as a friendly entry; real work on Shop.
+
+**Verify** via Coming-soon preview link (`?woo-share=<key>`), front end hidden until launch (see §10).
+
+### Category numbers (live, 2026-06-11)
+50 product categories → **23 parents** (incl. default `Uncategorized`) + **27 subcategories**
+(mostly under Ležaj ~22, Remen ~5). All 4,934 products currently **draft**.
