@@ -83,3 +83,13 @@ add_action( 'manage_product_posts_custom_column', function ( $column, $post_id )
 			: '—';
 	}
 }, 10, 2 );
+
+/**
+ * Keep the net-price column narrow and right-aligned so it doesn't stretch the
+ * products table (the category columns are constrained the same way).
+ */
+add_action( 'admin_head-edit.php', function () {
+	if ( isset( $_GET['post_type'] ) && 'product' === $_GET['post_type'] ) {
+		echo '<style>.column-net_price{width:110px;text-align:right;}</style>';
+	}
+} );

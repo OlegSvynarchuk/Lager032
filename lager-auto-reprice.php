@@ -144,3 +144,15 @@ add_action( 'acf/save_post', function ( $post_id ) {
 		}
 	}
 }, 20 );
+
+/**
+ * Catch product saves that never fire acf/save_post — Quick Edit, Bulk Edit,
+ * WP-CLI / REST. This makes a VP change reprice the product no matter how it
+ * was saved. The $busy guard in lager_reprice_product() absorbs the
+ * save-inside-save recursion these hooks would otherwise cause.
+ */
+$lager_reprice_on_save = function ( $product_id ) {
+	lager_reprice_product( (int) $product_id );
+};
+add_action( 'woocommerce_update_product', $lager_reprice_on_save, 20 );
+add_action( 'woocommerce_new_product', $lager_reprice_on_save, 20 );
