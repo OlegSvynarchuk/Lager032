@@ -205,6 +205,10 @@ Minimal, no page builder; WooCommerce + ACF only.
 
 **Homepage sections:**
 - ✅ Utility bar, header/nav, hero, brand strip (SKF/Würth/NTN/SNR), "Naša ponuda" 4×3 category grid.
+  - Category cards use a shared **placeholder image** as background until categories get real
+    images: `categoryplaceholder.jpg` → WP Media (attachment **4948**), id stored in option
+    `lager_cat_placeholder_id`; `front-page.php` falls back to it per card (real category
+    thumbnail overrides). Verify via Coming-soon preview link (not public yet).
 - ⏳ About ("Vaš partner u industrijskoj nabavci"), Contact ("Za sva pitanja kontaktirajte nas" + forma), full footer (simple version live for now).
 
 **Deployed & live:** scp to `wp-content/themes/lager032/`, then `wp theme activate lager032`.

@@ -70,10 +70,20 @@ $uri = get_template_directory_uri();
 				array( 'KUGLICE', 'kuglica' ),
 			);
 
+			// Shared placeholder background (Media id in option) until a category gets its own image.
+			$placeholder_style = '';
+			$ph_id = (int) get_option( 'lager_cat_placeholder_id' );
+			if ( $ph_id ) {
+				$ph_url = wp_get_attachment_image_url( $ph_id, 'large' );
+				if ( $ph_url ) {
+					$placeholder_style = ' style="background-image:url(' . esc_url( $ph_url ) . ')"';
+				}
+			}
+
 			foreach ( $cats as $cat ) {
 				list( $label, $slug ) = $cat;
 				$url   = '#';
-				$style = '';
+				$style = $placeholder_style;
 
 				if ( $slug ) {
 					$term = get_term_by( 'slug', $slug, 'product_cat' );
