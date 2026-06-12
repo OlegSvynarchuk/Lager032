@@ -25,6 +25,10 @@ function lager032_get_icon( $name ) {
 		'grid'   => '<path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/>',
 		'chevron'=> '<path d="M12 15.5 5.5 9 7 7.5l5 5 5-5L18.5 9z"/>',
 		'arrow'  => '<path d="M4 11h11.2l-3.6-3.6L13 6l6 6-6 6-1.4-1.4 3.6-3.6H4z"/>',
+		'clock'  => '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16zm1-13h-2v6l5 3 1-1.7-4-2.4z"/>',
+		'check'  => '<path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/>',
+		'box'    => '<path d="M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.2 6.5 3.6L12 11.4 5.5 7.8 12 4.2zM5 9.3l6 3.4v6.9l-6-3.3V9.3zm14 0v7l-6 3.3v-6.9l6-3.4z"/>',
+		'truck'  => '<path d="M3 4h11v10H3V4zm12 3h4l3 3v4h-2a2 2 0 1 1-4 0h-3a2 2 0 1 1-4 0H3v-2h12V7zm0 2v2h4l-1.5-2H15zM7 15a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2z"/>',
 	);
 
 	if ( ! isset( $icons[ $name ] ) ) {
