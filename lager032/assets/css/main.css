@@ -12,6 +12,17 @@
 	--white: #fff;
 	--container: 1240px;
 	--gutter: 24px;
+
+	/* Redesign palette (Figma 2026-06-12) */
+	--c-navy: #1B3E7A;
+	--c-ink: #0F1C36;
+	--c-red: #C8001D;
+	--c-red-dark: #a80018;
+	--c-muted: #5A6A8A;
+	--c-accent: #8EC5FF;
+	--c-panel: #E4ECF8;
+	--c-input: #EEF1F8;
+	--c-line: #E6EAF2;
 }
 
 /* ---- Base ---------------------------------------------------------------- */
@@ -323,4 +334,106 @@ a { color: inherit; }
 	.cat-grid { gap: 10px; }
 	.brand-strip__logos { gap: 28px; }
 	.brand-strip__logos img { height: 34px; }
+}
+
+/* ==========================================================================
+   REDESIGN 2026-06-12 — Header (util bar · masthead · Svi proizvodi mega-dropdown)
+   Figma nodes 106:3461 / 106:3506. New markup in header.php (util-bar / masthead).
+   ========================================================================== */
+
+/* Utility bar */
+.util-bar { background: var(--c-navy); color: #fff; font-size: 12px; }
+.util-bar__inner { display: flex; align-items: center; justify-content: space-between; min-height: 36px; gap: 16px; }
+.util-bar a { display: inline-flex; align-items: center; gap: 6px; color: #fff; text-decoration: none; }
+.util-bar__contacts, .util-bar__meta { display: flex; align-items: center; gap: 20px; }
+.util-bar .icon { width: 12px; height: 12px; opacity: .9; }
+.util-bar__addr { color: var(--c-accent); }
+.util-bar a:hover { text-decoration: underline; }
+
+/* Masthead */
+.masthead { background: #fff; border-bottom: 1px solid var(--c-line); position: relative; z-index: 50; }
+.masthead__inner { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+
+/* Logo */
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; flex: none; }
+.brand__badge { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 4px; background: var(--c-navy); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .5px; }
+.brand__text { display: flex; flex-direction: column; line-height: 1; }
+.brand__name { color: var(--c-navy); font-weight: 700; font-size: 17px; }
+.brand__sub { color: var(--c-muted); font-weight: 600; font-size: 10px; letter-spacing: .5px; margin-top: 3px; }
+
+/* "Svi proizvodi" button + mega-dropdown */
+.shopcats { position: relative; flex: none; }
+.shopcats__btn {
+	display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+	background: var(--c-red); color: #fff; border: 0; border-radius: 4px;
+	padding: 9px 14px; font: 600 14px/1 'Inter', sans-serif;
+}
+.shopcats__btn:hover { background: var(--c-red-dark); }
+.shopcats__btn .icon { width: 14px; height: 14px; }
+.shopcats__btn .icon--chevron { transition: transform .18s ease; }
+.shopcats__btn[aria-expanded="true"] .icon--chevron { transform: rotate(180deg); }
+
+.megamenu {
+	position: absolute; top: calc(100% + 8px); left: 0; width: 540px; max-width: 92vw;
+	background: #fff; border-radius: 10px; box-shadow: 0 18px 50px rgba(15,28,54,.18);
+	border: 1px solid var(--c-line); overflow: hidden;
+	opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .16s ease, transform .16s ease, visibility .16s;
+	z-index: 60;
+}
+.shopcats:hover .megamenu,
+.shopcats:focus-within .megamenu,
+.megamenu.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.megamenu__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--c-panel); }
+.megamenu__title { color: var(--c-navy); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+.megamenu__all { display: inline-flex; align-items: center; gap: 5px; color: var(--c-red); font-weight: 600; font-size: 12px; text-decoration: none; }
+.megamenu__all .icon { width: 11px; height: 11px; }
+.megamenu__all:hover { text-decoration: underline; }
+
+.megamenu__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; padding: 10px; }
+.megacat { display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 4px; text-decoration: none; }
+.megacat:hover { background: var(--c-input); }
+.megacat__name { color: var(--c-ink); font-weight: 600; font-size: 14px; }
+.megacat__sub { color: var(--c-muted); font-weight: 600; font-size: 12px; }
+
+/* Primary nav */
+.mainnav { flex: none; }
+.mainnav__list { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.mainnav__list a { display: inline-block; padding: 8px 12px; border-radius: 4px; color: var(--c-ink); font-weight: 600; font-size: 14px; text-decoration: none; }
+.mainnav__list a:hover, .mainnav__list .current-menu-item > a { background: var(--c-input); color: var(--c-navy); }
+
+/* Search */
+.searchbar { position: relative; flex: 1 1 auto; min-width: 160px; max-width: 360px; margin-left: auto; }
+.searchbar .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; color: var(--c-muted); }
+.searchbar input { width: 100%; height: 38px; border: 1px solid transparent; border-radius: 4px; background: var(--c-input); padding: 0 12px 0 34px; font: 400 14px/1 'Inter', sans-serif; color: var(--c-ink); }
+.searchbar input:focus { outline: none; border-color: var(--c-navy); background: #fff; }
+
+/* Cart */
+.cartbtn { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 8px 14px; border: 1px solid var(--c-line); border-radius: 4px; color: var(--c-ink); font-weight: 600; font-size: 14px; text-decoration: none; }
+.cartbtn:hover { border-color: var(--c-navy); color: var(--c-navy); }
+.cartbtn .icon { width: 17px; height: 17px; }
+
+/* Mobile nav toggle (hidden on desktop) */
+.navtoggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; padding: 6px; cursor: pointer; }
+.navtoggle span { width: 24px; height: 2px; background: var(--c-navy); border-radius: 2px; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+	.megamenu { width: 480px; }
+}
+@media (max-width: 900px) {
+	.navtoggle { display: inline-flex; order: 5; }
+	.mainnav { order: 10; flex-basis: 100%; display: none; }
+	.masthead.is-open .mainnav { display: block; }
+	.masthead.is-open .mainnav__list { flex-direction: column; align-items: stretch; gap: 0; padding-top: 8px; }
+	.masthead__inner { flex-wrap: wrap; row-gap: 10px; }
+	.searchbar { order: 8; flex-basis: 100%; max-width: none; margin-left: 0; }
+	.util-bar__meta .util-bar__addr { display: none; }
+	.megamenu { left: 0; }
+}
+@media (max-width: 560px) {
+	.util-bar__contacts a span { display: none; }
+	.cartbtn span { display: none; }
+	.megamenu { position: fixed; left: 8px; right: 8px; width: auto; max-width: none; }
+	.megamenu__grid { grid-template-columns: 1fr; }
 }
