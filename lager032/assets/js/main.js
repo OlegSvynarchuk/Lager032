@@ -26,6 +26,11 @@
 		});
 	}
 
+	// Archive facets: checkbox toggles apply immediately (price/search use the button/Enter).
+	document.querySelectorAll('.filters__form input[type="checkbox"]').forEach(function (cb) {
+		cb.addEventListener('change', function () { cb.form.submit(); });
+	});
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');
