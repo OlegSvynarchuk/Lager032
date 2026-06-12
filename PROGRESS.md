@@ -307,3 +307,38 @@ LAGER magacin) → Brands ("Ovlašćeni distributer vodećih brendova") → Cont
 
 > The current front-page.php (hero/brand strip/cat-grid/placeholder, §10) is largely SUPERSEDED
 > by this redesign; the category-placeholder wiring (§10) still applies to category card images.
+
+---
+
+## 13. Redesign build status (2026-06-12) — LIVE
+
+New palette: navy `#1B3E7A` · ink `#0F1C36` · red `#C8001D` · muted `#5A6A8A` · panel `#E4ECF8`
+· input `#EEF1F8`. Container widened to **1920px** max, `--gutter: clamp(16px,3.33vw,64px)`.
+
+**✅ P1 Chrome** — `header.php` (util-bar + masthead + "Svi proizvodi" mega-dropdown, 12 cats),
+`footer.php` (4-col dark footer). Header is **sticky** (`.siteheader` wrapper). Icons added to
+`inc/icons.php` (grid/chevron/arrow/clock/check/box/truck).
+
+**✅ P2 Homepage** — `front-page.php`: Hero (bg img + KPI band underneath, header+hero+KPI = 100vh,
+content left-aligned to container) · Kategorije (6 cards + counts) · Proizvodi (search + 3 filters +
+12 cards; empty until products published) · O Nama (25+, 4 features) · Brendovi (8 text cards) ·
+Kontakt (info + working form → `inc/contact.php`, emails admin). Home images in `assets/img/home/`.
+
+**✅ P4 Archive** — `archive-product.php` (covers shop + product_cat + product_brand): faceted
+sidebar (search · Dostupnost · Kategorija w/ counts · Proizvođač · Cena Od/Do) + sort + dense
+product rows + pagination. Custom WP_Query (tax+meta+search+sort). Checkbox facets auto-submit (JS).
+**Brand facet uses native `product_brand`** (WC 10.8) — empty until populated.
+
+**WooCommerce styling:** `inc/enqueue.php` **dequeues** woocommerce-general/layout/smallscreen on
+shop/product-taxonomy/single-product (we style those ourselves); kept on cart/checkout/account.
+Body is a sticky-footer flex column (no white gap under footer on short pages).
+
+**Deploy:** scp each changed file to `wp-content/themes/lager032/…`, `chmod 644` files / `755` new
+dirs (LiteSpeed 0700→404 trap), `php -l`, `wp cache flush`. Site **not** in coming-soon (public).
+
+### Still open
+- **Single product page** — needs Figma node (not delivered).
+- **Publish products** (all draft) → homepage Proizvodi + archive populate, real category counts.
+- **Populate `product_brand`** (parse SKF/FAG/… from names — fold into Excel upload tool) → brand facet appears.
+- **ex-VAT vs incl-VAT** price display decision (cards/rows show net + "bez PDV-a" per design).
+- Footer **PIB/Matični broj** still mockup placeholders (109876543 / 65432198).

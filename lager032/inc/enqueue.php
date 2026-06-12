@@ -46,3 +46,20 @@ add_action( 'wp_enqueue_scripts', function () {
 		);
 	}
 } );
+
+/**
+ * Drop WooCommerce's default stylesheets on the pages we fully style ourselves
+ * (shop + product category/brand archives, and single product). They inject
+ * spacing/typography that clashes with the custom design. Cart/checkout/account
+ * keep Woo's CSS so they stay usable until we design them.
+ */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! function_exists( 'is_shop' ) ) {
+		return;
+	}
+	if ( is_shop() || is_product_taxonomy() || is_product() ) {
+		wp_dequeue_style( 'woocommerce-general' );
+		wp_dequeue_style( 'woocommerce-layout' );
+		wp_dequeue_style( 'woocommerce-smallscreen' );
+	}
+}, 99 );

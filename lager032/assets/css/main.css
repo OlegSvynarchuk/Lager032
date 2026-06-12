@@ -34,7 +34,12 @@ body {
 	color: var(--ink);
 	line-height: 1.5;
 	background: var(--white);
+	/* Sticky footer: header + content + footer fill the viewport; footer never floats mid-page. */
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 }
+#content { flex: 1 0 auto; }
 
 img { max-width: 100%; height: auto; display: block; }
 a { color: inherit; }
