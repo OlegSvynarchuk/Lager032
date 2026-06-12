@@ -437,3 +437,40 @@ a { color: inherit; }
 	.megamenu { position: fixed; left: 8px; right: 8px; width: auto; max-width: none; }
 	.megamenu__grid { grid-template-columns: 1fr; }
 }
+
+/* ==========================================================================
+   REDESIGN 2026-06-12 — Footer (Figma node 110:2027 footer)
+   ========================================================================== */
+.sitefoot { background: #0C1D3D; color: #94A3B8; }
+.sitefoot__cols {
+	display: grid;
+	grid-template-columns: 1.6fr 1fr 1fr 1.4fr;
+	gap: 40px;
+	padding-top: 56px;
+	padding-bottom: 40px;
+}
+.footbrand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
+.footbrand__badge { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 4px; background: var(--c-red); color: #fff; font-weight: 700; font-size: 12px; letter-spacing: .5px; }
+.footbrand__text { display: flex; flex-direction: column; line-height: 1; }
+.footbrand__name { color: #fff; font-weight: 700; font-size: 17px; }
+.footbrand__sub { color: #64748B; font-size: 12px; margin-top: 3px; }
+.sitefoot__blurb { margin: 16px 0 0; font-size: 13px; line-height: 1.6; max-width: 320px; }
+
+.sitefoot__title { margin: 4px 0 16px; color: #E2E8F0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+.sitefoot__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+.sitefoot__list a { color: #94A3B8; text-decoration: none; font-size: 14px; }
+.sitefoot__list a:hover { color: #fff; }
+.sitefoot__contact li { display: flex; align-items: flex-start; gap: 9px; font-size: 14px; }
+.sitefoot__contact .icon { width: 15px; height: 15px; margin-top: 2px; color: var(--c-accent); flex: none; }
+
+.sitefoot__legal { border-top: 1px solid rgba(255,255,255,.08); }
+.sitefoot__legal-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 18px; padding-bottom: 18px; }
+.sitefoot__legal p { margin: 0; color: #475569; font-size: 12px; }
+
+@media (max-width: 900px) {
+	.sitefoot__cols { grid-template-columns: 1fr 1fr; gap: 32px; }
+	.sitefoot__legal-inner { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+@media (max-width: 520px) {
+	.sitefoot__cols { grid-template-columns: 1fr; }
+}
