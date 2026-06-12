@@ -21,15 +21,17 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 <section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/hero.jpg' ); ?>')">
 	<div class="hero__overlay" aria-hidden="true"></div>
 	<div class="container hero__inner">
-		<span class="hero__eyebrow"><?php esc_html_e( 'Online kupovina — brza isporuka', 'lager032' ); ?></span>
-		<h1 class="hero__title">
-			<?php esc_html_e( 'Ležajevi i industrijska', 'lager032' ); ?>
-			<span><?php esc_html_e( 'oprema za svaki stroj', 'lager032' ); ?></span>
-		</h1>
-		<p class="hero__lead"><?php esc_html_e( 'Više od 25 godina iskustva u snabdevanju ležajevima, semerinzima, remenjima i celokupnom industrijskom opremom od vodećih svetskih proizvođača.', 'lager032' ); ?></p>
-		<div class="hero__cta">
-			<a class="btn btn--red" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Pregledaj katalog', 'lager032' ); ?> <?php lager032_icon( 'arrow' ); ?></a>
-			<a class="btn btn--ghost" href="tel:+38132342281"><?php esc_html_e( 'Pozovite nas', 'lager032' ); ?></a>
+		<div class="hero__content">
+			<span class="hero__eyebrow"><?php esc_html_e( 'Online kupovina — brza isporuka', 'lager032' ); ?></span>
+			<h1 class="hero__title">
+				<?php esc_html_e( 'Ležajevi i industrijska', 'lager032' ); ?>
+				<span><?php esc_html_e( 'oprema za svaki stroj', 'lager032' ); ?></span>
+			</h1>
+			<p class="hero__lead"><?php esc_html_e( 'Više od 25 godina iskustva u snabdevanju ležajevima, semerinzima, remenjima i celokupnom industrijskom opremom od vodećih svetskih proizvođača.', 'lager032' ); ?></p>
+			<div class="hero__cta">
+				<a class="btn btn--red" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Pregledaj katalog', 'lager032' ); ?> <?php lager032_icon( 'arrow' ); ?></a>
+				<a class="btn btn--ghost" href="tel:+38132342281"><?php esc_html_e( 'Pozovite nas', 'lager032' ); ?></a>
+			</div>
 		</div>
 	</div>
 	<div class="hero__stats">
