@@ -22,6 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Preskoči na sadržaj', 'lager032' ); ?></a>
 
+<div class="siteheader">
 <!-- Utility bar -->
 <div class="util-bar">
 	<div class="container util-bar__inner">
@@ -145,5 +146,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</button>
 	</div>
 </header>
+</div><!-- .siteheader -->
 
 <main id="content" class="site-content">
