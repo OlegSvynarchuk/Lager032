@@ -34,27 +34,29 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 			</div>
 		</div>
 	</div>
-	<div class="hero__stats">
-		<div class="container hero__stats-inner">
-			<?php
-			$stats = array(
-				array( 'clock', '25+', 'Godina iskustva' ),
-				array( 'box', '5.000+', 'Artikala na lageru' ),
-				array( 'truck', 'Brza', 'isporuka kurirskom službom' ),
-				array( 'check', '6', 'Sertifikovanih brendova' ),
-			);
-			foreach ( $stats as $st ) {
-				printf(
-					'<div class="herostat">%1$s<div><strong>%2$s</strong><span>%3$s</span></div></div>',
-					lager032_get_icon( $st[0] ),
-					esc_html( $st[1] ),
-					esc_html( $st[2] )
-				);
-			}
-			?>
-		</div>
-	</div>
 </section>
+
+<!-- HERO KPI band — full width, underneath the hero -->
+<div class="hero__stats">
+	<div class="container hero__stats-inner">
+		<?php
+		$stats = array(
+			array( 'clock', '25+', 'Godina iskustva' ),
+			array( 'box', '5.000+', 'Artikala na lageru' ),
+			array( 'truck', 'Brza', 'isporuka kurirskom službom' ),
+			array( 'check', '6', 'Sertifikovanih brendova' ),
+		);
+		foreach ( $stats as $st ) {
+			printf(
+				'<div class="herostat">%1$s<div><strong>%2$s</strong><span>%3$s</span></div></div>',
+				lager032_get_icon( $st[0] ),
+				esc_html( $st[1] ),
+				esc_html( $st[2] )
+			);
+		}
+		?>
+	</div>
+</div>
 
 <!-- ========================= KATEGORIJE ========================= -->
 <section class="cats">
