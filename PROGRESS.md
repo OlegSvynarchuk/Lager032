@@ -264,3 +264,46 @@ downloadable price list, live stock qty, "list updated" date.
 ### Category numbers (live, 2026-06-11)
 50 product categories → **23 parents** (incl. default `Uncategorized`) + **27 subcategories**
 (mostly under Ležaj ~22, Remen ~5). All 4,934 products currently **draft**.
+
+---
+
+## 12. Theme REDESIGN — new concept (2026-06-12)
+
+Designer reworked the concept. New Figma nodes (file `rkOC41hpF2Dx1HR93xt0Fb`):
+- **Header** `106:3461` · **"Svi proizvodi" mega-dropdown** `106:3506` · **Homepage** `110:2027`.
+
+The new concept **strongly matches the parts-sale / search-first model** (§11): prominent
+search by *name OR šifra*, "Svi proizvodi" category mega-menu, filter dropdowns, article counts.
+Main deviation: homepage shows image product **cards** (grid), not a dense list — a marketing
+showcase; placeholder-image repetition is a known caveat until real photos exist.
+
+**New header:** utility bar (phones · lager032@gmail.com · Kneza Miloša 100, Čačak), logo
+**LAGER STR ČAČAK·SRBIJA**, red **Svi proizvodi** mega-dropdown, nav (Početna · O Nama ·
+Sertifikati · Kontakt), **Pretraži artikle** search, **Korpa** cart.
+
+**Mega-dropdown:** 12 categories × 2 cols, each name + subcategory-summary subtitle, "Sve kategorije →".
+
+**New homepage sections:** Hero → Kategorije (6 featured cards w/ counts: Ležajevi 1.200+,
+Kućišta 400+, Semerinzi 320+, Lanci 240+, Remenje 180+, Masti 60+) → **Proizvodi** (search
+"Pretraži po nazivu ili šifri…" + **3 filter dropdowns** + 12 product cards) → About ("25+",
+LAGER magacin) → Brands ("Ovlašćeni distributer vodećih brendova") → Contact form → footer.
+
+### Decisions (2026-06-12)
+- **Shop archive + single-product designs:** not delivered yet → build home + chrome now;
+  infer archive/detail from homepage card + filter style until designs arrive.
+- **Brand filter:** create a new **`brand` taxonomy**; populate by parsing brand from product
+  names (e.g. SKF/Würth/NTN) — ideally during the Excel upload.
+- **Start: Phase 1 = site chrome** (header + mega-dropdown + footer).
+
+### Reimplementation plan (phased)
+- **P0 Reconcile data:** map design's 12 categories ↔ 23 WP parents (incl. new *Linearne
+  tehnologije*, merged *KM Navrtke & MB Podloške*); dropdown **subtitle** source (child names
+  or new ACF field); brand taxonomy; extract Figma assets (hero bg, category imgs, logos, icons).
+- **P1 Chrome:** header.php · mega-dropdown (data-driven) · footer.php · CSS.  ← current
+- **P2 Homepage:** rebuild front-page.php (Hero · Kategorije+counts · Proizvodi+search+filters ·
+  About · Brands · Contact).
+- **P3 Search/filter backend:** AJAX instant search by title+SKU; filters (category/brand/sort).
+- **P4 Shop pages:** archive + single product (needs designs).
+
+> The current front-page.php (hero/brand strip/cat-grid/placeholder, §10) is largely SUPERSEDED
+> by this redesign; the category-placeholder wiring (§10) still applies to category card images.
