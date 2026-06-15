@@ -383,6 +383,35 @@ WP-CLI can't auto-write it here ("special configuration" warning). Now in place;
 
 **Production migration TODO:** 301-redirect old `shop.lager032.rs/...` URLs → new paths to keep rankings.
 
+---
+
+## 15. Session log — 2026-06-15
+
+- **Products published:** all 4,934 drafts → publish (xargs batches). Archive (`/prodavnica/`) +
+  homepage Proizvodi now populate; real category counts (Ležaj 2,582). Site is a **dev link** →
+  set **`blog_public=0`** (discourage indexing); flip ON at production.
+- **Single product page built** (`single-product.php` + `template-parts/contact.php`): data-first
+  per eecart — breadcrumb · **category image as illustrative ref** · title · šifra/brand · price +
+  "bez PDV-a" · stock · qty + add-to-cart (in-stock only) · CTA · **Specifikacija** table · Slični
+  proizvodi (4) · contact · **Product + BreadcrumbList JSON-LD**. Verified in/out-of-stock.
+- **Brands: SKIPPED** (decision) — brand not in data; ~40–48% of names contain a token + false
+  positives ("INA" in mašINA). Proizvođač facet stays auto-hidden; homepage Brendovi = static.
+- **URL architecture:** one domain (NO `shop.` subdomain). Applied **Serbian pretty permalinks**:
+  `/prodavnica/` (shop), `/kategorija/{slug}/` (categories, nested), `/proizvod/{slug}/` (products,
+  flat). **Created `.htaccess`** (subdomain docroot had none → pretty URLs 404'd; LiteSpeed). All 200.
+- **SEO = standing principle** (memory `seo-best-practices`); titles/meta, JSON-LD, breadcrumbs, etc.
+- **Archive top padding** 40px → 16px (removed near-white gap under sticky header).
+
+**Template map:** `/` → front-page.php · `/prodavnica/` + `/kategorija/{slug}/` → archive-product.php
+(same template; category just scopes the query + H1) · `/proizvod/{slug}/` → single-product.php.
+
+### Open / next
+1. **Data cleanup** — strip trailing `---` from product names.
+2. **Pricing decision** — ex-VAT vs incl-VAT ("bez PDV-a"), apply consistently.
+3. **Cart/checkout styling** — still Woo default; design later.
+- Optional: category directory page at `/kategorija/` (bare path is currently 404); AJAX filters
+  (currently GET reload); `rel=canonical`/`noindex` on filtered param URLs.
+
 ### Standing principle: SEO
 Apply **SEO best practices** in every template/feature — titles/meta, single H1, Product +
 BreadcrumbList JSON-LD, breadcrumbs, image alt, pretty permalinks, sitemap, internal linking.
