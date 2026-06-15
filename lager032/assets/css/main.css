@@ -598,7 +598,7 @@ a { color: inherit; }
 /* ==========================================================================
    REDESIGN 2026-06-12 — Product archive (faceted list, Figma 106:2027)
    ========================================================================== */
-.archive { padding: 40px 0 72px; background: #F6F8FC; min-height: 60vh; }
+.archive { padding: 16px 0 64px; background: #F6F8FC; min-height: 60vh; }
 .archive__head { margin-bottom: 24px; }
 .archive__title { margin: 4px 0 0; color: var(--c-navy); font-size: 30px; font-weight: 700; }
 .archive__layout { display: grid; grid-template-columns: 280px 1fr; gap: 28px; align-items: start; }
