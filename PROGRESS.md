@@ -348,9 +348,14 @@ dirs (LiteSpeed 0700→404 trap), `php -l`, `wp cache flush`. Site **not** in co
   only) · "pozovite za upit" CTA · **Specifikacija** table (grows w/ data) · Slični proizvodi (4) ·
   contact · **Product + BreadcrumbList JSON-LD** (SEO). Verified on in/out-of-stock products.
 
+### Decision: brands SKIPPED for now (2026-06-15)
+Brand isn't in the data (no Excel column); only ~40–48% of product names contain a brand token,
+and short tokens (e.g. "INA") false-match Serbian words (mašINA). So: **Proizvođač facet stays
+auto-hidden** (empty `product_brand`), homepage Brendovi cards remain **static trust content**.
+Revisit only if the client adds a brand column to the Excel. No code change needed.
+
 ### Next 3 steps
-1. **Brands + data cleanup** — populate `product_brand` (parse SKF/FAG/… from names) + strip
-   trailing `---` from product names → unlocks Proizvođač facet + cleaner data.
+1. **Data cleanup** — strip trailing `---` from product names.
 2. **Pricing decision** — settle ex-VAT vs incl-VAT ("bez PDV-a") and apply consistently sitewide.
 3. **Cart/checkout styling** — still WooCommerce default (Woo CSS kept there); design later.
 
