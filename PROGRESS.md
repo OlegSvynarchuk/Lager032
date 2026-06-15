@@ -359,6 +359,30 @@ Revisit only if the client adds a brand column to the Excel. No code change need
 2. **Pricing decision** — settle ex-VAT vs incl-VAT ("bez PDV-a") and apply consistently sitewide.
 3. **Cart/checkout styling** — still WooCommerce default (Woo CSS kept there); design later.
 
+---
+
+## 14. URL architecture (DECIDED + APPLIED 2026-06-15)
+
+**One domain, shop as a path — NO `shop.` subdomain** (subdomains split SEO authority; we unified
+marketing + shop in one theme). On production everything lives on `lager032.rs`.
+
+**Pretty permalinks (Serbian slugs) — APPLIED on dev:**
+- `permalink_structure = /%postname%/`
+- Shop (all products): **`/prodavnica/`** (shop page slug set to `prodavnica`)
+- Category archives: **`/kategorija/{slug}/`** (nested for subcats) — `category_base=kategorija`
+- Single product: **`/proizvod/{slug}/`** (flat — stable if re-categorized) — `product_base=proizvod`
+- Search/filtered: `/prodavnica/?s=…&fcat=…`
+
+**Where the product LIST renders:** `/prodavnica/` (all) and `/kategorija/{slug}/` (per category) —
+both via `archive-product.php`.
+
+**⚠️ Server gotcha (LiteSpeed subdomain docroot):** the subdomain docroot
+(`…/lager032.pixels2pixels.ch/`) had **no `.htaccess`**, so pretty permalinks 404'd. Fix = create
+`.htaccess` with the standard `# BEGIN WordPress … RewriteRule . /index.php [L]` block (RewriteBase `/`).
+WP-CLI can't auto-write it here ("special configuration" warning). Now in place; all URLs 200.
+
+**Production migration TODO:** 301-redirect old `shop.lager032.rs/...` URLs → new paths to keep rankings.
+
 ### Standing principle: SEO
 Apply **SEO best practices** in every template/feature — titles/meta, single H1, Product +
 BreadcrumbList JSON-LD, breadcrumbs, image alt, pretty permalinks, sitemap, internal linking.
