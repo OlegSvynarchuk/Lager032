@@ -336,9 +336,25 @@ Body is a sticky-footer flex column (no white gap under footer on short pages).
 **Deploy:** scp each changed file to `wp-content/themes/lager032/…`, `chmod 644` files / `755` new
 dirs (LiteSpeed 0700→404 trap), `php -l`, `wp cache flush`. Site **not** in coming-soon (public).
 
-### Still open
-- **Single product page** — needs Figma node (not delivered).
-- **Publish products** (all draft) → homepage Proizvodi + archive populate, real category counts.
-- **Populate `product_brand`** (parse SKF/FAG/… from names — fold into Excel upload tool) → brand facet appears.
-- **ex-VAT vs incl-VAT** price display decision (cards/rows show net + "bez PDV-a" per design).
-- Footer **PIB/Matični broj** still mockup placeholders (109876543 / 65432198).
+### Status update 2026-06-15
+- **All 4,934 products PUBLISHED** — archive + homepage Proizvodi now populate; real category
+  counts live (e.g. Ležaj 2,582). Site is a **dev link**, indexing **discouraged**
+  (`blog_public=0`) → flip ON at production.
+
+### Build status
+- **✅ Single product page** (2026-06-15) — `single-product.php` + `template-parts/contact.php`.
+  Data-first per eecart: breadcrumb · **category image as illustrative reference** ("Slika je
+  ilustrativna") · title · šifra/brand · price + "bez PDV-a" · stock · qty + add-to-cart (in-stock
+  only) · "pozovite za upit" CTA · **Specifikacija** table (grows w/ data) · Slični proizvodi (4) ·
+  contact · **Product + BreadcrumbList JSON-LD** (SEO). Verified on in/out-of-stock products.
+
+### Next 3 steps
+1. **Brands + data cleanup** — populate `product_brand` (parse SKF/FAG/… from names) + strip
+   trailing `---` from product names → unlocks Proizvođač facet + cleaner data.
+2. **Pricing decision** — settle ex-VAT vs incl-VAT ("bez PDV-a") and apply consistently sitewide.
+3. **Cart/checkout styling** — still WooCommerce default (Woo CSS kept there); design later.
+
+### Standing principle: SEO
+Apply **SEO best practices** in every template/feature — titles/meta, single H1, Product +
+BreadcrumbList JSON-LD, breadcrumbs, image alt, pretty permalinks, sitemap, internal linking.
+(See memory `seo-best-practices`.) Footer **PIB/Matični broj** still mockup placeholders.

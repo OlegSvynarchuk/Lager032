@@ -31,6 +31,18 @@
 		cb.addEventListener('change', function () { cb.form.submit(); });
 	});
 
+	// Single product: quantity stepper.
+	document.querySelectorAll('.qty').forEach(function (qty) {
+		var input = qty.querySelector('input');
+		qty.querySelectorAll('.qty__btn').forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var v = parseInt(input.value, 10) || 1;
+				v += parseInt(btn.getAttribute('data-dir'), 10);
+				input.value = v < 1 ? 1 : v;
+			});
+		});
+	});
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');
