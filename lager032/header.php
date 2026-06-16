@@ -64,7 +64,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		);
 		$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' );
 		?>
-		<div class="shopcats">
+		<div class="masthead__center"><div class="shopcats">
 			<a class="shopcats__btn" href="<?php echo esc_url( $shop_url ); ?>" aria-haspopup="true">
 				<?php lager032_icon( 'grid' ); ?>
 				<span><?php esc_html_e( 'Svi proizvodi', 'lager032' ); ?></span>
@@ -121,7 +121,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				);
 			}
 			?>
-		</nav>
+		</nav></div><!-- .masthead__center -->
 
 		<form class="searchbar" role="search" method="get" action="<?php echo esc_url( $shop_url ); ?>">
 			<?php lager032_icon( 'search' ); ?>

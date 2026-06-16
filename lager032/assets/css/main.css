@@ -322,7 +322,9 @@ a { color: inherit; }
 
 /* Masthead */
 .masthead { background: #fff; border-bottom: 1px solid var(--c-line); position: relative; z-index: 50; }
-.masthead__inner { display: flex; align-items: center; gap: 16px; min-height: 64px; }
+.masthead__inner { display: flex; align-items: center; gap: 16px; min-height: 64px; position: relative; }
+/* below desktop, the wrapper is transparent so mobile nav rules keep working */
+.masthead__center { display: contents; }
 
 /* Logo */
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; flex: none; }
@@ -383,7 +385,7 @@ a { color: inherit; }
 /* Desktop: center the [Svi proizvodi + nav] block between the logo (left) and search/cart (right).
    Two auto margins split the free space equally → the middle group sits centered. */
 @media (min-width: 1024px) {
-	.shopcats { margin-left: auto; }
+	.masthead__center { display: flex; align-items: center; gap: 16px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 	.searchbar { flex: 0 0 auto; width: 300px; margin-left: auto; }
 }
 
