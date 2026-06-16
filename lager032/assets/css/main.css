@@ -806,6 +806,8 @@ a { color: inherit; }
 .sr-cat em { color: var(--c-muted); font-style: normal; font-weight: 400; font-size: 12px; }
 .sr-cat:hover { background: var(--c-input); }
 .sr-sep { height: 1px; background: var(--c-line); margin: 5px 4px; }
+.sr-head { padding: 9px 10px 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--c-muted); }
+.sr-head + .sr-head, .sr-cat + .sr-head { border-top: 1px solid var(--c-line); margin-top: 4px; }
 
 @media (max-width: 900px) {
 	.searchresults { left: 0; right: 0; width: auto; }

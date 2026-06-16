@@ -76,10 +76,13 @@
 				show(); return;
 			}
 			var html = '';
-			cats.forEach(function (c) {
-				html += '<a class="sr-cat" href="' + c.url + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg><span>' + esc(c.name) + '</span><em>' + c.count + '</em></a>';
-			});
-			if (cats.length && items.length) { html += '<div class="sr-sep"></div>'; }
+			if (cats.length) {
+				html += '<div class="sr-head">Kategorije</div>';
+				cats.forEach(function (c) {
+					html += '<a class="sr-cat" href="' + c.url + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg><span>' + esc(c.name) + '</span><em>' + c.count + ' proizvoda</em></a>';
+				});
+			}
+			if (items.length) { html += '<div class="sr-head">Proizvodi</div>'; }
 			items.forEach(function (it) {
 				html += '<a class="sr-row" href="' + it.url + '">'
 					+ '<img class="sr-img" src="' + it.img + '" alt="" loading="lazy">'
