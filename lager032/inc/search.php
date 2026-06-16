@@ -103,14 +103,39 @@ function lager032_ajax_search() {
 	// Also suggest matching categories (product names are codes, so a word like
 	// "semering" won't hit any product title — but it should surface the category).
 	$cats      = array();
-	$cat_terms = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'number' => 4, 'name__like' => $q ) );
-	if ( ! is_wp_error( $cat_terms ) ) {
+	$cat_terms = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'number' => 40, 'orderby' => 'count', 'order' => 'DESC', 'name__like' => $q ) );
+	if ( ! is_wp_error( $cat_terms ) && $cat_terms ) {
+		// Collapse to the matched parent: drop any term whose ancestor also matched
+		// (so "leza" shows just "Ležaj", not its 22 children). Subcategory-only matches stay.
+		$matched = wp_list_pluck( $cat_terms, 'term_id' );
 		foreach ( $cat_terms as $t ) {
 			if ( 'uncategorized' === $t->slug ) {
 				continue;
 			}
+			$skip = false;
+			foreach ( get_ancestors( $t->term_id, 'product_cat' ) as $anc ) {
+				if ( in_array( $anc, $matched, true ) ) {
+					$skip = true;
+					break;
+				}
+			}
+			if ( $skip ) {
+				continue;
+			}
 			$cl = get_term_link( $t );
-			$cats[] = array( 'name' => $t->name, 'url' => is_wp_error( $cl ) ? '' : $cl, 'count' => (int) $t->count );
+			// Accurate count incl. subcategories (matches the category-page total).
+			$cq = new WP_Query( array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'no_found_rows'  => false,
+				'tax_query'      => array( array( 'taxonomy' => 'product_cat', 'field' => 'term_id', 'terms' => $t->term_id, 'include_children' => true ) ),
+			) );
+			$cats[] = array( 'name' => $t->name, 'url' => is_wp_error( $cl ) ? '' : $cl, 'count' => (int) $cq->found_posts );
+			if ( count( $cats ) >= 4 ) {
+				break;
+			}
 		}
 	}
 
