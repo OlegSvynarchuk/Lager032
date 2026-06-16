@@ -350,7 +350,7 @@ a { color: inherit; }
 .megamenu {
 	position: absolute; top: calc(100% + 8px); left: 0; width: 540px; max-width: 92vw;
 	background: #fff; border-radius: 10px; box-shadow: 0 18px 50px rgba(15,28,54,.18);
-	border: 1px solid var(--c-line); overflow: hidden;
+	border: 1px solid var(--c-line); overflow: visible;
 	opacity: 0; visibility: hidden; transform: translateY(-6px); transition: opacity .16s ease, transform .16s ease, visibility .16s;
 	z-index: 60;
 }
@@ -358,17 +358,37 @@ a { color: inherit; }
 .shopcats:focus-within .megamenu,
 .megamenu.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-.megamenu__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--c-panel); }
+.megamenu__head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--c-panel); border-radius: 10px 10px 0 0; }
 .megamenu__title { color: var(--c-navy); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
 .megamenu__all { display: inline-flex; align-items: center; gap: 5px; color: var(--c-red); font-weight: 600; font-size: 12px; text-decoration: none; }
 .megamenu__all .icon { width: 11px; height: 11px; }
 .megamenu__all:hover { text-decoration: underline; }
 
 .megamenu__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; padding: 10px; }
-.megacat { display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 4px; text-decoration: none; }
-.megacat:hover { background: var(--c-input); }
+.megacat, .megacat--has-sub > .megacat__main { display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 4px; text-decoration: none; }
+.megacat:hover, .megacat--has-sub > .megacat__main:hover { background: var(--c-input); }
 .megacat__name { color: var(--c-ink); font-weight: 600; font-size: 14px; }
 .megacat__sub { color: var(--c-muted); font-weight: 600; font-size: 12px; }
+
+/* Categories with subcategories: caret + hover flyout to the right */
+.megacat--has-sub { position: relative; }
+.megacat--has-sub > .megacat__main { position: relative; padding-right: 22px; }
+.megacat--has-sub > .megacat__main::after { content: '\203A'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--c-muted); font-weight: 700; font-size: 16px; line-height: 1; }
+.submenu {
+	position: absolute; left: 100%; top: -8px; display: none;
+	grid-auto-flow: column; grid-template-rows: repeat(12, auto); gap: 1px 4px;
+	min-width: 220px; background: #fff; border: 1px solid var(--c-line); border-radius: 8px;
+	box-shadow: 0 18px 50px rgba(15,28,54,.18); padding: 10px; z-index: 70;
+}
+.megacat--has-sub:hover > .submenu, .megacat--has-sub:focus-within > .submenu { display: grid; }
+.submenu__item, .submenu__all { display: block; padding: 6px 12px; border-radius: 4px; color: var(--c-ink); font-size: 13px; text-decoration: none; white-space: nowrap; }
+.submenu__item:hover, .submenu__all:hover { background: var(--c-input); color: var(--c-navy); }
+.submenu__all { color: var(--c-red); font-weight: 600; }
+
+/* Below desktop, render the flyout inline (single column) instead of off-screen to the side. */
+@media (max-width: 1023px) {
+	.submenu { position: static; grid-auto-flow: row; grid-template-rows: none; min-width: 0; box-shadow: none; border: 0; padding: 2px 0 6px 14px; }
+}
 
 /* Primary nav */
 .mainnav { flex: none; }

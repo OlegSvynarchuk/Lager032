@@ -46,8 +46,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</a>
 
 		<?php
-		// "Svi proizvodi" mega-dropdown. Categories from the Figma (label, subtitle, slug).
-		// Subtitles are curated copy; slug links to the product_cat archive ('' = not mapped yet).
+		// "Svi proizvodi" mega-dropdown. Curated top-level categories (label, subtitle, slug);
+		// categories that have product_cat children render a subcategory flyout on hover.
 		$mega = array(
 			array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'lezaj' ),
 			array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'semering' ),
@@ -82,7 +82,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php
 					foreach ( $mega as $m ) {
 						list( $label, $sub, $slug ) = $m;
-						$url = $shop_url;
+						$url  = $shop_url;
+						$kids = array();
 						if ( $slug ) {
 							$term = get_term_by( 'slug', $slug, 'product_cat' );
 							if ( $term && ! is_wp_error( $term ) ) {
@@ -90,14 +91,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 								if ( ! is_wp_error( $link ) ) {
 									$url = $link;
 								}
+								$kids = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $term->term_id, 'hide_empty' => false ) );
+								if ( is_wp_error( $kids ) ) {
+									$kids = array();
+								}
 							}
 						}
-						printf(
-							'<a class="megacat" href="%1$s" role="menuitem"><span class="megacat__name">%2$s</span><span class="megacat__sub">%3$s</span></a>',
-							esc_url( $url ),
-							esc_html( $label ),
-							esc_html( $sub )
-						);
+
+						if ( $kids ) {
+							echo '<div class="megacat megacat--has-sub">';
+							printf(
+								'<a class="megacat__main" href="%1$s"><span class="megacat__name">%2$s</span><span class="megacat__sub">%3$s</span></a>',
+								esc_url( $url ),
+								esc_html( $label ),
+								esc_html( $sub )
+							);
+							echo '<div class="submenu" role="menu">';
+							printf(
+								'<a class="submenu__all" href="%1$s">%2$s</a>',
+								esc_url( $url ),
+								/* translators: %s: category name. */
+								esc_html( sprintf( __( 'Svi: %s', 'lager032' ), $label ) )
+							);
+							foreach ( $kids as $kid ) {
+								$kl = get_term_link( $kid );
+								printf(
+									'<a class="submenu__item" href="%1$s">%2$s</a>',
+									esc_url( is_wp_error( $kl ) ? $shop_url : $kl ),
+									esc_html( $kid->name )
+								);
+							}
+							echo '</div></div>';
+						} else {
+							printf(
+								'<a class="megacat" href="%1$s" role="menuitem"><span class="megacat__name">%2$s</span><span class="megacat__sub">%3$s</span></a>',
+								esc_url( $url ),
+								esc_html( $label ),
+								esc_html( $sub )
+							);
+						}
 					}
 					?>
 				</div>
