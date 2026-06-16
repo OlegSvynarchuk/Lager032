@@ -2,29 +2,9 @@
 (function () {
 	'use strict';
 
-	// "Svi proizvodi" mega-dropdown: hover opens on desktop (CSS); click/tap toggles too.
-	var shop = document.querySelector('.shopcats');
-	if (shop) {
-		var btn = shop.querySelector('.shopcats__btn');
-		var menu = shop.querySelector('.megamenu');
-		btn.addEventListener('click', function (e) {
-			e.preventDefault();
-			var open = menu.classList.toggle('is-open');
-			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-		});
-		document.addEventListener('click', function (e) {
-			if (!shop.contains(e.target)) {
-				menu.classList.remove('is-open');
-				btn.setAttribute('aria-expanded', 'false');
-			}
-		});
-		document.addEventListener('keydown', function (e) {
-			if (e.key === 'Escape') {
-				menu.classList.remove('is-open');
-				btn.setAttribute('aria-expanded', 'false');
-			}
-		});
-	}
+	// "Svi proizvodi" is a link to the shop (/prodavnica). The mega-dropdown opens on
+	// hover / keyboard focus via CSS (.shopcats:hover / :focus-within); clicking the
+	// button navigates to the shop — no JS toggle needed.
 
 	// Archive facets: checkbox toggles apply immediately (price/search use the button/Enter).
 	document.querySelectorAll('.filters__form input[type="checkbox"]').forEach(function (cb) {

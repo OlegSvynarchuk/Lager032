@@ -42,11 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<div class="container masthead__inner">
 
 		<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<span class="brand__badge">L032</span>
-			<span class="brand__text">
-				<span class="brand__name">LAGER STR</span>
-				<span class="brand__sub"><?php esc_html_e( 'ČAČAK · SRBIJA', 'lager032' ); ?></span>
-			</span>
+			<img class="brand__img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png' ); ?>" width="141" height="36" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 		</a>
 
 		<?php
@@ -69,11 +65,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' );
 		?>
 		<div class="shopcats">
-			<button type="button" class="shopcats__btn" aria-haspopup="true" aria-expanded="false">
+			<a class="shopcats__btn" href="<?php echo esc_url( $shop_url ); ?>" aria-haspopup="true">
 				<?php lager032_icon( 'grid' ); ?>
 				<span><?php esc_html_e( 'Svi proizvodi', 'lager032' ); ?></span>
 				<?php lager032_icon( 'chevron' ); ?>
-			</button>
+			</a>
 
 			<div class="megamenu" role="menu">
 				<div class="megamenu__head">

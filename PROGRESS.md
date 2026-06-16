@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-11.
+> Last updated: 2026-06-15.
 
 ---
 
@@ -416,3 +416,27 @@ WP-CLI can't auto-write it here ("special configuration" warning). Now in place;
 Apply **SEO best practices** in every template/feature — titles/meta, single H1, Product +
 BreadcrumbList JSON-LD, breadcrumbs, image alt, pretty permalinks, sitemap, internal linking.
 (See memory `seo-best-practices`.) Footer **PIB/Matični broj** still mockup placeholders.
+
+---
+
+## 16. Session log — 2026-06-15 (this laptop — header & homepage polish)
+
+Small UX/asset fixes on top of the redesign (all deployed; site is the public dev link):
+
+1. **"Svi proizvodi" is now a link** → `/prodavnica/` (was a `<button>`). The mega-dropdown
+   still opens on hover / keyboard focus (CSS `:hover`/`:focus-within`); removed the JS
+   click-toggle so the click navigates. Chevron rotates on hover instead of `aria-expanded`.
+   *Touch caveat:* tapping it navigates (doesn't open the dropdown) — acceptable since the
+   shop lists all categories. Files: `header.php`, `assets/js/main.js`, `assets/css/main.css`.
+2. **Archive padding removed** — `.archive` `padding: 16px 0 64px` → `0`, so the product list
+   sits flush under the sticky header and at the bottom.
+3. **Real logo in header** — replaced the text "L032" badge with the actual **LAGER** logo
+   image (Figma node `106:2735`, exported PNG @scale 4 → `assets/img/logo.png`; `.brand__img`
+   at 40px). NOTE: the **footer** still uses the text badge (`footbrand`); the colored logo
+   isn't legible on the dark footer — needs a white/knockout version if we want it there.
+4. **Homepage "Proizvodi" (Katalog) section removed** — its own search + 3 filter dropdowns +
+   12-product grid + `wc_get_products()` query were redundant with `/prodavnica/`. Homepage now:
+   Hero → KPI → Kategorije → O Nama → Brendovi → Kontakt. Leftover `.catalog*`/`.prodcard*` CSS
+   is now dead (harmless; strip in a later cleanup).
+
+Deploy per usual: scp changed file(s), `chmod 644`, `php -l`, `wp cache flush`.
