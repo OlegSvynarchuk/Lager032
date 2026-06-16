@@ -440,3 +440,47 @@ Small UX/asset fixes on top of the redesign (all deployed; site is the public de
    is now dead (harmless; strip in a later cleanup).
 
 Deploy per usual: scp changed file(s), `chmod 644`, `php -l`, `wp cache flush`.
+
+---
+
+## Session log — 2026-06-16
+
+**Header polish**
+- util-bar **right-aligned** (both phones now beside email + address).
+- Nav **centered in container**: wrapped "Svi proizvodi" + nav in `.masthead__center`, absolutely
+  centered on desktop (≥1024px); `display:contents` below that keeps the mobile hamburger nav intact.
+  Logo alone left, search + cart right.
+- Added **Katalog** nav item (→ shop). Nav item gaps widened to 19px (incl. before Svi proizvodi).
+- **Subcategory flyouts** in the "Svi proizvodi" mega-dropdown: categories with children (Ležaj 22,
+  Remen 5) show their **real subcategories on hover** (data-driven from `product_cat`), `›` caret,
+  "Svi: {kategorija}" link; the other 10 link directly. `.megamenu` overflow set visible for the flyout.
+
+**Phase 3 — Live AJAX search** (`inc/search.php` + `assets/js/main.js` + CSS) — DONE:
+- Typeahead (debounce 250ms, abort stale), matches **title + SKU**, ranked (exact SKU → starts →
+  title starts → contains), diacritic-insensitive.
+- **Code normalization**: strip spaces/dashes/dots/slashes + lowercase → `6205-2RS` = `6205 2RS` =
+  `62052rs` all match.
+- **Category suggestions** collapsed to the matched parent (e.g. Ležaj 2.582, accurate incl-children
+  count); subcategory-specific queries (e.g. "aksijalni") show the matching subtypes.
+- Labeled groups **KATEGORIJE / PROIZVODI**, highlighted match, rows = thumb · naziv · šifra · price ·
+  stock, **quick-add to cart** (AJAX `wc-ajax=add_to_cart` + cart-count fragment → header badge),
+  "Prikaži sve rezultate (N) →" footer, keyboard nav (↑/↓/Enter/Esc), no-results state. 640px dropdown.
+- Endpoint nonce-protected, published-only. Localized via `LagerSearch`.
+
+**Pricing decision RESOLVED — show FULL price incl. PDV** (closes the §13/§15 open item):
+- Was showing **net + "bez PDV-a"** (per Figma). Switched ALL templates (archive `.prow`, single
+  product, related, search results) to **`$product->get_price_html()`**, which returns the incl-PDV
+  price per Woo's `tax_display_shop=incl`. Dropped the "bez PDV-a" label → clean single number.
+  Example: net 1.599 → **1.919 рсд**. Single-product JSON-LD now uses `wc_get_price_including_tax()`.
+  Matches the old site (which showed sa-PDV) + Serbian consumer-price norm. (Site is **retail/B2C** — "no B2B".)
+
+**Data note — "spojnica" gap (diagnostic):** 33 products are *named* "spojn*"; **9** are in the
+**Spojnice** category, **24** are in **"Lanci i lančanici"** (all 24 — likely chain couplings). This is
+source (Croonus) categorization, not a search bug — search finds all 33 by name regardless. Whether to
+re-categorize the 24 is a client decision.
+
+### Next
+1. **Product name cleanup** — strip trailing `---` from product titles.
+2. **Cart / checkout styling** — still WooCommerce default (Woo CSS kept there).
+3. Optional: wire the live-search dropdown to the **homepage/shop** search boxes too; **spojnica
+   re-categorization** (client decision); strip dead `.catalog*`/`.prodcard*`/`*__price small` CSS.

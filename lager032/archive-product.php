@@ -262,7 +262,7 @@ $base_url = $current_term ? get_term_link( $current_term ) : ( function_exists( 
 									?>
 								</div>
 								<div class="prow__side">
-									<span class="prow__price"><?php echo wp_kses_post( wc_price( $product->get_regular_price() ) ); ?><small><?php esc_html_e( 'bez PDV-a', 'lager032' ); ?></small></span>
+									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
 									<span class="prow__stock <?php echo $instockp ? 'is-in' : 'is-out'; ?>"><?php echo $instockp ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
 									<a class="btn btn--navy btn--sm" href="<?php echo esc_url( $product->add_to_cart_url() ); ?>"><?php lager032_icon( 'cart' ); ?> <?php esc_html_e( 'Dodaj u korpu', 'lager032' ); ?></a>
 								</div>

@@ -29,7 +29,6 @@ add_action( 'wp_enqueue_scripts', function () {
 			'noResultsHint' => __( 'Proverite šifru ili nas pozovite za upit.', 'lager032' ),
 			'add'         => __( 'Dodaj u korpu', 'lager032' ),
 			'added'       => __( 'Dodato', 'lager032' ),
-			'noPdv'       => __( 'bez PDV-a', 'lager032' ),
 			'inStock'     => __( 'Na stanju', 'lager032' ),
 			'outStock'    => __( 'Nema na stanju', 'lager032' ),
 		),
@@ -95,7 +94,7 @@ function lager032_ajax_search() {
 			'title'   => $product->get_name(),
 			'sku'     => $product->get_sku(),
 			'url'     => get_permalink( $id ),
-			'price'   => html_entity_decode( wp_strip_all_tags( wc_price( $product->get_regular_price() ) ), ENT_QUOTES, 'UTF-8' ),
+			'price'   => html_entity_decode( wp_strip_all_tags( $product->get_price_html() ), ENT_QUOTES, 'UTF-8' ),
 			'inStock' => $product->is_in_stock(),
 			'img'     => $img,
 		);

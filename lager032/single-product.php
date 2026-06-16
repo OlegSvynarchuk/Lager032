@@ -72,7 +72,7 @@ while ( have_posts() ) :
 						<?php if ( $brand ) : ?><span><?php esc_html_e( 'Proizvođač:', 'lager032' ); ?> <strong><?php echo esc_html( $brand ); ?></strong></span><?php endif; ?>
 					</div>
 
-					<div class="single__price"><?php echo wp_kses_post( wc_price( $net ) ); ?><small><?php esc_html_e( 'bez PDV-a', 'lager032' ); ?></small></div>
+					<div class="single__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></div>
 
 					<div class="single__stock <?php echo $instock ? 'is-in' : 'is-out'; ?>">
 						<?php lager032_icon( $instock ? 'check' : 'box' ); ?>
@@ -129,12 +129,11 @@ while ( have_posts() ) :
 					foreach ( $related as $rp ) {
 						$rid = $rp->get_id();
 						printf(
-							'<a class="relcard" href="%1$s"><span class="relcard__media">%2$s</span><span class="relcard__name">%3$s</span><span class="relcard__price">%4$s<small>%5$s</small></span></a>',
+							'<a class="relcard" href="%1$s"><span class="relcard__media">%2$s</span><span class="relcard__name">%3$s</span><span class="relcard__price">%4$s</span></a>',
 							esc_url( get_permalink( $rid ) ),
 							$rp->get_image( 'woocommerce_thumbnail' ), // phpcs:ignore
 							esc_html( $rp->get_name() ),
-							wp_kses_post( wc_price( $rp->get_regular_price() ) ),
-							esc_html__( 'bez PDV-a', 'lager032' )
+							wp_kses_post( $rp->get_price_html() )
 						);
 					}
 					echo '</div></div>';
@@ -175,7 +174,7 @@ while ( have_posts() ) :
 		'brand'       => $brand ? array( '@type' => 'Brand', 'name' => $brand ) : null,
 		'offers'      => array(
 			'@type'         => 'Offer',
-			'price'         => $net,
+			'price'         => wc_get_price_including_tax( $product ),
 			'priceCurrency' => get_woocommerce_currency(),
 			'availability'  => $instock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
 			'url'           => get_permalink(),
