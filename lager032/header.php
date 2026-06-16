@@ -167,6 +167,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<a class="cartbtn" href="<?php echo esc_url( $cart_url ); ?>">
 			<?php lager032_icon( 'cart' ); ?>
 			<span><?php esc_html_e( 'Korpa', 'lager032' ); ?></span>
+			<?php $cc = ( function_exists( 'WC' ) && WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0; ?>
+			<span class="cartbtn__count"<?php echo $cc ? '' : ' hidden'; ?>><?php echo esc_html( $cc ); ?></span>
 		</a>
 
 		<button class="navtoggle" aria-label="<?php esc_attr_e( 'Meni', 'lager032' ); ?>" aria-expanded="false">
