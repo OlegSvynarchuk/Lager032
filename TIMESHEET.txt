@@ -1,0 +1,50 @@
+LAGER032 — WORK LOG / TIMESHEET
+Project: WordPress + WooCommerce migration & custom theme (lager032)
+Site: https://lager032.pixels2pixels.ch  (dev)
+
+
+=====================================================================
+2026-06-15
+=====================================================================
+- Published the full catalogue: set all 4,934 products from draft to
+  PUBLISHED; turned on "discourage search engines from indexing" so the
+  dev site stays out of Google.
+- Built the SINGLE PRODUCT page (data-first template): breadcrumb,
+  category image used as an illustrative reference, title, code (sifra),
+  brand, price, stock, quantity + add-to-cart, "call for enquiry" CTA,
+  specifications table, related products, and Product + Breadcrumb
+  structured data (JSON-LD for SEO).
+- Brand filter: decided to SKIP for now (brand is not in the source data;
+  only ~half of product names contain a brand, with false positives) — the
+  manufacturer facet auto-hides.
+- URL ARCHITECTURE: moved from query-string URLs to clean Serbian
+  permalinks — /prodavnica/ (shop), /kategorija/{slug}/ (categories),
+  /proizvod/{slug}/ (products); created the missing server .htaccess so the
+  pretty URLs resolve (decided against a shop. subdomain for SEO).
+- Set "best SEO practices" as a standing project principle.
+- Layout: tightened the product-archive top spacing.
+
+=====================================================================
+2026-06-16
+=====================================================================
+- HEADER layout: right-aligned the top contact bar (phones beside e-mail
+  + address); centered the "Svi proizvodi" + main navigation block in the
+  header; added a "Katalog" menu item; widened nav spacing; switched the
+  logo to the image logo.
+- MEGA-DROPDOWN: added subcategory fly-out menus on hover for the
+  categories that have subcategories (driven live from the catalogue;
+  collapses to the parent so it stays clean).
+- Built LIVE AJAX SEARCH (typeahead):
+    * searches product name AND code/SKU, ranked, diacritic-insensitive;
+    * code normalization (6205-2RS = 6205 2RS = 62052rs all match);
+    * category suggestions (collapsed to the matched parent, real counts);
+    * grouped + labelled results (Kategorije / Proizvodi), highlighted match;
+    * quick add-to-cart from the results + live cart badge;
+    * keyboard navigation, "view all results" link, no-results state.
+- PRICING: switched the whole storefront to show the FULL price including
+  VAT (PDV) instead of the net price (removed the "bez PDV-a" display) —
+  e.g. 1.599 -> 1.919 RSD; updated product structured data accordingly.
+- Diagnostics: analysed product naming vs. categorisation (the "spojnica"
+  gap report) to confirm search behaviour.
+- Updated project documentation (PROGRESS.md); committed and deployed all
+  changes to the dev site.
