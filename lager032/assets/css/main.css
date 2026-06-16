@@ -774,7 +774,7 @@ a { color: inherit; }
 .cartbtn__count[hidden] { display: none; }
 
 .searchresults {
-	position: absolute; top: calc(100% + 6px); right: 0; width: 440px; max-width: 92vw;
+	position: absolute; top: calc(100% + 6px); right: 0; width: 640px; max-width: 92vw;
 	background: #fff; border: 1px solid var(--c-line); border-radius: 10px;
 	box-shadow: 0 18px 50px rgba(15,28,54,.18); padding: 6px; z-index: 80; max-height: 70vh; overflow-y: auto;
 }
