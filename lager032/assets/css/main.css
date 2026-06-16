@@ -310,7 +310,7 @@ a { color: inherit; }
 
 /* Utility bar */
 .util-bar { background: var(--c-navy); color: #fff; font-size: 12px; }
-.util-bar__inner { display: flex; align-items: center; justify-content: space-between; min-height: 36px; gap: 16px; }
+.util-bar__inner { display: flex; align-items: center; justify-content: flex-end; min-height: 36px; gap: 24px; }
 .util-bar a { display: inline-flex; align-items: center; gap: 6px; color: #fff; text-decoration: none; }
 .util-bar__contacts, .util-bar__meta { display: flex; align-items: center; gap: 20px; }
 .util-bar .icon { width: 12px; height: 12px; opacity: .9; }
