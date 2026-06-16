@@ -115,7 +115,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				) );
 			} else {
 				printf(
-					'<ul class="mainnav__list"><li><a href="%1$s">%2$s</a></li><li><a href="#">O Nama</a></li><li><a href="#">Sertifikati</a></li><li><a href="#">Kontakt</a></li></ul>',
+					'<ul class="mainnav__list"><li><a href="%1$s">%2$s</a></li><li><a href="' . esc_url( $shop_url ) . '">Katalog</a></li><li><a href="#">O Nama</a></li><li><a href="#">Sertifikati</a></li><li><a href="#">Kontakt</a></li></ul>',
 					esc_url( home_url( '/' ) ),
 					esc_html__( 'Početna', 'lager032' )
 				);

@@ -372,7 +372,7 @@ a { color: inherit; }
 
 /* Primary nav */
 .mainnav { flex: none; }
-.mainnav__list { display: flex; align-items: center; gap: 4px; list-style: none; margin: 0; padding: 0; }
+.mainnav__list { display: flex; align-items: center; gap: 19px; list-style: none; margin: 0; padding: 0; }
 .mainnav__list a { display: inline-block; padding: 8px 12px; border-radius: 4px; color: var(--c-ink); font-weight: 600; font-size: 14px; text-decoration: none; }
 .mainnav__list a:hover, .mainnav__list .current-menu-item > a { background: var(--c-input); color: var(--c-navy); }
 
@@ -385,7 +385,7 @@ a { color: inherit; }
 /* Desktop: center the [Svi proizvodi + nav] block between the logo (left) and search/cart (right).
    Two auto margins split the free space equally → the middle group sits centered. */
 @media (min-width: 1024px) {
-	.masthead__center { display: flex; align-items: center; gap: 16px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+	.masthead__center { display: flex; align-items: center; gap: 19px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
 	.searchbar { flex: 0 0 auto; width: 300px; margin-left: auto; }
 }
 
