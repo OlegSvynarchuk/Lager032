@@ -11,6 +11,50 @@
 		cb.addEventListener('change', function () { cb.form.submit(); });
 	});
 
+	// Category nav: collapsible parent groups — the caret toggles the subcategory list.
+	document.querySelectorAll('.catnav__toggle').forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			var group = btn.closest('.catnav__group');
+			if (!group) return;
+			btn.setAttribute('aria-expanded', group.classList.toggle('is-open') ? 'true' : 'false');
+		});
+	});
+
+	// Price range: dual-handle slider kept in sync with the Od/Do inputs (the inputs submit).
+	document.querySelectorAll('.prange').forEach(function (el) {
+		var lo = +el.dataset.min, hi = +el.dataset.max;
+		if (!(hi > lo)) return;
+		var rMin = el.querySelector('.prange__range--min'),
+			rMax = el.querySelector('.prange__range--max'),
+			nMin = el.querySelector('.prange__num--min'),
+			nMax = el.querySelector('.prange__num--max'),
+			fill = el.querySelector('.prange__fill');
+		function pct(v) { return ((v - lo) / (hi - lo)) * 100; }
+		function paint() { fill.style.left = pct(+rMin.value) + '%'; fill.style.right = (100 - pct(+rMax.value)) + '%'; }
+		function fromRange(which) {
+			var a = +rMin.value, b = +rMax.value;
+			if (a > b) { if (which === 'min') { rMax.value = a; b = a; } else { rMin.value = b; a = b; } }
+			nMin.value = a > lo ? a : '';
+			nMax.value = b < hi ? b : '';
+			paint();
+		}
+		function fromNum() {
+			var a = nMin.value === '' ? lo : Math.max(lo, Math.min(hi, +nMin.value || lo));
+			var b = nMax.value === '' ? hi : Math.max(lo, Math.min(hi, +nMax.value || hi));
+			if (a > b) { a = b; }
+			rMin.value = a; rMax.value = b; paint();
+		}
+		var form = el.closest('form');
+		function applyNow() { if (form) form.submit(); }
+		rMin.addEventListener('input', function () { fromRange('min'); });   // live: drag updates thumb/fill/inputs
+		rMax.addEventListener('input', function () { fromRange('max'); });
+		rMin.addEventListener('change', applyNow);                          // release: apply the filter
+		rMax.addEventListener('change', applyNow);
+		nMin.addEventListener('change', function () { fromNum(); applyNow(); });
+		nMax.addEventListener('change', function () { fromNum(); applyNow(); });
+		paint();
+	});
+
 	// Archive: preserve scroll position across the filter/sort reload (GET reloads the page,
 	// which would otherwise jump to top). Save on any filter change/submit; restore on load.
 	var archiveEl = document.querySelector('.archive');

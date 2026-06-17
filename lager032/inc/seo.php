@@ -21,7 +21,7 @@ function lager_is_product_archive() {
 
 /** The query-string keys that turn a clean archive into a filtered permutation. */
 function lager_archive_filter_keys() {
-	return array( 'fcat', 'fbrand', 'instock', 'min_price', 'max_price', 's', 'orderby' );
+	return array( 'fcat', 'fbrand', 'instock', 'min_price', 'max_price', 'q', 'orderby' );
 }
 
 /** True when the current archive carries any filter/sort/search parameter. */

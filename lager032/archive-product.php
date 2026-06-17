@@ -23,7 +23,10 @@ $sel_brands = isset( $_GET['fbrand'] ) ? array_map( 'sanitize_title', (array) wp
 $instock    = ! empty( $_GET['instock'] );
 $min_price  = ( isset( $_GET['min_price'] ) && '' !== $_GET['min_price'] ) ? floatval( $_GET['min_price'] ) : '';
 $max_price  = ( isset( $_GET['max_price'] ) && '' !== $_GET['max_price'] ) ? floatval( $_GET['max_price'] ) : '';
-$search     = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
+// Catalog search uses our own `q` param, NOT WordPress' `s` — keeping `s` out of the URL avoids
+// WP's search machinery (incl. its single-result "redirect to the product" behaviour). The value
+// is still passed to WP_Query as `s` internally below.
+$search     = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
 $orderby    = isset( $_GET['orderby'] ) ? sanitize_key( $_GET['orderby'] ) : 'date';
 $paged      = max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
 
@@ -54,17 +57,56 @@ $meta_query = array();
 if ( $instock ) {
 	$meta_query[] = array( 'key' => '_stock_status', 'value' => 'instock' );
 }
+
+// ---- Contextual price bounds (gross) — computed from the current list (category + search +
+// availability), EXCLUDING the price filter itself, so the slider range always matches what's
+// shown and you can still widen. $show_price is false when there's no real range (≤1 product or
+// all one price) → the price filter is hidden. ----
+$lk = $GLOBALS['wpdb']->prefix . 'wc_product_meta_lookup';
+// Search uses the shared normalized matcher (title + SKU) so the archive list matches the typeahead.
+$search_ids = ( '' !== $search ) ? lager_search_product_ids( $search ) : null;
+$has_constraints = ( $is_cat || $is_brand || '' !== $search || $instock || ! empty( $sel_brands ) || ! empty( $sel_cats ) );
+if ( $has_constraints ) {
+	$bargs = array(
+		'post_type'      => 'product',
+		'post_status'    => 'publish',
+		'fields'         => 'ids',
+		'posts_per_page' => -1,
+		'no_found_rows'  => true,
+		'tax_query'      => $tax_query,  // phpcs:ignore WordPress.DB.SlowDBQuery
+		'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery -- instock only at this point
+	);
+	if ( null !== $search_ids ) {
+		$bargs['post__in'] = $search_ids ? $search_ids : array( 0 );
+	}
+	$bound_ids   = get_posts( $bargs );
+	$bound_count = count( $bound_ids );
+	$prow        = $bound_ids
+		? $GLOBALS['wpdb']->get_row( 'SELECT MIN(min_price) lo, MAX(max_price) hi FROM ' . $lk . ' WHERE product_id IN (' . implode( ',', array_map( 'absint', $bound_ids ) ) . ') AND min_price > 0' )
+		: null;
+} else {
+	$prow        = $GLOBALS['wpdb']->get_row( 'SELECT MIN(min_price) lo, MAX(max_price) hi, COUNT(*) c FROM ' . $lk . ' WHERE min_price > 0' );
+	$bound_count = $prow ? (int) $prow->c : 0;
+}
+$price_lo   = ( $prow && null !== $prow->lo ) ? (int) ( floor( (float) $prow->lo * 1.2 / 10 ) * 10 ) : 0;
+$price_hi   = ( $prow && null !== $prow->hi ) ? (int) ( ceil( (float) $prow->hi * 1.2 / 10 ) * 10 ) : 0;
+$show_price = ( $bound_count > 1 && $price_hi > $price_lo );
+
 if ( '' !== $min_price || '' !== $max_price ) {
-	$pq = array( 'key' => '_price', 'type' => 'NUMERIC' );
-	if ( '' !== $min_price && '' !== $max_price ) {
+	// Od/Do are gross (incl. PDV, matching displayed prices); stored _price is net, so convert
+	// the bounds to net for the comparison. PDV is a flat 20%.
+	$net_min = ( '' !== $min_price ) ? ( (float) $min_price / 1.2 ) : '';
+	$net_max = ( '' !== $max_price ) ? ( (float) $max_price / 1.2 ) : '';
+	$pq      = array( 'key' => '_price', 'type' => 'NUMERIC' );
+	if ( '' !== $net_min && '' !== $net_max ) {
 		$pq['compare'] = 'BETWEEN';
-		$pq['value']   = array( $min_price, $max_price );
-	} elseif ( '' !== $min_price ) {
+		$pq['value']   = array( $net_min, $net_max );
+	} elseif ( '' !== $net_min ) {
 		$pq['compare'] = '>=';
-		$pq['value']   = $min_price;
+		$pq['value']   = $net_min;
 	} else {
 		$pq['compare'] = '<=';
-		$pq['value']   = $max_price;
+		$pq['value']   = $net_max;
 	}
 	$meta_query[] = $pq;
 }
@@ -77,8 +119,8 @@ $args = array(
 	'tax_query'      => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery
 	'meta_query'     => $meta_query, // phpcs:ignore WordPress.DB.SlowDBQuery
 );
-if ( $search ) {
-	$args['s'] = $search;
+if ( null !== $search_ids ) {
+	$args['post__in'] = $search_ids ? $search_ids : array( 0 );
 }
 switch ( $orderby ) {
 	case 'price':
@@ -99,6 +141,10 @@ switch ( $orderby ) {
 		$args['orderby'] = 'date';
 		$args['order']   = 'DESC';
 }
+if ( null !== $search_ids && 'date' === $orderby ) {
+	$args['orderby'] = 'post__in'; // keep search-relevance order unless the user picked a sort
+	unset( $args['order'] );
+}
 $q = new WP_Query( $args );
 
 $total    = (int) $q->found_posts;
@@ -112,7 +158,7 @@ $base_url = $current_term ? get_term_link( $current_term ) : ( function_exists( 
 // state (so removing a chip preserves the sort) but is not itself shown as a removable chip.
 $active = array();
 if ( $search ) {
-	$active['s'] = $search;
+	$active['q'] = $search;
 }
 if ( $sel_cats ) {
 	$active['fcat'] = $sel_cats;
@@ -173,12 +219,12 @@ if ( '' !== $min_price || '' !== $max_price ) {
 }
 if ( $search ) {
 	$p = $active;
-	unset( $p['s'] );
+	unset( $p['q'] );
 	$chips[] = array( 'label' => '„' . $search . '"', 'url' => $chip_url( $p ) );
 }
 ?>
 
-<section class="archive">
+<section class="archive<?php echo ( ! $is_cat && ! $is_brand ) ? ' archive--shop' : ''; ?>">
 	<div class="container">
 
 		<?php
@@ -252,45 +298,88 @@ if ( $search ) {
 			<aside class="filters">
 
 				<?php
-				// Category panel: the shop shows top-level categories (browse in); a category page
-				// shows ONLY its own subcategories (drill-down); a leaf category shows none. Up/cross
-				// navigation is via the breadcrumb — so we never offer a sibling that ANDs to empty.
-				$shop_link   = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' );
-				$panel_label = $is_cat ? __( 'Potkategorije', 'lager032' ) : __( 'Kategorije', 'lager032' );
-				$panel_terms = get_terms( array(
-					'taxonomy'   => 'product_cat',
-					'parent'     => $is_cat ? (int) $current_term->term_id : 0,
-					'hide_empty' => false,
-				) );
-				if ( ! is_wp_error( $panel_terms ) && $panel_terms ) :
-					?>
-					<nav class="catnav" aria-label="<?php echo esc_attr( $panel_label ); ?>">
-						<span class="catnav__title"><?php echo esc_html( $panel_label ); ?></span>
+				// Persistent category navigation (links, not filters): every archive shows the full
+				// top-level list. Parents with subcategories are collapsible — the current branch is
+				// auto-expanded and highlighted, the rest collapsed. Navigation only → one click to any
+				// category, no empty-AND, consistent rail everywhere. (Breadcrumb above handles "where am I".)
+				$shop_link = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' );
+				$cur_id    = $is_cat ? (int) $current_term->term_id : 0;
+				$open_id   = $cur_id;
+				if ( $cur_id ) {
+					$anc = get_ancestors( $cur_id, 'product_cat' );
+					if ( $anc ) {
+						$open_id = (int) end( $anc ); // top-level ancestor → that branch opens
+					}
+				}
+				$parents = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => 0, 'hide_empty' => false ) );
+				?>
+				<nav class="catnav" aria-label="<?php esc_attr_e( 'Kategorije', 'lager032' ); ?>">
+					<span class="catnav__title"><?php esc_html_e( 'Kategorije', 'lager032' ); ?></span>
+					<a class="catnav__all<?php echo $is_cat ? '' : ' is-active'; ?>" href="<?php echo esc_url( $shop_link ); ?>">
+						<?php lager032_icon( 'grid' ); ?><span><?php esc_html_e( 'Svi proizvodi', 'lager032' ); ?></span>
+					</a>
+					<?php if ( ! is_wp_error( $parents ) && $parents ) : ?>
 						<ul class="catnav__list">
 							<?php
-							foreach ( $panel_terms as $t ) {
-								if ( 'uncategorized' === $t->slug ) {
+							foreach ( $parents as $p ) {
+								if ( 'uncategorized' === $p->slug ) {
 									continue;
 								}
-								$tl = get_term_link( $t );
-								printf(
-									'<li><a class="catnav__item" href="%1$s"><span>%2$s</span><em>%3$d</em></a></li>',
-									esc_url( is_wp_error( $tl ) ? $shop_link : $tl ),
-									esc_html( $t->name ),
-									(int) $t->count
+								$pid      = (int) $p->term_id;
+								$p_active = ( $pid === $cur_id );
+								$p_link   = get_term_link( $p );
+								$p_url    = is_wp_error( $p_link ) ? $shop_link : $p_link;
+								$kids     = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $pid, 'hide_empty' => false ) );
+								$has_kids = ( $kids && ! is_wp_error( $kids ) );
+								$item     = sprintf(
+									'<a class="catnav__item%1$s" href="%2$s"%3$s><span>%4$s</span><em>%5$d</em></a>',
+									$p_active ? ' is-active' : '',
+									esc_url( $p_url ),
+									$p_active ? ' aria-current="page"' : '',
+									esc_html( $p->name ),
+									(int) $p->count
 								);
+
+								if ( ! $has_kids ) {
+									echo '<li>' . $item . '</li>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* above.
+									continue;
+								}
+
+								$is_open = ( $pid === $open_id );
+								printf( '<li class="catnav__group%s"><div class="catnav__row">', $is_open ? ' is-open' : '' );
+								echo $item; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with esc_* above.
+								printf(
+									'<button type="button" class="catnav__toggle" aria-expanded="%1$s" aria-label="%2$s">%3$s</button></div><ul class="catnav__sub">',
+									$is_open ? 'true' : 'false',
+									esc_attr__( 'Prikaži potkategorije', 'lager032' ),
+									lager032_get_icon( 'chevron' )
+								);
+								foreach ( $kids as $k ) {
+									$k_active = ( (int) $k->term_id === $cur_id );
+									$k_link   = get_term_link( $k );
+									$k_url    = is_wp_error( $k_link ) ? $shop_link : $k_link;
+									printf(
+										'<li><a class="catnav__sublink%1$s" href="%2$s"%3$s><span>%4$s</span><em>%5$d</em></a></li>',
+										$k_active ? ' is-active' : '',
+										esc_url( $k_url ),
+										$k_active ? ' aria-current="page"' : '',
+										esc_html( $k->name ),
+										(int) $k->count
+									);
+								}
+								echo '</ul></li>';
 							}
 							?>
 						</ul>
-					</nav>
-				<?php endif; ?>
+					<?php endif; ?>
+				</nav>
 
 				<form class="filters__form" method="get" action="<?php echo esc_url( $base_url ); ?>">
 					<div class="filters__top"><?php lager032_icon( 'grid' ); ?><span><?php esc_html_e( 'Filteri', 'lager032' ); ?></span></div>
 
 					<div class="filters__search">
 						<?php lager032_icon( 'search' ); ?>
-						<input type="search" name="s" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Pretraži artikle...', 'lager032' ); ?>">
+						<input type="search" name="q" value="<?php echo esc_attr( $search ); ?>" placeholder="<?php esc_attr_e( 'Pretraži artikle...', 'lager032' ); ?>">
 					</div>
 
 					<details class="fsec" open>
@@ -318,13 +407,26 @@ if ( $search ) {
 						</details>
 					<?php endif; ?>
 
+					<?php if ( $show_price ) :
+						$val_lo = ( '' !== $min_price ) ? max( $price_lo, min( $price_hi, (int) $min_price ) ) : $price_lo;
+						$val_hi = ( '' !== $max_price ) ? max( $price_lo, min( $price_hi, (int) $max_price ) ) : $price_hi;
+						?>
 					<details class="fsec" open>
 						<summary><?php esc_html_e( 'Cena (RSD)', 'lager032' ); ?><?php lager032_icon( 'chevron' ); ?></summary>
-						<div class="fprice">
-							<label><?php esc_html_e( 'Od', 'lager032' ); ?><input type="number" name="min_price" min="0" value="<?php echo esc_attr( $min_price ); ?>"></label>
-							<label><?php esc_html_e( 'Do', 'lager032' ); ?><input type="number" name="max_price" min="0" value="<?php echo esc_attr( $max_price ); ?>"></label>
+						<div class="prange" data-min="<?php echo esc_attr( $price_lo ); ?>" data-max="<?php echo esc_attr( $price_hi ); ?>">
+							<div class="prange__slider">
+								<span class="prange__rail" aria-hidden="true"></span>
+								<span class="prange__fill" aria-hidden="true"></span>
+								<input type="range" class="prange__range prange__range--min" min="<?php echo esc_attr( $price_lo ); ?>" max="<?php echo esc_attr( $price_hi ); ?>" step="10" value="<?php echo esc_attr( $val_lo ); ?>" aria-label="<?php esc_attr_e( 'Najniža cena', 'lager032' ); ?>">
+								<input type="range" class="prange__range prange__range--max" min="<?php echo esc_attr( $price_lo ); ?>" max="<?php echo esc_attr( $price_hi ); ?>" step="10" value="<?php echo esc_attr( $val_hi ); ?>" aria-label="<?php esc_attr_e( 'Najviša cena', 'lager032' ); ?>">
+							</div>
+							<div class="prange__fields">
+								<label class="prange__field"><?php esc_html_e( 'Od', 'lager032' ); ?><input type="number" inputmode="numeric" class="prange__num prange__num--min" name="min_price" min="<?php echo esc_attr( $price_lo ); ?>" max="<?php echo esc_attr( $price_hi ); ?>" value="<?php echo ( '' !== $min_price ) ? esc_attr( (int) $min_price ) : ''; ?>" placeholder="<?php echo esc_attr( $price_lo ); ?>"></label>
+								<label class="prange__field"><?php esc_html_e( 'Do', 'lager032' ); ?><input type="number" inputmode="numeric" class="prange__num prange__num--max" name="max_price" min="<?php echo esc_attr( $price_lo ); ?>" max="<?php echo esc_attr( $price_hi ); ?>" value="<?php echo ( '' !== $max_price ) ? esc_attr( (int) $max_price ) : ''; ?>" placeholder="<?php echo esc_attr( $price_hi ); ?>"></label>
+							</div>
 						</div>
 					</details>
+					<?php endif; // $show_price ?>
 
 					<input type="hidden" name="orderby" value="<?php echo esc_attr( $orderby ); ?>">
 					<button type="submit" class="btn btn--navy btn--block filters__apply"><?php esc_html_e( 'Primeni filtere', 'lager032' ); ?></button>
@@ -356,7 +458,7 @@ if ( $search ) {
 					<form id="sortform" method="get" action="<?php echo esc_url( $base_url ); ?>" hidden>
 						<?php
 						if ( $search ) {
-							echo '<input type="hidden" name="s" value="' . esc_attr( $search ) . '">';
+							echo '<input type="hidden" name="q" value="' . esc_attr( $search ) . '">';
 						}
 						foreach ( $sel_cats as $c ) {
 							echo '<input type="hidden" name="fcat[]" value="' . esc_attr( $c ) . '">';

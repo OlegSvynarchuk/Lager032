@@ -72,3 +72,16 @@ Site: https://lager032.pixels2pixels.ch  (dev)
 - SHOP UX: added removable "active filter" chips and kept the scroll
   position when applying a filter (no more jumping to the top).
 - Committed and deployed everything to the dev site.
+- FILTERING CONSISTENCY pass:
+    * Category sidebar is now a persistent, collapsible list of links (open
+      on the current branch) — one click to any category from any page.
+    * Moved the Filters box above the category list.
+    * Price filter is now a slider with two handles using the real lowest/
+      highest prices of the CURRENT list; updates as you filter; applies when
+      you release; hides itself when there is no range (1 item / one price).
+    * Fixed a confusing redirect: searching down to a single product used to
+      jump you to that product page — now it stays on the list.
+    * Made the shop/category search find the same products as the instant
+      search box (codes like 6204-2RS / 62042RS now match everywhere).
+    * Fixed stray spacing above the header.
+- Deployed everything to the dev site.

@@ -523,3 +523,22 @@ All deployed + verified on the dev link; PHP lint clean.
 2. Mobile: collapse the category panel + filters into a "Filteri" drawer (currently stacks above results).
 3. Optional: wire live-search into the homepage/shop search boxes; spojnica re-categorization (client);
    strip dead `.catalog*`/`.prodcard*` CSS.
+
+---
+
+## Session log — 2026-06-17 (cont.) — filtering consistency
+
+- **Category sidebar = persistent collapsible tree** (links): every archive shows the full list;
+  parents with subcategories collapse (active branch auto-opens). One click to any category.
+- **Filteri card moved above** the category list (flex order).
+- **Price filter = dual-handle slider** (real GROSS bounds), synced Od/Do inputs, **applies on drag
+  release**. Bounds are **contextual** (reflect current category/search/availability, excl. price) and
+  the filter **auto-hides when there's no range** (≤1 product / one price). Query converts gross→net.
+- **Search param `s` → `q`** (own param). Killed WP's single-result "redirect to the product" behaviour
+  (multiple mechanisms tried; `q` sidesteps all). Updated header search, sortform, viewAll, SEO keys.
+- **Archive search unified with the typeahead** — `lager_search_product_ids()` (title + SKU, code
+  normalization `6204-2RS`=`62042rs`); archive uses `post__in` + relevance order. No more mismatch.
+- **`section.archive` not `.archive`** — bare `.archive` also hit `<body>` (WP archive body class),
+  which had added stray padding above the sticky header. Padding: 24/48 top/bottom on the section only.
+- Decisions locked: category click = **reset filters** (clean URL); sidebar search = **within category**;
+  facet counts = **catalog totals**.

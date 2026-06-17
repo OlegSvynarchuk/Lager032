@@ -157,10 +157,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 		<form class="searchbar" role="search" method="get" action="<?php echo esc_url( $shop_url ); ?>">
 			<?php lager032_icon( 'search' ); ?>
-			<input type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>"
+			<input type="search" name="q" value="<?php echo isset( $_GET['q'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['q'] ) ) ) : ''; ?>"
 				placeholder="<?php esc_attr_e( 'Pretraži artikle...', 'lager032' ); ?>"
 				aria-label="<?php esc_attr_e( 'Pretraži artikle', 'lager032' ); ?>">
-			<input type="hidden" name="post_type" value="product">
 		</form>
 
 		<?php $cart_url = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/korpa/' ); ?>

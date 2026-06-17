@@ -153,7 +153,7 @@ function lager032_ajax_search() {
 		'results'    => $results,
 		'total'      => $total,
 		'viewAll' => add_query_arg(
-			array( 's' => rawurlencode( $q ), 'post_type' => 'product' ),
+			array( 'q' => $q ),
 			function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' )
 		),
 	) );
@@ -169,3 +169,46 @@ add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
 	$fragments['span.cartbtn__count'] = '<span class="cartbtn__count"' . ( $count ? '' : ' hidden' ) . '>' . esc_html( $count ) . '</span>';
 	return $fragments;
 } );
+
+/**
+ * Product IDs matching a search query by title + SKU (raw AND code-normalized so
+ * "6205-2RS" = "6205 2RS" = "62052rs"), ranked. Used by the archive list so its search
+ * matches the typeahead instead of WordPress' weaker default title search.
+ *
+ * @param string $q     Search text.
+ * @param int    $limit Max IDs (0 = all).
+ * @return int[] Ranked product IDs.
+ */
+function lager_search_product_ids( $q, $limit = 0 ) {
+	$q = trim( (string) $q );
+	if ( mb_strlen( $q ) < 2 ) {
+		return array();
+	}
+	global $wpdb;
+	$like   = '%' . $wpdb->esc_like( $q ) . '%';
+	$starts = $wpdb->esc_like( $q ) . '%';
+	$norm   = preg_replace( '/[\s.\-_\/]+/u', '', mb_strtolower( $q ) );
+	if ( '' === $norm ) {
+		$norm = mb_strtolower( $q );
+	}
+	$nlike = '%' . $wpdb->esc_like( $norm ) . '%';
+	$ntit  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(p.post_title),' ',''),'-',''),'.',''),'/','')";
+	$nsku  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(m.meta_value),' ',''),'-',''),'.',''),'/','')";
+	$sql   = "SELECT p.ID
+		FROM {$wpdb->posts} p
+		LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
+		WHERE p.post_type = 'product' AND p.post_status = 'publish'
+		  AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )
+		GROUP BY p.ID
+		ORDER BY ( CASE
+		  WHEN m.meta_value = %s THEN 0
+		  WHEN m.meta_value LIKE %s THEN 1
+		  WHEN p.post_title LIKE %s THEN 2
+		  ELSE 3 END ), p.post_title ASC";
+	$params = array( $like, $like, $nlike, $nlike, $q, $starts, $starts );
+	if ( $limit > 0 ) {
+		$sql     .= ' LIMIT %d';
+		$params[] = $limit;
+	}
+	return array_map( 'intval', (array) $wpdb->get_col( $wpdb->prepare( $sql, $params ) ) );
+}
