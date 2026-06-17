@@ -84,4 +84,7 @@ Site: https://lager032.pixels2pixels.ch  (dev)
     * Made the shop/category search find the same products as the instant
       search box (codes like 6204-2RS / 62042RS now match everywhere).
     * Fixed stray spacing above the header.
+- Added a quantity stepper + instant add-to-cart on each product row
+  (set amount, click "Dodaj" → added straight to the cart, badge updates).
+- Fixed the same stray-spacing bug on the single product page.
 - Deployed everything to the dev site.

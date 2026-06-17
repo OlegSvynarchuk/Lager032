@@ -509,7 +509,16 @@ if ( $search ) {
 								<div class="prow__side">
 									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
 									<span class="prow__stock <?php echo $instockp ? 'is-in' : 'is-out'; ?>"><?php echo $instockp ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
-									<a class="btn btn--navy btn--sm" href="<?php echo esc_url( $product->add_to_cart_url() ); ?>"><?php lager032_icon( 'cart' ); ?> <?php esc_html_e( 'Dodaj u korpu', 'lager032' ); ?></a>
+									<?php if ( $instockp ) : ?>
+									<div class="prow__buy">
+										<div class="qtybox">
+											<button type="button" class="qtybox__btn" data-dir="-1" aria-label="<?php esc_attr_e( 'Smanji', 'lager032' ); ?>">&minus;</button>
+											<input type="number" class="qtybox__input" value="1" min="1" step="1" inputmode="numeric" aria-label="<?php esc_attr_e( 'Količina', 'lager032' ); ?>">
+											<button type="button" class="qtybox__btn" data-dir="1" aria-label="<?php esc_attr_e( 'Povećaj', 'lager032' ); ?>">+</button>
+										</div>
+										<button type="button" class="btn btn--navy btn--sm prow__add" data-id="<?php echo esc_attr( get_the_ID() ); ?>"><?php lager032_icon( 'cart' ); ?> <span><?php esc_html_e( 'Dodaj', 'lager032' ); ?></span></button>
+									</div>
+									<?php endif; ?>
 								</div>
 							</article>
 							<?php

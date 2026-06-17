@@ -542,3 +542,6 @@ All deployed + verified on the dev link; PHP lint clean.
   which had added stray padding above the sticky header. Padding: 24/48 top/bottom on the section only.
 - Decisions locked: category click = **reset filters** (clean URL); sidebar search = **within category**;
   facet counts = **catalog totals**.
+- **Per-row quick add-to-cart**: in-stock archive rows get a qty stepper + "Dodaj" that AJAX-adds the
+  chosen quantity (reuses the typeahead's `wc-ajax=add_to_cart` + cart-count fragment). `.qtybox`/`.prow__add`.
+- Single product page: scoped its wrapper to `section.single` (same `body.single` padding bug).

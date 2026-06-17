@@ -192,6 +192,46 @@
 	function hl(text, q) { var e = esc(text), i = e.toLowerCase().indexOf(esc(q).toLowerCase()); return i < 0 ? e : e.slice(0, i) + '<mark>' + e.slice(i, i + q.length) + '</mark>' + e.slice(i + q.length); }
 	function cartIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14h9.45a1 1 0 0 0 .96-.73L20 6H6.2l-.6-3H2v2h2l2.6 11.6A2 2 0 0 0 8.55 18H19v-2H8.42l.18-.8z"/></svg>'; }
 
+	// Archive rows: quantity stepper + add that quantity to cart (AJAX, header badge updates).
+	function lagerAddToCart(id, qty, btn) {
+		if (!window.LagerSearch || !LagerSearch.wcAdd) return;
+		if (btn) btn.classList.add('is-loading');
+		var body = new URLSearchParams();
+		body.append('product_id', id);
+		body.append('quantity', qty || 1);
+		fetch(LagerSearch.wcAdd, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+			.then(function (r) { return r.json(); })
+			.then(function (res) {
+				if (btn) btn.classList.remove('is-loading');
+				if (res && res.fragments) {
+					Object.keys(res.fragments).forEach(function (sel) {
+						document.querySelectorAll(sel).forEach(function (el) {
+							var t = document.createElement('div'); t.innerHTML = res.fragments[sel];
+							if (t.firstElementChild) el.replaceWith(t.firstElementChild);
+						});
+					});
+				}
+				if (btn) { btn.classList.add('is-added'); setTimeout(function () { btn.classList.remove('is-added'); }, 1500); }
+			})
+			.catch(function () { if (btn) btn.classList.remove('is-loading'); });
+	}
+	document.querySelectorAll('.qtybox').forEach(function (box) {
+		var input = box.querySelector('.qtybox__input');
+		box.querySelectorAll('.qtybox__btn').forEach(function (b) {
+			b.addEventListener('click', function () {
+				var v = (parseInt(input.value, 10) || 1) + parseInt(b.getAttribute('data-dir'), 10);
+				input.value = v < 1 ? 1 : v;
+			});
+		});
+	});
+	document.querySelectorAll('.prow__add').forEach(function (btn) {
+		btn.addEventListener('click', function () {
+			var row = btn.closest('.prow');
+			var inp = row ? row.querySelector('.qtybox__input') : null;
+			lagerAddToCart(btn.getAttribute('data-id'), inp ? (parseInt(inp.value, 10) || 1) : 1, btn);
+		});
+	});
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');

@@ -746,6 +746,15 @@ section.archive { padding: 24px 0 48px; background: #F6F8FC; min-height: 60vh; }
 .prow__stock { font-size: 12px; font-weight: 600; }
 .prow__stock.is-in { color: #1a7a3c; }
 .prow__stock.is-out { color: #b00020; }
+.prow__buy { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.qtybox { display: inline-flex; align-items: center; border: 1px solid var(--c-line); border-radius: 8px; overflow: hidden; background: #fff; }
+.qtybox__btn { width: 30px; height: 36px; border: 0; background: none; color: var(--c-navy); font-size: 18px; line-height: 1; cursor: pointer; }
+.qtybox__btn:hover { background: var(--c-input); }
+.qtybox__input { width: 42px; height: 36px; border: 0; border-left: 1px solid var(--c-line); border-right: 1px solid var(--c-line); text-align: center; font-size: 14px; color: var(--c-ink); -moz-appearance: textfield; }
+.qtybox__input::-webkit-outer-spin-button, .qtybox__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.prow__add { white-space: nowrap; }
+.prow__add.is-loading { opacity: .6; pointer-events: none; }
+.prow__add.is-added { background: #1a7a3c; }
 
 .archive__pager { margin-top: 28px; }
 .archive__pager .page-numbers { list-style: none; display: flex; gap: 6px; justify-content: center; padding: 0; margin: 0; }
@@ -767,7 +776,7 @@ section.archive { padding: 24px 0 48px; background: #F6F8FC; min-height: 60vh; }
 /* ==========================================================================
    REDESIGN 2026-06-12 — Single product (data-first, Figma 47:2291 adapted)
    ========================================================================== */
-.single { padding: 28px 0 64px; background: #fff; }
+section.single { padding: 28px 0 64px; background: #fff; } /* section.single, not .single — <body> also has `single` */
 .crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--c-muted); font-size: 13px; margin-bottom: 24px; }
 .crumbs a { color: var(--c-muted); text-decoration: none; }
 .crumbs a:hover { color: var(--c-navy); }
