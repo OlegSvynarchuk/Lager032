@@ -48,3 +48,27 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   gap report) to confirm search behaviour.
 - Updated project documentation (PROGRESS.md); committed and deployed all
   changes to the dev site.
+
+=====================================================================
+2026-06-17
+=====================================================================
+- PRODUCT NAMES: cleaned the "---" separator left over from the export out
+  of 176 product names (e.g. "BETA OSIGURAC 3X80 ---" -> "BETA OSIGURAC
+  3X80"). Page addresses unchanged.
+- HEADER: fixed the navigation so it no longer overlaps the search box on
+  smaller screens (it now centers in the available space and collapses to
+  the menu button earlier when there isn't room).
+- SHOP/CATEGORY FILTERING REWORKED for clarity + SEO:
+    * Categories are now NAVIGATION, not a filter — the left panel shows
+      top-level categories on the shop and only the sub-categories on a
+      category page (nothing on a category with no sub-categories), so you
+      can never pick a combination that returns an empty list.
+    * Added breadcrumbs (with search-engine structured data) to move back
+      up to the shop / parent category.
+    * Search, availability and price filters stay the same on every page.
+- SEO: filtered/sorted URLs are now "noindex" and point back to the clean
+  category/shop page (canonical), so search engines index the clean pages
+  only — protects rankings.
+- SHOP UX: added removable "active filter" chips and kept the scroll
+  position when applying a filter (no more jumping to the top).
+- Committed and deployed everything to the dev site.

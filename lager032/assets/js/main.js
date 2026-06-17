@@ -11,6 +11,24 @@
 		cb.addEventListener('change', function () { cb.form.submit(); });
 	});
 
+	// Archive: preserve scroll position across the filter/sort reload (GET reloads the page,
+	// which would otherwise jump to top). Save on any filter change/submit; restore on load.
+	var archiveEl = document.querySelector('.archive');
+	if (archiveEl) {
+		try {
+			var sv = sessionStorage.getItem('lagerArcScroll');
+			if (sv !== null) { sessionStorage.removeItem('lagerArcScroll'); window.scrollTo(0, parseInt(sv, 10) || 0); }
+		} catch (e) {}
+		var saveArcScroll = function () { try { sessionStorage.setItem('lagerArcScroll', String(Math.round(window.scrollY))); } catch (e) {} };
+		// Capture phase so we save BEFORE the programmatic form.submit() fires.
+		document.addEventListener('change', function (e) {
+			if (e.target.closest && e.target.closest('.filters__form, .results__sort, #sortform')) saveArcScroll();
+		}, true);
+		document.addEventListener('submit', function (e) {
+			if (e.target.closest && e.target.closest('.filters__form, #sortform')) saveArcScroll();
+		}, true);
+	}
+
 	// Single product: quantity stepper.
 	document.querySelectorAll('.qty').forEach(function (qty) {
 		var input = qty.querySelector('input');

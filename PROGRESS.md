@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-15.
+> Last updated: 2026-06-17.
 
 ---
 
@@ -484,3 +484,42 @@ re-categorize the 24 is a client decision.
 2. **Cart / checkout styling** — still WooCommerce default (Woo CSS kept there).
 3. Optional: wire the live-search dropdown to the **homepage/shop** search boxes too; **spojnica
    re-categorization** (client decision); strip dead `.catalog*`/`.prodcard*`/`*__price small` CSS.
+
+---
+
+## Session log — 2026-06-17
+
+**Product name cleanup — DONE** (closes prior "Next #1").
+- `clean-titles.php` (dry-run / `apply`, like the other maintenance scripts): collapses runs of 3+
+  dashes to a space + trims. **176 titles** cleaned (`BETA OSIGURAC 3X80 ---` → `BETA OSIGURAC 3X80`,
+  `UCFL 001 --- AL` → `UCFL 001 AL`). post_title only — slugs/URLs unchanged. Verified 0 left.
+
+**Header nav — responsive fix.** The centered nav was absolutely positioned (`left:50%; translate`),
+so it overlapped the search input on smaller screens. Now **in normal flow** (`.masthead__center`
+flex:1 + justify-center) → it can't overlap (search shrinks first). Hamburger breakpoint raised
+**900 → 1199px** so the full horizontal nav only shows where it fits.
+
+**Catalog filtering reworked — category is NOW navigation, not a filter** (resolves the empty-AND /
+inconsistent-rail confusion):
+- Removed the `fcat[]` category checkboxes. The left rail shows a **category panel of links**: on the
+  shop → **top-level** ("Kategorije", browse in); on a category page → **only its subcategories**
+  ("Potkategorije", drill down); on a **leaf** category → none. Never offers a sibling category, so you
+  can't AND into empty results.
+- **Breadcrumbs** added (visible + `BreadcrumbList` JSON-LD) as the up/cross navigation.
+- Brand / availability / price / search stay as filters, **consistent on every archive page**.
+
+**SEO — `inc/seo.php`** (new): product archives get a `rel=canonical` to the clean base; filtered /
+sorted / searched `?param` permutations get **`noindex` + canonical-to-base** (no crawl-budget waste /
+duplicates). Clean category/shop URLs stay self-canonical & indexable. (On the dev link `blog_public=0`
+makes everything `noindex` anyway; the filter avoids a contradictory `nofollow, follow`.)
+
+**Archive UX:** **active-filter chips** (availability/price/search) with one-click remove + "Poništi
+sve"; **scroll position preserved** across the filter reload (sessionStorage) — no jump-to-top.
+
+All deployed + verified on the dev link; PHP lint clean.
+
+### Next
+1. **Cart / checkout styling** — still WooCommerce default.
+2. Mobile: collapse the category panel + filters into a "Filteri" drawer (currently stacks above results).
+3. Optional: wire live-search into the homepage/shop search boxes; spojnica re-categorization (client);
+   strip dead `.catalog*`/`.prodcard*` CSS.

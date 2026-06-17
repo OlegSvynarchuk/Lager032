@@ -402,11 +402,13 @@ a { color: inherit; }
 .searchbar input { width: 100%; height: 38px; border: 1px solid transparent; border-radius: 4px; background: var(--c-input); padding: 0 12px 0 34px; font: 400 14px/1 'Inter', sans-serif; color: var(--c-ink); }
 .searchbar input:focus { outline: none; border-color: var(--c-navy); background: #fff; }
 
-/* Desktop: center the [Svi proizvodi + nav] block between the logo (left) and search/cart (right).
-   Two auto margins split the free space equally → the middle group sits centered. */
-@media (min-width: 1024px) {
-	.masthead__center { display: flex; align-items: center; gap: 19px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-	.searchbar { flex: 0 0 auto; width: 300px; margin-left: auto; }
+/* Desktop (≥1200px): the [Svi proizvodi + nav] block sits in NORMAL FLOW and is centered
+   in the free space between the logo (left) and the search/cart (right). In-flow (not
+   absolute) means it can never overlap the search — the search shrinks before anything
+   collides. Below 1200px the nav collapses to the hamburger (see the max-width:1199 block). */
+@media (min-width: 1200px) {
+	.masthead__center { display: flex; align-items: center; gap: 14px; flex: 1 1 auto; justify-content: center; min-width: 0; }
+	.searchbar { flex: 0 1 280px; min-width: 190px; margin-left: 0; }
 }
 
 /* Cart */
@@ -422,7 +424,7 @@ a { color: inherit; }
 @media (max-width: 1024px) {
 	.megamenu { width: 480px; }
 }
-@media (max-width: 900px) {
+@media (max-width: 1199px) {
 	.navtoggle { display: inline-flex; order: 5; }
 	.mainnav { order: 10; flex-basis: 100%; display: none; }
 	.masthead.is-open .mainnav { display: block; }
@@ -643,6 +645,31 @@ a { color: inherit; }
 .filters__search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--c-muted); }
 .filters__search input { width: 100%; height: 40px; border: 1px solid var(--c-line); border-radius: 8px; background: var(--c-input); padding: 0 12px 0 34px; font-size: 14px; }
 .filters__search input:focus { outline: none; border-color: var(--c-navy); background: #fff; }
+
+/* Category panel (links, not filters): top-level on the shop, subcategories on a category page */
+.catnav { background: #fff; border: 1px solid var(--c-line); border-radius: 12px; padding: 12px; margin-bottom: 16px; }
+.catnav__title { display: block; color: var(--c-navy); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: .4px; padding: 2px 4px 8px; }
+.catnav__list { list-style: none; margin: 0; padding: 0; }
+.catnav__item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 8px; color: var(--c-ink); font-size: 14px; text-decoration: none; }
+.catnav__item:hover { background: var(--c-input); color: var(--c-navy); }
+.catnav__item em { color: var(--c-muted); font-style: normal; font-size: 12px; }
+
+/* Breadcrumb */
+.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 14px; font-size: 13px; color: var(--c-muted); }
+.crumbs a { color: var(--c-muted); text-decoration: none; }
+.crumbs a:hover { color: var(--c-navy); text-decoration: underline; }
+.crumbs [aria-current="page"] { color: var(--c-ink); font-weight: 600; }
+.crumbs__sep { color: var(--c-line); }
+
+/* Active-filter chips */
+.archive__chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 18px; }
+.archive__chips-label { color: var(--c-muted); font-size: 13px; font-weight: 600; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--c-line); border-radius: 999px; background: var(--c-input); color: var(--c-ink); font-size: 13px; text-decoration: none; }
+.chip:hover { border-color: var(--c-navy); color: var(--c-navy); }
+.chip__x { font-size: 15px; line-height: 1; color: var(--c-muted); }
+.chip:hover .chip__x { color: var(--c-red); }
+.chip--reset { background: transparent; border-style: dashed; color: var(--c-muted); }
+.chip--reset:hover { color: var(--c-red); border-color: var(--c-red); }
 
 .fsec { border-top: 1px solid var(--c-line); padding: 12px 0; }
 .fsec summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; color: var(--c-ink); font-weight: 600; font-size: 14px; }
