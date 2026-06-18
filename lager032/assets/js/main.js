@@ -414,6 +414,44 @@
 		});
 	})();
 
+	// Checkout: editable quantity + remove on the order table (re-renders review).
+	(function () {
+		if (!document.body.classList.contains('woocommerce-checkout')) return;
+		function apply(res) {
+			if (res && res.fragments) {
+				Object.keys(res.fragments).forEach(function (sel) {
+					document.querySelectorAll(sel).forEach(function (el) {
+						var t = document.createElement('div'); t.innerHTML = res.fragments[sel];
+						if (t.firstElementChild) el.replaceWith(t.firstElementChild);
+					});
+				});
+			}
+		}
+		function refresh() { if (window.jQuery) jQuery(document.body).trigger('update_checkout'); }
+		function setQty(id, qty) {
+			if (!window.LagerSearch || !LagerSearch.setQty) return;
+			var body = new URLSearchParams();
+			body.append('product_id', id); body.append('quantity', qty); body.append('nonce', LagerSearch.nonce);
+			fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(function (r) { return r.json(); })
+				.then(function (res) { apply(res); refresh(); })
+				.catch(refresh);
+		}
+		document.addEventListener('click', function (e) {
+			if (!e.target.closest('#order_review')) return;
+			var rem = e.target.closest('.lo-remove');
+			if (rem) { setQty(rem.getAttribute('data-id'), 0); return; }
+			var qb = e.target.closest('.lo-qty .qtybox__btn');
+			var row = e.target.closest('.cart_item');
+			if (qb && row) {
+				var cur = parseInt(row.getAttribute('data-qty'), 10) || 1;
+				var next = cur + parseInt(qb.getAttribute('data-dir'), 10);
+				if (next < 1) next = 1;
+				if (next !== cur) setQty(row.getAttribute('data-id'), next);
+			}
+		});
+	})();
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');

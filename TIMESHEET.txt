@@ -141,3 +141,19 @@ Site: https://lager032.pixels2pixels.ch  (dev)
     * Card payments online are PENDING — they need a Serbian payment gateway and
       a merchant account (e.g. WSPay / Monri / AllSecure-Intesa). The checkout is
       ready to add it once the client chooses a provider.
+- CHECKOUT REBUILT to match the client's existing site (one page):
+    * Cart + checkout are now a SINGLE page at /korpa/ — customer details +
+      delivery details on top, the full cart table (Šifra, Kategorija, Naziv,
+      Cena, Količina, Ukupno) with editable quantity + remove below, then the
+      Osnovica / PDV / "Ukupno za naplatu" summary. Opening the cart lands here.
+    * Form fields match the old site: Ime, Prezime, E-mail, Mobilni telefon,
+      Fiksni telefon / Ulica, Broj zgrade/kuće, Sprat, Broj stana, Interfon,
+      Grad, Dostavna poruka. Extra fields are saved on the order + shown in the
+      admin and order e-mails. Country fixed to Srbija (no picker).
+    * SHIPPING is no longer calculated — the page states "Troškove dostave plaća
+      kupac" (buyer pays the courier), as on the old site.
+    * Removed the page title ("Cart"), the coupon/login boxes, and all the
+      unused B2B fields. Everything is in Serbian Latin.
+    * Fixed the broken header on cart/checkout (the logo was blown up huge and
+      the bar was too tall) — it now matches every other page.
+    * Fully restyled to the theme. Note: cart/checkout page slug is now /korpa/.

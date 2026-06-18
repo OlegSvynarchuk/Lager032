@@ -162,7 +162,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				aria-label="<?php esc_attr_e( 'Pretraži artikle', 'lager032' ); ?>">
 		</form>
 
-		<?php $cart_url = function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : home_url( '/korpa/' ); ?>
+		<?php $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : home_url( '/korpa/' ); ?>
 		<a class="cartbtn" href="<?php echo esc_url( $cart_url ); ?>">
 			<?php lager032_icon( 'cart' ); ?>
 			<span><?php esc_html_e( 'Korpa', 'lager032' ); ?></span>

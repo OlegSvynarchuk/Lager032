@@ -49,15 +49,15 @@ add_action( 'wp_enqueue_scripts', function () {
 
 /**
  * Drop WooCommerce's default stylesheets on the pages we fully style ourselves
- * (shop + product category/brand archives, and single product). They inject
- * spacing/typography that clashes with the custom design. Cart/checkout/account
- * keep Woo's CSS so they stay usable until we design them.
+ * (shop + product archives, single product, cart + checkout). They inject
+ * spacing/typography that clashes with the custom design — notably forcing the
+ * header logo to its natural height on cart/checkout.
  */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! function_exists( 'is_shop' ) ) {
 		return;
 	}
-	if ( is_shop() || is_product_taxonomy() || is_product() ) {
+	if ( is_shop() || is_product_taxonomy() || is_product() || is_cart() || is_checkout() ) {
 		wp_dequeue_style( 'woocommerce-general' );
 		wp_dequeue_style( 'woocommerce-layout' );
 		wp_dequeue_style( 'woocommerce-smallscreen' );
