@@ -1024,10 +1024,12 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 /* Payment + place order (right aligned with the summary) */
 #payment { background: var(--c-input); border-radius: 12px; margin: 22px 0 0 auto; max-width: 420px; }
 #payment .payment_methods { list-style: none; margin: 0; padding: 16px 18px 6px; }
-#payment .payment_methods li { margin: 0 0 8px; }
-#payment .payment_methods li label { display: inline; font-weight: 600; color: var(--c-ink); }
-#payment .payment_methods li input[type="radio"] { margin-right: 8px; }
-#payment .payment_box { background: #fff; border-radius: 8px; padding: 10px 12px; margin: 6px 0 4px; font-size: 13px; color: var(--c-muted); }
+#payment .payment_methods > li { margin: 0 0 10px; padding: 13px 15px; border: 1px solid var(--c-line); border-radius: 10px; background: #fff; transition: border-color .15s, box-shadow .15s; }
+#payment .payment_methods > li:has(input:checked) { border-color: var(--c-navy); box-shadow: 0 0 0 2px rgba(27,62,122,.12); }
+#payment .payment_methods > li > label { display: inline-flex; align-items: center; gap: 9px; font-weight: 600; color: var(--c-ink); cursor: pointer; }
+#payment .payment_methods li input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--c-navy); cursor: pointer; }
+#payment .payment_methods li img { max-height: 24px; vertical-align: middle; margin-left: 6px; }
+#payment .payment_box { background: var(--c-input); border-radius: 8px; padding: 10px 12px; margin: 10px 0 2px; font-size: 13px; color: var(--c-muted); }
 #payment .payment_box::before { display: none; }
 #payment .place-order { padding: 8px 18px 18px; }
 #payment .woocommerce-terms-and-conditions-wrapper { padding: 0 18px 8px; font-size: 13px; }
