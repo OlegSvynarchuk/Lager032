@@ -901,3 +901,4 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .single__remove[hidden] { display: none; }
 .single__remove:hover { background: #b00020; color: #fff; border-color: #b00020; }
 .single__remove .icon { width: 18px; height: 18px; }
+.price-pdv { font-weight: 400; font-size: 11px; color: var(--c-muted); }

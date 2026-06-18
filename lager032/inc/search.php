@@ -33,6 +33,7 @@ add_action( 'wp_enqueue_scripts', function () {
 			'added'       => __( 'Dodato', 'lager032' ),
 			'inStock'     => __( 'Na stanju', 'lager032' ),
 			'outStock'    => __( 'Nema na stanju', 'lager032' ),
+			'withPdv'     => __( 'sa PDV-om', 'lager032' ),
 		),
 	) );
 }, 20 );

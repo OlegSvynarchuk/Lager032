@@ -507,7 +507,7 @@ if ( $search ) {
 									?>
 								</div>
 								<div class="prow__side">
-									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
+									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?><small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></span>
 									<span class="prow__stock <?php echo $instockp ? 'is-in' : 'is-out'; ?>"><?php echo $instockp ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
 									<?php if ( $instockp ) : ?>
 									<div class="prow__buy">
