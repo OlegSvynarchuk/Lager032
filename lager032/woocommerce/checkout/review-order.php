@@ -56,8 +56,8 @@ $cart = WC()->cart;
 		}
 		?>
 	</tbody>
-</table>
-
+	<tfoot>
+		<tr class="lo-summary-row"><td class="lo-summary-cell" colspan="6">
 <div class="lager-order-summary">
 	<?php
 	$osnovica = $cart->get_subtotal();   // net (ex PDV)
@@ -68,3 +68,6 @@ $cart = WC()->cart;
 	<div class="los-row los-total"><span><?php esc_html_e( 'Ukupno za naplatu', 'lager032' ); ?></span><span><?php echo wp_kses_post( $cart->get_total() ); ?></span></div>
 	<p class="los-note"><?php esc_html_e( 'Troškove dostave plaća kupac.', 'lager032' ); ?></p>
 </div>
+		</td></tr>
+	</tfoot>
+</table>

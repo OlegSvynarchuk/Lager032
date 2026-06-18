@@ -1020,6 +1020,8 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .los-total { border-top: 2px solid var(--c-line); margin-top: 6px; padding-top: 14px; font-weight: 700; }
 .los-total span:last-child { color: var(--c-navy); font-size: 22px; }
 .los-note { text-align: right; color: var(--c-muted); font-size: 13px; margin: 10px 0 0; }
+.lager-order-table tfoot td.lo-summary-cell { padding: 4px 12px 14px; border: 0; background: transparent; }
+.lo-summary-cell .lager-order-summary { max-width: 320px; margin: 6px 0 0 auto; }
 
 /* Payment + place order (right aligned with the summary) */
 #payment { background: var(--c-input); border-radius: 12px; margin: 22px 0 0 auto; max-width: 420px; }
