@@ -545,3 +545,30 @@ All deployed + verified on the dev link; PHP lint clean.
 - **Per-row quick add-to-cart**: in-stock archive rows get a qty stepper + "Dodaj" that AJAX-adds the
   chosen quantity (reuses the typeahead's `wc-ajax=add_to_cart` + cart-count fragment). `.qtybox`/`.prow__add`.
 - Single product page: scoped its wrapper to `section.single` (same `body.single` padding bug).
+
+---
+
+## Session log - 2026-06-18 - cart drawer, one-page checkout, Serbian dashboard
+
+**Cart state + drawer**
+- Product list + single product reflect the cart on load (cache-safe, applied client-side via `wc-ajax=lager_cart_state`); row/button SET quantity (not blind re-add), remove at 0, marked "U korpi (N)".
+- Stock never blocks: `woocommerce_product_is_in_stock` + `..._backorders_allowed` => true (order any qty, incl. 0). Dropped out-of-stock UI; shows "Na stanju".
+- Mini-cart fly-out drawer (footer `aside.minicart` + overlay), opened by the header cart icon. Server-rendered `lager_minicart_body_html()` registered as cart fragment `div.minicart__body` => live updates. Per-item +/- stepper, remove, and "Isprazni korpu" clear (`wc_ajax_lager_clear_cart`). inc/cart.php.
+- Currency symbol forced to Latin "RSD" (was Cyrillic) via `woocommerce_currency_symbol`; "sa PDV-om" label by prices.
+
+**One-page checkout** (inc/checkout.php + woocommerce/checkout/* overrides, new page.php)
+- Cart + checkout merged to one page at **/korpa/** (checkout slug renamed; `template_redirect` sends a non-empty cart -> checkout, guarded vs empty-cart loop). Converted cart/checkout from Gutenberg blocks to classic shortcodes.
+- Custom billing fields in two sections (`lager_section` customer/delivery): Ime, Prezime, E-mail, Mobilni telefon, Fiksni telefon / Ulica, Broj zgrade/kuce, Sprat, Broj stana, Interfon, Grad, Dostavna poruka. Extras saved to order meta + shown in admin + e-mails. Country fixed RS (hidden). gettext map + `default_address_fields` relabel kill English leaks (incl. address-i18n JS).
+- Template overrides: form-checkout.php (two-column grid: forms left / order right, 1180px container), form-billing.php (sectioned headings + required note), review-order.php (table Sifra/Kategorija/Naziv/Cena/Kolicina + editable qty via `setQty` + `update_checkout`).
+- Shipping NOT calculated: `woocommerce_cart_needs_shipping(_address)` => false; note "Troskove dostave placa kupac."
+- Totals: Osnovica (net) / PDV (20%) / Ukupno za naplatu (gross). Removed per-line total column (duplicated grand total on 1-item carts); dropped Woo "(incl. VAT)" suffix (`woocommerce_countries_inc/ex_tax_or_vat` => '').
+- **Duplicate-summary bug**: totals sat in a `<div>` outside the table; Woo's on-load `update_checkout` replaces `.woocommerce-checkout-review-order-table` and left the original summary behind => two blocks. Fixed by moving totals into the table `<tfoot>` (atomic swap).
+- Page title hidden on cart/checkout; Woo default CSS dequeued on cart/checkout (fixed the blown-up header logo); full custom checkout CSS in main.css.
+
+**Payments**
+- Enabled "Uplatnica / bankovni transfer" (BACS) + "Placanje pouzecem" (COD); styled methods as selectable radio cards. Card online pending a Serbian gateway + merchant account. Bank account no. / shipping values are PLACEHOLDERS (need client).
+
+**Serbian dashboard**
+- WP admin set to Serbian for the manager: installed sr_RS core + WooCommerce packs, applied **per user** (`locale=sr_RS` user meta) so the storefront stays en_US/Latin. Cyrillic only (no official Latin pack); reversible per user.
+
+**Verified**: 2 real test orders placed and landed in the dashboard.

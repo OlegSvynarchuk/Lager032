@@ -157,3 +157,23 @@ Site: https://lager032.pixels2pixels.ch  (dev)
     * Fixed the broken header on cart/checkout (the logo was blown up huge and
       the bar was too tall) — it now matches every other page.
     * Fully restyled to the theme. Note: cart/checkout page slug is now /korpa/.
+- CHECKOUT LAYOUT polish: the page was stretching the full screen width; put it
+  in a centered container and arranged it in two columns — customer/delivery
+  forms on the left, the cart + order summary on the right (stacks on phones).
+- PAYMENT METHOD SELECTION: added a second method so buyers can choose — checkout
+  now shows selectable payment cards (radio buttons): "Uplatnica / bankovni
+  transfer" and "Plaćanje pouzećem" (cash on delivery). (Card online still
+  pending a Serbian gateway + merchant account.)
+- Fixed the order total appearing twice on the checkout: the per-line total
+  equalled the grand total on single-item orders, and a WooCommerce on-load
+  refresh was leaving a second copy of the totals block behind. Removed the
+  duplicate line-total column and moved the totals inside the order table so the
+  live refresh swaps them as one unit — the total now shows exactly once.
+- Removed a leftover English "(incl. VAT)" tag from prices.
+- Verified the whole order flow end-to-end: test orders placed successfully and
+  arrived correctly in the dashboard.
+- DASHBOARD IN SERBIAN: switched the WordPress admin to Serbian for the content
+  manager — installed the WordPress + WooCommerce Serbian language pack and
+  applied it per account, so the public storefront is completely untouched
+  (still Latin). NOTE: WordPress/WooCommerce only ship Serbian in Cyrillic, so
+  the dashboard is in Cyrillic; it's reversible per user at any time.
