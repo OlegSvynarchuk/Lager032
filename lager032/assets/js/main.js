@@ -371,20 +371,45 @@
 		overlay.addEventListener('click', closeCart);
 		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeCart(); });
 
+		// Update one product's cart quantity (0 removes), then refresh the drawer.
+		function miniSet(id, qty, btn) {
+			if (!window.LagerSearch || !LagerSearch.setQty) return;
+			if (btn) btn.setAttribute('disabled', '');
+			var body = new URLSearchParams();
+			body.append('product_id', id);
+			body.append('quantity', qty);
+			body.append('nonce', LagerSearch.nonce);
+			fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(function (r) { return r.json(); })
+				.then(function (res) { applyFragments(res); })
+				.catch(function () { if (btn) btn.removeAttribute('disabled'); });
+		}
+
 		drawer.addEventListener('click', function (e) {
 			if (e.target.closest('.minicart__close')) { closeCart(); return; }
+			var item = e.target.closest('.minicart__item');
+			// Remove a line.
 			var rem = e.target.closest('.minicart__remove');
-			if (rem && window.LagerSearch) {
-				var item = rem.closest('.minicart__item'); if (!item) return;
-				rem.setAttribute('disabled', '');
-				var body = new URLSearchParams();
-				body.append('product_id', item.getAttribute('data-id'));
-				body.append('quantity', '0');
-				body.append('nonce', LagerSearch.nonce);
-				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+			if (rem && item) { miniSet(item.getAttribute('data-id'), 0, rem); return; }
+			// Decrease / increase quantity (min 1; remove via the × button).
+			var qbtn = e.target.closest('.qtybox__btn');
+			if (qbtn && item) {
+				var cur = parseInt(item.getAttribute('data-qty'), 10) || 1;
+				var next = cur + parseInt(qbtn.getAttribute('data-dir'), 10);
+				if (next < 1) next = 1;
+				if (next !== cur) miniSet(item.getAttribute('data-id'), next, qbtn);
+				return;
+			}
+			// Empty the whole cart.
+			var clr = e.target.closest('.minicart__clear');
+			if (clr && window.LagerSearch && LagerSearch.clearCart) {
+				clr.setAttribute('disabled', '');
+				var cbody = new URLSearchParams();
+				cbody.append('nonce', LagerSearch.nonce);
+				fetch(LagerSearch.clearCart, { method: 'POST', body: cbody, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 					.then(function (r) { return r.json(); })
 					.then(function (res) { applyFragments(res); })
-					.catch(function () { rem.removeAttribute('disabled'); });
+					.catch(function () { clr.removeAttribute('disabled'); });
 			}
 		});
 	})();

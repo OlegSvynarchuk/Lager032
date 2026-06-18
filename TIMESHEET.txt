@@ -118,3 +118,9 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   as you add from the list/search. Keeps the shopper on the catalogue.
 - Also added a "sa PDV-om" label next to every price (clarifies the displayed
   price includes VAT).
+- DRAWER controls: each item now has a +/− quantity stepper (updates the cart
+  and totals live) and a remove button, plus an "Isprazni korpu" (empty cart)
+  action — manage the whole cart from the drawer without leaving the page.
+- CURRENCY UNIFIED to Serbian Latin: prices showed the Cyrillic "рсд" while the
+  rest of the site is Latin — switched the currency symbol to "RSD" everywhere
+  so the storefront reads consistently.
