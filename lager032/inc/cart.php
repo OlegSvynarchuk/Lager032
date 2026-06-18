@@ -73,3 +73,54 @@ add_action( 'wc_ajax_lager_set_cart_qty', 'lager_ajax_set_cart_qty' );
  */
 add_filter( 'woocommerce_product_is_in_stock', '__return_true' );
 add_filter( 'woocommerce_product_backorders_allowed', '__return_true' );
+
+/**
+ * Mini-cart drawer body (items + subtotal + actions). Rendered server-side in the
+ * footer and registered as a cart fragment so add/remove updates it live.
+ */
+function lager_minicart_body_html() {
+	$cart     = ( function_exists( 'WC' ) && WC()->cart ) ? WC()->cart : null;
+	$shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/prodavnica/' );
+
+	ob_start();
+	echo '<div class="minicart__body">';
+
+	if ( ! $cart || $cart->is_empty() ) {
+		echo '<div class="minicart__empty"><p>' . esc_html__( 'Vaša korpa je prazna.', 'lager032' ) . '</p>';
+		echo '<a class="btn btn--navy btn--block" href="' . esc_url( $shop_url ) . '">' . esc_html__( 'Nastavi kupovinu', 'lager032' ) . '</a></div>';
+	} else {
+		echo '<ul class="minicart__items">';
+		foreach ( $cart->get_cart() as $ci ) {
+			$product = isset( $ci['data'] ) ? $ci['data'] : null;
+			if ( ! $product ) {
+				continue;
+			}
+			$pid  = (int) $ci['product_id'];
+			$qty  = (int) $ci['quantity'];
+			$link = get_permalink( $pid );
+			echo '<li class="minicart__item" data-id="' . esc_attr( $pid ) . '">';
+			echo '<a class="minicart__img" href="' . esc_url( $link ) . '">' . $product->get_image( 'woocommerce_thumbnail' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<div class="minicart__info">';
+			echo '<a class="minicart__name" href="' . esc_url( $link ) . '">' . esc_html( $product->get_name() ) . '</a>';
+			echo '<span class="minicart__qty">' . esc_html( $qty ) . ' &times; ' . wp_kses_post( wc_price( wc_get_price_to_display( $product ) ) ) . '</span>';
+			echo '</div>';
+			echo '<div class="minicart__end"><span class="minicart__price">' . wp_kses_post( $cart->get_product_subtotal( $product, $qty ) ) . '</span>';
+			echo '<button type="button" class="minicart__remove" aria-label="' . esc_attr__( 'Ukloni', 'lager032' ) . '">&times;</button></div>';
+			echo '</li>';
+		}
+		echo '</ul>';
+		echo '<div class="minicart__foot">';
+		echo '<div class="minicart__subtotal"><span>' . esc_html__( 'Ukupno', 'lager032' ) . '</span><strong>' . wp_kses_post( $cart->get_cart_subtotal() ) . '</strong></div>';
+		echo '<a class="btn btn--line btn--block" href="' . esc_url( wc_get_cart_url() ) . '">' . esc_html__( 'Pogledaj korpu', 'lager032' ) . '</a>';
+		echo '<a class="btn btn--navy btn--block" href="' . esc_url( wc_get_checkout_url() ) . '">' . esc_html__( 'Plaćanje', 'lager032' ) . '</a>';
+		echo '</div>';
+	}
+
+	echo '</div>';
+	return ob_get_clean();
+}
+
+add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
+	$fragments['div.minicart__body'] = lager_minicart_body_html();
+	return $fragments;
+} );

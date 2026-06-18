@@ -102,6 +102,16 @@ $foot_cats = array(
 	</div>
 </footer>
 
+<!-- Mini-cart drawer -->
+<div class="minicart-overlay" hidden></div>
+<aside class="minicart" aria-label="<?php esc_attr_e( 'Korpa', 'lager032' ); ?>" hidden>
+	<div class="minicart__head">
+		<strong><?php esc_html_e( 'Vaša korpa', 'lager032' ); ?></strong>
+		<button type="button" class="minicart__close" aria-label="<?php esc_attr_e( 'Zatvori', 'lager032' ); ?>">&times;</button>
+	</div>
+	<?php echo lager_minicart_body_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+</aside>
+
 <?php wp_footer(); ?>
 </body>
 </html>

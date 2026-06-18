@@ -347,6 +347,48 @@
 		if (removeBtn) removeBtn.addEventListener('click', function (e) { e.preventDefault(); setQty(0, removeBtn); });
 	})();
 
+	// Mini-cart drawer.
+	(function () {
+		var cartBtn = document.querySelector('.cartbtn');
+		var drawer = document.querySelector('.minicart');
+		var overlay = document.querySelector('.minicart-overlay');
+		if (!cartBtn || !drawer || !overlay) return;
+
+		function applyFragments(res) {
+			if (res && res.fragments) {
+				Object.keys(res.fragments).forEach(function (sel) {
+					document.querySelectorAll(sel).forEach(function (el) {
+						var t = document.createElement('div'); t.innerHTML = res.fragments[sel];
+						if (t.firstElementChild) el.replaceWith(t.firstElementChild);
+					});
+				});
+			}
+		}
+		function openCart() { drawer.hidden = false; overlay.hidden = false; requestAnimationFrame(function () { drawer.classList.add('is-open'); overlay.classList.add('is-open'); }); document.body.style.overflow = 'hidden'; }
+		function closeCart() { drawer.classList.remove('is-open'); overlay.classList.remove('is-open'); document.body.style.overflow = ''; setTimeout(function () { drawer.hidden = true; overlay.hidden = true; }, 260); }
+
+		cartBtn.addEventListener('click', function (e) { e.preventDefault(); openCart(); });
+		overlay.addEventListener('click', closeCart);
+		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeCart(); });
+
+		drawer.addEventListener('click', function (e) {
+			if (e.target.closest('.minicart__close')) { closeCart(); return; }
+			var rem = e.target.closest('.minicart__remove');
+			if (rem && window.LagerSearch) {
+				var item = rem.closest('.minicart__item'); if (!item) return;
+				rem.setAttribute('disabled', '');
+				var body = new URLSearchParams();
+				body.append('product_id', item.getAttribute('data-id'));
+				body.append('quantity', '0');
+				body.append('nonce', LagerSearch.nonce);
+				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+					.then(function (r) { return r.json(); })
+					.then(function (res) { applyFragments(res); })
+					.catch(function () { rem.removeAttribute('disabled'); });
+			}
+		});
+	})();
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');

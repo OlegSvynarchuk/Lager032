@@ -111,3 +111,10 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   reload), the button is marked after adding ("U korpi (N)"), it reflects
   the cart on page load, and has a remove button. (Previously it was a plain
   form submit with no on-page feedback.)
+- MINI-CART DRAWER: clicking the cart icon in the header now opens a slide-out
+  cart panel (built to match the theme) instead of leaving the page — shows
+  the items (image, name, qty × price, line total), a running subtotal, and
+  "Pogledaj korpu" + "Plaćanje" buttons; remove an item inline; updates live
+  as you add from the list/search. Keeps the shopper on the catalogue.
+- Also added a "sa PDV-om" label next to every price (clarifies the displayed
+  price includes VAT).
