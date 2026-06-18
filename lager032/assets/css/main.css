@@ -882,3 +882,10 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 @media (max-width: 900px) {
 	.searchresults { left: 0; right: 0; width: auto; }
 }
+
+/* In-cart reflection on the product list (2026-06-18) */
+.prow--incart { border-color: var(--c-navy); box-shadow: inset 3px 0 0 var(--c-navy); }
+.prow--incart .prow__add { background: #1a7a3c; border-color: #1a7a3c; }
+.prow--incart .prow__add:hover { background: #166a33; border-color: #166a33; }
+.prow__add.is-loading { opacity: .6; pointer-events: none; }
+.prow__add.is-added { background: #1a7a3c; border-color: #1a7a3c; }

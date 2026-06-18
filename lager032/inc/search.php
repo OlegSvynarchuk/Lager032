@@ -21,6 +21,8 @@ add_action( 'wp_enqueue_scripts', function () {
 		'ajax'   => admin_url( 'admin-ajax.php' ),
 		'nonce'  => wp_create_nonce( 'lager_search' ),
 		'wcAdd'  => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '',
+		'cartState' => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'lager_cart_state' ) : '',
+		'setQty'    => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'lager_set_cart_qty' ) : '',
 		'minLen' => 2,
 		'i18n'   => array(
 			'placeholder' => __( 'Pretraži artikle...', 'lager032' ),

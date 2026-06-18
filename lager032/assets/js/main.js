@@ -224,13 +224,62 @@
 			});
 		});
 	});
-	document.querySelectorAll('.prow__add').forEach(function (btn) {
-		btn.addEventListener('click', function () {
-			var row = btn.closest('.prow');
-			var inp = row ? row.querySelector('.qtybox__input') : null;
-			lagerAddToCart(btn.getAttribute('data-id'), inp ? (parseInt(inp.value, 10) || 1) : 1, btn);
+	(function () {
+		var addBtns = document.querySelectorAll('.prow__add');
+		if (!addBtns.length || !window.LagerSearch) return;
+
+		function applyFragments(res) {
+			if (res && res.fragments) {
+				Object.keys(res.fragments).forEach(function (sel) {
+					document.querySelectorAll(sel).forEach(function (el) {
+						var t = document.createElement('div'); t.innerHTML = res.fragments[sel];
+						if (t.firstElementChild) el.replaceWith(t.firstElementChild);
+					});
+				});
+			}
+		}
+		function markRow(btn, qty) {
+			var row = btn.closest('.prow'); if (!row) return;
+			var inCart = qty > 0;
+			row.classList.toggle('prow--incart', inCart);
+			var label = btn.querySelector('span');
+			if (label) label.textContent = inCart ? 'U korpi (' + qty + ')' : 'Dodaj';
+			var inp = row.querySelector('.qtybox__input');
+			if (inp && inCart) inp.value = qty;
+		}
+		// On load: reflect the current cart on the list (highlight + quantity).
+		fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
+			.then(function (r) { return r.json(); })
+			.then(function (data) {
+				var items = (data && data.items) || {};
+				addBtns.forEach(function (btn) {
+					var id = btn.getAttribute('data-id');
+					if (items[id]) markRow(btn, items[id]);
+				});
+			}).catch(function () {});
+		// Click: SET the cart to the stepper quantity (add / update), keeping list ↔ cart in sync.
+		addBtns.forEach(function (btn) {
+			btn.addEventListener('click', function () {
+				var row = btn.closest('.prow');
+				var inp = row ? row.querySelector('.qtybox__input') : null;
+				var qty = inp ? (parseInt(inp.value, 10) || 1) : 1;
+				btn.classList.add('is-loading');
+				var body = new URLSearchParams();
+				body.append('product_id', btn.getAttribute('data-id'));
+				body.append('quantity', qty);
+				body.append('nonce', LagerSearch.nonce);
+				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+					.then(function (r) { return r.json(); })
+					.then(function (res) {
+						btn.classList.remove('is-loading');
+						applyFragments(res);
+						markRow(btn, (res && typeof res.qty === 'number') ? res.qty : qty);
+						btn.classList.add('is-added'); setTimeout(function () { btn.classList.remove('is-added'); }, 1200);
+					})
+					.catch(function () { btn.classList.remove('is-loading'); });
+			});
 		});
-	});
+	})();
 
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
