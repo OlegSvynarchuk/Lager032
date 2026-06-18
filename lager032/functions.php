@@ -19,4 +19,5 @@ require_once get_template_directory() . '/inc/enqueue.php';
 require_once get_template_directory() . '/inc/contact.php';
 require_once get_template_directory() . '/inc/search.php';
 require_once get_template_directory() . '/inc/cart.php';
+require_once get_template_directory() . '/inc/checkout.php';
 require_once get_template_directory() . '/inc/seo.php';

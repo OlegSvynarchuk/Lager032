@@ -124,3 +124,20 @@ Site: https://lager032.pixels2pixels.ch  (dev)
 - CURRENCY UNIFIED to Serbian Latin: prices showed the Cyrillic "рсд" while the
   rest of the site is Latin — switched the currency symbol to "RSD" everywhere
   so the storefront reads consistently.
+- CHECKOUT & CART rebuilt as a SINGLE STYLED CHECKOUT:
+    * The slide-out drawer is now the cart; "Plaćanje" goes straight to one
+      themed checkout page (which already lists the order) — fewer steps.
+    * Converted cart & checkout from Gutenberg blocks to the classic forms so
+      the theme, fields and text are fully under our control.
+    * Enabled "Uplatnica / bankovni transfer" payment and created a "Srbija"
+      shipping zone (courier flat-rate + free delivery over a threshold).
+      NOTE: bank account number, shipping price and free-shipping threshold are
+      PLACEHOLDERS — need the real values from the client.
+    * Trimmed the form for retail buyers (removed company / 2nd address line /
+      region, made phone required) and translated all checkout & cart wording to
+      Serbian Latin (labels, buttons, headings, messages).
+    * Styled the whole checkout + cart to the site theme: two-column layout with
+      a sticky order summary, themed inputs, buttons, totals and notices.
+    * Card payments online are PENDING — they need a Serbian payment gateway and
+      a merchant account (e.g. WSPay / Monri / AllSecure-Intesa). The checkout is
+      ready to add it once the client chooses a provider.
