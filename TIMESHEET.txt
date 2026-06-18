@@ -101,3 +101,13 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   chosen quantity (set, not blind re-add), removes at 0, and caps to the
   available stock. Built cache-safely (applied client-side so the shop
   pages stay cacheable). Tested end-to-end on the dev site.
+- STOCK NO LONGER BLOCKS SALES (per client): customers can order ANY
+  quantity regardless of the database stock, including items at 0 — orders
+  are processed manually and stock is refilled. Removed the quantity cap and
+  made every product always orderable (no per-product data change). Removed
+  the "out of stock" state + exact stock counts from the storefront (stock
+  numbers remain in admin for reference); products show simply "Na stanju".
+- SINGLE PRODUCT add-to-cart now behaves like the list: AJAX (no page
+  reload), the button is marked after adding ("U korpi (N)"), it reflects
+  the cart on page load, and has a remove button. (Previously it was a plain
+  form submit with no on-page feedback.)

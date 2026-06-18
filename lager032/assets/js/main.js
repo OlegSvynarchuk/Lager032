@@ -302,6 +302,51 @@
 		});
 	})();
 
+	// Single product: AJAX add/update + reflect cart state + remove.
+	(function () {
+		var addBtn = document.querySelector('.single__add');
+		if (!addBtn || !window.LagerSearch) return;
+		var form = addBtn.closest('.addcart');
+		var qtyInput = form ? form.querySelector('input[name="quantity"]') : null;
+		var removeBtn = document.querySelector('.single__remove');
+		var labelEl = addBtn.querySelector('.single__add-label');
+		var labelDefault = labelEl ? labelEl.textContent : 'Dodaj u korpu';
+
+		function applyFragments(res) {
+			if (res && res.fragments) {
+				Object.keys(res.fragments).forEach(function (sel) {
+					document.querySelectorAll(sel).forEach(function (el) {
+						var t = document.createElement('div'); t.innerHTML = res.fragments[sel];
+						if (t.firstElementChild) el.replaceWith(t.firstElementChild);
+					});
+				});
+			}
+		}
+		function mark(qty) {
+			var inCart = qty > 0;
+			if (labelEl) labelEl.textContent = inCart ? 'U korpi (' + qty + ')' : labelDefault;
+			addBtn.classList.toggle('is-incart', inCart);
+			if (qtyInput) qtyInput.value = inCart ? qty : 1;
+			if (removeBtn) removeBtn.hidden = !inCart;
+		}
+		function setQty(qty, btn) {
+			btn.classList.add('is-loading');
+			var body = new URLSearchParams();
+			body.append('product_id', addBtn.getAttribute('data-id'));
+			body.append('quantity', qty);
+			body.append('nonce', LagerSearch.nonce);
+			fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(function (r) { return r.json(); })
+				.then(function (res) { btn.classList.remove('is-loading'); applyFragments(res); mark((res && typeof res.qty === 'number') ? res.qty : qty); })
+				.catch(function () { btn.classList.remove('is-loading'); });
+		}
+		fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
+			.then(function (r) { return r.json(); })
+			.then(function (data) { var items = (data && data.items) || {}; var id = addBtn.getAttribute('data-id'); if (items[id]) mark(items[id]); }).catch(function () {});
+		addBtn.addEventListener('click', function (e) { e.preventDefault(); setQty(qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1, addBtn); });
+		if (removeBtn) removeBtn.addEventListener('click', function (e) { e.preventDefault(); setQty(0, removeBtn); });
+	})();
+
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
 	var masthead = document.querySelector('.masthead');

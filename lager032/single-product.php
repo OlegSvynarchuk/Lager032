@@ -78,7 +78,7 @@ while ( have_posts() ) :
 						<?php lager032_icon( $instock ? 'check' : 'box' ); ?>
 						<?php
 						if ( $instock ) {
-							echo esc_html( null !== $stock_q ? sprintf( __( 'Na stanju (%s kom)', 'lager032' ), $stock_q ) : __( 'Na stanju', 'lager032' ) );
+							esc_html_e( 'Na stanju', 'lager032' );
 						} else {
 							esc_html_e( 'Nema na stanju', 'lager032' );
 						}
@@ -92,7 +92,8 @@ while ( have_posts() ) :
 								<input type="number" name="quantity" value="1" min="1" inputmode="numeric">
 								<button type="button" class="qty__btn" data-dir="1" aria-label="+">+</button>
 							</div>
-							<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $pid ); ?>" class="btn btn--navy"><?php lager032_icon( 'cart' ); ?> <?php esc_html_e( 'Dodaj u korpu', 'lager032' ); ?></button>
+							<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $pid ); ?>" class="btn btn--navy single__add" data-id="<?php echo esc_attr( $pid ); ?>"><?php lager032_icon( 'cart' ); ?> <span class="single__add-label"><?php esc_html_e( 'Dodaj u korpu', 'lager032' ); ?></span></button>
+								<button type="button" class="single__remove" data-id="<?php echo esc_attr( $pid ); ?>" hidden aria-label="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>"><?php lager032_icon( 'trash' ); ?></button>
 						</form>
 					<?php endif; ?>
 

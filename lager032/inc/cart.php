@@ -37,16 +37,6 @@ function lager_ajax_set_cart_qty() {
 		wp_send_json_error();
 	}
 
-	// Clamp to available stock (managed stock, no backorders) so an over-stock set
-	// caps to what's available instead of silently failing.
-	$po = wc_get_product( $pid );
-	if ( $po && $po->managing_stock() && ! $po->backorders_allowed() ) {
-		$max = $po->get_stock_quantity();
-		if ( null !== $max ) {
-			$qty = min( $qty, max( 0, (int) $max ) );
-		}
-	}
-
 	$key = null;
 	foreach ( WC()->cart->get_cart() as $k => $ci ) {
 		if ( (int) $ci['product_id'] === $pid ) {
@@ -74,3 +64,12 @@ function lager_ajax_set_cart_qty() {
 	) );
 }
 add_action( 'wc_ajax_lager_set_cart_qty', 'lager_ajax_set_cart_qty' );
+
+/**
+ * Stock is never a hard limit: orders are processed manually and stock is refilled,
+ * so a customer may order any quantity regardless of the DB stock (even at 0).
+ * Treat every product as in-stock + allow backorders — no per-product data change,
+ * applies to future products too. (Stock quantities stay in the DB for reference.)
+ */
+add_filter( 'woocommerce_product_is_in_stock', '__return_true' );
+add_filter( 'woocommerce_product_backorders_allowed', '__return_true' );

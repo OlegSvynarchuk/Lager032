@@ -894,3 +894,10 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .prow--incart .prow__remove:hover { background: #b00020; color: #fff; border-color: #b00020; }
 .prow__remove.is-loading { opacity: .6; pointer-events: none; }
 .prow__remove .icon { width: 16px; height: 16px; }
+.single__add.is-incart { background: #1a7a3c; border-color: #1a7a3c; }
+.single__add.is-incart:hover { background: #166a33; border-color: #166a33; }
+.single__add.is-loading { opacity: .6; pointer-events: none; }
+.single__remove { display: inline-grid; place-items: center; width: 46px; border: 1px solid var(--c-line); border-radius: 8px; background: #fff; color: #b00020; cursor: pointer; }
+.single__remove[hidden] { display: none; }
+.single__remove:hover { background: #b00020; color: #fff; border-color: #b00020; }
+.single__remove .icon { width: 18px; height: 18px; }
