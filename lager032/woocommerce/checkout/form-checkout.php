@@ -20,6 +20,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout lager-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data">
 
+	<div class="lager-checkout__grid">
+	<div class="lager-checkout__main">
 	<?php if ( $checkout->get_checkout_fields() ) : ?>
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 		<div id="customer_details">
@@ -27,7 +29,9 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 		</div>
 		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 	<?php endif; ?>
+	</div><!-- .lager-checkout__main -->
 
+	<div class="lager-checkout__side">
 	<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
 	<h3 id="order_review_heading" class="lager-order-heading"><?php esc_html_e( 'Vaša porudžbina', 'lager032' ); ?></h3>
 
@@ -36,6 +40,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 		<?php do_action( 'woocommerce_checkout_order_review' ); ?>
 	</div>
 	<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
+	</div><!-- .lager-checkout__side -->
+	</div><!-- .lager-checkout__grid -->
 
 </form>
 
