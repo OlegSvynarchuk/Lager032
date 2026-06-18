@@ -517,6 +517,7 @@ if ( $search ) {
 											<button type="button" class="qtybox__btn" data-dir="1" aria-label="<?php esc_attr_e( 'Povećaj', 'lager032' ); ?>">+</button>
 										</div>
 										<button type="button" class="btn btn--navy btn--sm prow__add" data-id="<?php echo esc_attr( get_the_ID() ); ?>"><?php lager032_icon( 'cart' ); ?> <span><?php esc_html_e( 'Dodaj', 'lager032' ); ?></span></button>
+										<button type="button" class="prow__remove" data-id="<?php echo esc_attr( get_the_ID() ); ?>" aria-label="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>" title="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>"><?php lager032_icon( 'trash' ); ?></button>
 									</div>
 									<?php endif; ?>
 								</div>

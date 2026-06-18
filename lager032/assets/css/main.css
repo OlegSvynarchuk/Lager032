@@ -889,3 +889,8 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .prow--incart .prow__add:hover { background: #166a33; border-color: #166a33; }
 .prow__add.is-loading { opacity: .6; pointer-events: none; }
 .prow__add.is-added { background: #1a7a3c; border-color: #1a7a3c; }
+.prow__remove { display: none; }
+.prow--incart .prow__remove { display: inline-grid; place-items: center; width: 34px; height: 34px; flex: none; border: 1px solid var(--c-line); border-radius: 8px; background: #fff; color: #b00020; cursor: pointer; }
+.prow--incart .prow__remove:hover { background: #b00020; color: #fff; border-color: #b00020; }
+.prow__remove.is-loading { opacity: .6; pointer-events: none; }
+.prow__remove .icon { width: 16px; height: 16px; }

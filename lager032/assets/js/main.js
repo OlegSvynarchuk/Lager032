@@ -245,7 +245,7 @@
 			var label = btn.querySelector('span');
 			if (label) label.textContent = inCart ? 'U korpi (' + qty + ')' : 'Dodaj';
 			var inp = row.querySelector('.qtybox__input');
-			if (inp && inCart) inp.value = qty;
+			if (inp) inp.value = inCart ? qty : 1;
 		}
 		// On load: reflect the current cart on the list (highlight + quantity).
 		fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
@@ -277,6 +277,27 @@
 						btn.classList.add('is-added'); setTimeout(function () { btn.classList.remove('is-added'); }, 1200);
 					})
 					.catch(function () { btn.classList.remove('is-loading'); });
+			});
+		});
+
+		// Remove-from-cart button (visible on in-cart rows) — sets the quantity to 0.
+		document.querySelectorAll('.prow__remove').forEach(function (rb) {
+			rb.addEventListener('click', function () {
+				var row = rb.closest('.prow');
+				var addBtn = row ? row.querySelector('.prow__add') : null;
+				rb.classList.add('is-loading');
+				var body = new URLSearchParams();
+				body.append('product_id', rb.getAttribute('data-id'));
+				body.append('quantity', '0');
+				body.append('nonce', LagerSearch.nonce);
+				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+					.then(function (r) { return r.json(); })
+					.then(function (res) {
+						rb.classList.remove('is-loading');
+						applyFragments(res);
+						if (addBtn) markRow(addBtn, (res && typeof res.qty === 'number') ? res.qty : 0);
+					})
+					.catch(function () { rb.classList.remove('is-loading'); });
 			});
 		});
 	})();
