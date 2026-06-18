@@ -17,6 +17,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 add_filter( 'woocommerce_cart_needs_shipping', '__return_false' );
 add_filter( 'woocommerce_cart_needs_shipping_address', '__return_false' );
 
+/* Drop WooCommerce's English "(incl. VAT)" / "(ex. VAT)" tax suffix — the order
+ * summary already itemises PDV, so the per-line tag is just noise. */
+add_filter( 'woocommerce_countries_inc_tax_or_vat', '__return_empty_string' );
+add_filter( 'woocommerce_countries_ex_tax_or_vat', '__return_empty_string' );
+
 /* -------------------------------------------------------------------------
  * Merge cart + checkout into one page: the cart URL always lands on checkout.
  * ---------------------------------------------------------------------- */

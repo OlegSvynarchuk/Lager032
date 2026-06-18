@@ -19,7 +19,6 @@ $cart = WC()->cart;
 			<th class="lo-naziv"><?php esc_html_e( 'Naziv', 'lager032' ); ?></th>
 			<th class="lo-cena"><?php esc_html_e( 'Cena', 'lager032' ); ?></th>
 			<th class="lo-kol"><?php esc_html_e( 'Količina', 'lager032' ); ?></th>
-			<th class="lo-uk"><?php esc_html_e( 'Iznos', 'lager032' ); ?></th>
 			<th class="lo-x"><span class="screen-reader-text"><?php esc_html_e( 'Ukloni', 'lager032' ); ?></span></th>
 		</tr>
 	</thead>
@@ -51,7 +50,6 @@ $cart = WC()->cart;
 						<button type="button" class="qtybox__btn" data-dir="1" aria-label="<?php esc_attr_e( 'Povećaj', 'lager032' ); ?>">+</button>
 					</div>
 				</td>
-				<td class="lo-uk" data-label="<?php esc_attr_e( 'Iznos', 'lager032' ); ?>"><?php echo wp_kses_post( $cart->get_product_subtotal( $_product, $cart_item['quantity'] ) ); ?></td>
 				<td class="lo-x"><button type="button" class="lo-remove" data-id="<?php echo esc_attr( $pid ); ?>" aria-label="<?php esc_attr_e( 'Ukloni proizvod', 'lager032' ); ?>">&times;</button></td>
 			</tr>
 			<?php
