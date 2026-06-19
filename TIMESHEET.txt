@@ -177,3 +177,14 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   applied it per account, so the public storefront is completely untouched
   (still Latin). NOTE: WordPress/WooCommerce only ship Serbian in Cyrillic, so
   the dashboard is in Cyrillic; it's reversible per user at any time.
+
+=====================================================================
+2026-06-19
+=====================================================================
+- Built the THANK-YOU page (after an order is placed): order confirmation,
+  payment instructions (bank transfer details + reference number, or cash
+  on delivery), the ordered items with product image, the price breakdown
+  (base / VAT / total), and the buyer's contact + delivery details — all in
+  Serbian. Product images use a default placeholder until real photos exist.
+  (Real bank account number still needed from the client.)
+- Committed and deployed to the dev site.

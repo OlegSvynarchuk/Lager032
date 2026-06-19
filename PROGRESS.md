@@ -572,3 +572,15 @@ All deployed + verified on the dev link; PHP lint clean.
 - WP admin set to Serbian for the manager: installed sr_RS core + WooCommerce packs, applied **per user** (`locale=sr_RS` user meta) so the storefront stays en_US/Latin. Cyrillic only (no official Latin pack); reversible per user.
 
 **Verified**: 2 real test orders placed and landed in the dashboard.
+
+---
+
+## Session log — 2026-06-19
+
+**Thank-you / order-received page** (`woocommerce/checkout/thankyou.php` override, Serbian Latin):
+confirmation + order #/date/email/total/payment · **payment instructions** (BACS: account from
+`woocommerce_bacs_accounts` + iznos + "poziv na broj" = order #; or COD note) · items table with
+**image** (catalog placeholder when none) + šifra/qty/price · totals (Osnovica/PDV/Ukupno) · customer
+& delivery cards. Verified via direct template render (TITLE/PAY/IMG/TOTALS).
+- Note: guest visiting the order URL without their session hits WC's **email-verification gate**; the
+  buyer sees the full page right after checkout. Bank account # is still a **placeholder** (client).
