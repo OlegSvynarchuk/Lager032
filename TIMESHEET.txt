@@ -187,4 +187,13 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   (base / VAT / total), and the buyer's contact + delivery details — all in
   Serbian. Product images use a default placeholder until real photos exist.
   (Real bank account number still needed from the client.)
+- CHECKOUT form: removed the optional Sprat / Broj stana / Interfon
+  fields; renamed "Broj zgrade/kuće" to "Broj" and made it required.
+  Thank-you page: small fixes (totals shown once; product line now shows
+  name + category). Cart drawer: reduced two buttons to one.
+- ORDER E-MAILS: set up Gmail SMTP so mail actually delivers; made the
+  customer + admin order e-mails fully Serbian and branded (sender "LAGER
+  STR", logo, navy color, Serbian subjects, body, payment/bank details).
+- ADMIN: added Telefon / Grad / Broj artikala columns to the orders list
+  so the staff see customer + order info at a glance (like the old site).
 - Committed and deployed to the dev site.

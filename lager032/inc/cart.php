@@ -123,8 +123,7 @@ function lager_minicart_body_html() {
 		echo '</ul>';
 		echo '<div class="minicart__foot">';
 		echo '<div class="minicart__subtotal"><span>' . esc_html__( 'Ukupno', 'lager032' ) . '</span><strong>' . wp_kses_post( $cart->get_cart_subtotal() ) . '</strong></div>';
-		echo '<a class="btn btn--line btn--block" href="' . esc_url( wc_get_cart_url() ) . '">' . esc_html__( 'Pogledaj korpu', 'lager032' ) . '</a>';
-		echo '<a class="btn btn--navy btn--block" href="' . esc_url( wc_get_checkout_url() ) . '">' . esc_html__( 'Plaćanje', 'lager032' ) . '</a>';
+		echo '<a class="btn btn--navy btn--block" href="' . esc_url( wc_get_cart_url() ) . '">' . esc_html__( 'Pogledaj korpu', 'lager032' ) . '</a>';
 			echo '<button type="button" class="minicart__clear">' . esc_html__( 'Isprazni korpu', 'lager032' ) . '</button>';
 		echo '</div>';
 	}

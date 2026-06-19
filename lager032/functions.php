@@ -21,3 +21,5 @@ require_once get_template_directory() . '/inc/search.php';
 require_once get_template_directory() . '/inc/cart.php';
 require_once get_template_directory() . '/inc/checkout.php';
 require_once get_template_directory() . '/inc/seo.php';
+require_once get_template_directory() . '/inc/emails.php';
+require_once get_template_directory() . '/inc/admin-orders.php';

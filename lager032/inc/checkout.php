@@ -121,32 +121,11 @@ add_filter( 'woocommerce_checkout_fields', function ( $fields ) {
 			'priority'     => 60,
 		),
 		'billing_house_no'   => array(
-			'label'        => 'Broj zgrade/kuće',
-			'required'     => false,
+			'label'        => 'Broj',
+			'required'     => true,
 			'class'        => array( 'form-row-last' ),
 			'lager_section' => 'delivery',
 			'priority'     => 70,
-		),
-		'billing_floor'      => array(
-			'label'        => 'Sprat',
-			'required'     => false,
-			'class'        => array( 'form-row-third' ),
-			'lager_section' => 'delivery',
-			'priority'     => 80,
-		),
-		'billing_apartment'  => array(
-			'label'        => 'Broj stana',
-			'required'     => false,
-			'class'        => array( 'form-row-third' ),
-			'lager_section' => 'delivery',
-			'priority'     => 90,
-		),
-		'billing_intercom'   => array(
-			'label'        => 'Interfon',
-			'required'     => false,
-			'class'        => array( 'form-row-third' ),
-			'lager_section' => 'delivery',
-			'priority'     => 100,
 		),
 		'billing_city'       => array(
 			'label'        => 'Grad',
@@ -176,10 +155,7 @@ add_filter( 'woocommerce_checkout_fields', function ( $fields ) {
 function lager_checkout_extra_fields() {
 	return array(
 		'billing_phone2'        => 'Fiksni telefon',
-		'billing_house_no'      => 'Broj zgrade/kuće',
-		'billing_floor'         => 'Sprat',
-		'billing_apartment'     => 'Broj stana',
-		'billing_intercom'      => 'Interfon',
+		'billing_house_no'      => 'Broj',
 		'billing_delivery_note' => 'Dostavna poruka',
 	);
 }

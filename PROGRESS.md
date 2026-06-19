@@ -584,3 +584,23 @@ confirmation + order #/date/email/total/payment · **payment instructions** (BAC
 & delivery cards. Verified via direct template render (TITLE/PAY/IMG/TOTALS).
 - Note: guest visiting the order URL without their session hits WC's **email-verification gate**; the
   buyer sees the full page right after checkout. Bank account # is still a **placeholder** (client).
+
+**Checkout fields tidy-up** (`inc/checkout.php`): removed Sprat / Broj stana / Interfon; renamed
+"Broj zgrade/kuće" → **"Broj"** and made it **required** (delivery-critical). Thank-you tweaks: dropped
+"Ukupno" from the meta list (kept in totals), product cell now shows name + category. Mini-cart drawer:
+two redundant buttons → single **"Pogledaj korpu"**.
+
+**Order e-mails — SMTP + Serbian + branded** (`inc/emails.php`, new):
+- SMTP via Gmail (`smtp.gmail.com:587`, app password) — client set up; mail delivers.
+- From **LAGER STR `<lager032@gmail.com>`**; site title set to **LAGER STR** (`blogname`).
+- Serbian **subjects + headings** (per-email filters) and **body** (gettext map scoped to e-mail
+  rendering only, so admin/storefront stay en_US) — greeting, intros, bank details, addresses, totals
+  labels, country Srbija. Serbian footer line via `woocommerce_email_additional_content_*`.
+- Branding: `woocommerce_email_base_color=#1B3E7A`, header image = logo.
+
+**Admin orders list** (`inc/admin-orders.php`, new): added **Telefon · Grad · Broj artikala** columns
+(after Ukupno) to match the old site's order overview — HPOS + legacy hooks.
+
+### Open / next
+- Real product images · real **bank account #** + PIB/Matični broj · **O Nama / Sertifikati / Kontakt**
+  pages (nav `#`) · Serbian card-payment gateway · go-live (no-index off, 301 old URLs).

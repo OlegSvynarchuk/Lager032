@@ -41,7 +41,6 @@ $ph_id  = (int) get_option( 'lager_cat_placeholder_id' );
 			<li><span><?php esc_html_e( 'Datum', 'lager032' ); ?></span><strong><?php echo esc_html( wc_format_datetime( $order->get_date_created() ) ); ?></strong></li>
 			<li><span><?php esc_html_e( 'E-mail', 'lager032' ); ?></span><strong><?php echo esc_html( $order->get_billing_email() ); ?></strong></li>
 			<li><span><?php esc_html_e( 'Plaćanje', 'lager032' ); ?></span><strong><?php echo esc_html( $order->get_payment_method_title() ); ?></strong></li>
-			<li><span><?php esc_html_e( 'Ukupno', 'lager032' ); ?></span><strong><?php echo wp_kses_post( $order->get_formatted_order_total() ); ?></strong></li>
 		</ul>
 
 		<div class="thankyou__pay">
@@ -89,10 +88,12 @@ $ph_id  = (int) get_option( 'lager_cat_placeholder_id' );
 						$img = $img_id
 							? wp_get_attachment_image( $img_id, 'thumbnail', false, array( 'class' => 'thankyou__img' ) )
 							: '<img class="thankyou__img" src="' . esc_url( wc_placeholder_img_src( 'thumbnail' ) ) . '" alt="">';
-						$sku = $product ? $product->get_sku() : '';
+						$sku  = $product ? $product->get_sku() : '';
+						$cats = $product ? get_the_terms( $product->get_id(), 'product_cat' ) : false;
+						$cat  = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '';
 						?>
 						<tr>
-							<td class="ty-prod"><?php echo wp_kses_post( $img ); ?><span><?php echo esc_html( $item->get_name() ); ?></span></td>
+							<td class="ty-prod"><?php echo wp_kses_post( $img ); ?><span class="ty-prodinfo"><span class="ty-name"><?php echo esc_html( $item->get_name() ); ?></span><?php if ( $cat ) : ?><span class="ty-cat"><?php echo esc_html( $cat ); ?></span><?php endif; ?></span></td>
 							<td data-label="<?php esc_attr_e( 'Šifra', 'lager032' ); ?>"><?php echo esc_html( $sku ? $sku : '—' ); ?></td>
 							<td data-label="<?php esc_attr_e( 'Količina', 'lager032' ); ?>"><?php echo esc_html( $item->get_quantity() ); ?></td>
 							<td data-label="<?php esc_attr_e( 'Cena', 'lager032' ); ?>"><?php echo wp_kses_post( wc_price( $order->get_line_total( $item, true ) ) ); ?></td>

@@ -1110,6 +1110,9 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .thankyou__items h2 { font-size: 16px; color: var(--c-navy); margin: 0 0 12px; }
 .thankyou__img { width: 44px; height: 44px; object-fit: contain; border: 1px solid var(--c-line); border-radius: 6px; background: #fff; flex: none; }
 .ty-prod { display: flex; align-items: center; gap: 10px; text-align: left; }
+.ty-prodinfo { display: flex; flex-direction: column; gap: 1px; }
+.ty-name { color: var(--c-ink); font-weight: 600; }
+.ty-cat { color: var(--c-muted); font-size: 12px; }
 .thankyou__details { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
 .thankyou__card { background: #fff; border: 1px solid var(--c-line); border-radius: 12px; padding: 16px 18px; }
 .thankyou__card h3 { margin: 0 0 8px; font-size: 14px; color: var(--c-navy); }
