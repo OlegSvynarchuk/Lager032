@@ -17,7 +17,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Google fonts used in the Figma: Lato (hero), Inter (body/headings), Roboto Condensed (card labels).
 	wp_enqueue_style(
 		'lager032-fonts',
-		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap',
+		'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700;900&family=Montserrat:wght@500;600;700&family=Roboto+Condensed:wght@400;700&display=swap',
 		array(),
 		null
 	);
