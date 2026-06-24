@@ -197,3 +197,22 @@ Site: https://lager032.pixels2pixels.ch  (dev)
 - ADMIN: added Telefon / Grad / Broj artikala columns to the orders list
   so the staff see customer + order info at a glance (like the old site).
 - Committed and deployed to the dev site.
+
+=====================================================================
+2026-06-24
+=====================================================================
+- HEADER + NAVIGATION redesigned to the new Figma design (pulled the layout,
+  spacing, fonts and colors straight from Figma):
+    * Top bar (navy): the contact info (two phones, e-mail, address) plus the
+      SEARCH box and CART icon now live together up here on the right.
+    * Main bar (white): a BIGGER logo on the left; the menu (Početna, O nama,
+      Katalog, Sertifikati) and a red "Prodavnica" button on the right.
+    * Switched the header type to Montserrat to match the design.
+    * Kept the category mega-menu on hover of the "Prodavnica" button, so the
+      category navigation isn't lost.
+- Header fine-tuning: the two phone numbers share one phone icon, and the
+  contact block sits right next to the search box (as in the design).
+- NOTE: the header uses the design's exact navy/red (#112955 / #D60000), which
+  are a touch different from the rest of the site's current navy/red — can roll
+  these out site-wide for full consistency if wanted.
+- Committed and deployed to the dev site.

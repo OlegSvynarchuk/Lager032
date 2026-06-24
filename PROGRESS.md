@@ -604,3 +604,34 @@ two redundant buttons → single **"Pogledaj korpu"**.
 ### Open / next
 - Real product images · real **bank account #** + PIB/Matični broj · **O Nama / Sertifikati / Kontakt**
   pages (nav `#`) · Serbian card-payment gateway · go-live (no-index off, 301 old URLs).
+
+---
+
+## Session log - 2026-06-24 - header + navigation redesign (Figma 47:2420)
+
+Pulled the spec from Figma via the REST API (`.figma-token`, file key `rkOC41hpF2Dx1HR93xt0Fb`,
+node `47:2420`) - layout, auto-layout gaps/padding, fonts, colors, text, X-positions.
+
+**Structure** (`header.php`, full rewrite - still two rows, content rearranged):
+- **Top bar** `.util-bar` (navy `#112955`): contacts (`.util-bar__phones` = one phone icon + both
+  numbers, then e-mail, then address) **+ the search box + cart icon** - all right-clustered next to
+  the search (`justify-content: flex-end`), matching the Figma X-positions.
+- **Nav bar** `.masthead` (white, min-height 86): logo left (`.brand__img` height 56), then
+  `.mainnav` right = links (Početna / O nama / Katalog / Sertifikati, Montserrat 600/13, navy, hover
+  red) + red **"Prodavnica"** button `.shopcats__btn` (`#d60000`, Montserrat 700/12 uppercase).
+- Search + cart **moved out of the masthead** up into the top bar. Cart is now a white icon + red
+  count badge on the navy bar.
+- Kept the **category mega-dropdown** attached to the "Prodavnica" button (hover), re-anchored to the
+  right (`.megamenu { right: 0 }`). `masthead__center` wrapper removed.
+
+**Type**: added **Montserrat** (500/600/700) to the Google Fonts enqueue (`inc/enqueue.php`).
+
+**Colors**: header uses the Figma tokens **navy `#112955` / red `#d60000`** (FIGMA.md design tokens).
+These differ slightly from the global `--c-navy #1B3E7A` / `--c-red #C8001D` - NOT yet rolled out
+site-wide (decision pending). Search field bg `#eef1f8` (= `--c-input`).
+
+**Responsive**: nav collapses to the hamburger < 1100px (`.mainnav` column, `.shopcats__btn` full
+width); top bar wraps < 768px (address hidden, search goes fluid).
+
+Note: rebased on top of the teammate's thank-you/e-mails/admin-columns commits - no conflicts (header
+files were untouched by that work).
