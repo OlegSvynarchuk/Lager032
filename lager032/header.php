@@ -32,8 +32,11 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 	<div class="util-bar">
 		<div class="container util-bar__inner">
 			<div class="util-bar__contacts">
-				<a href="tel:+38132342281"><?php lager032_icon( 'phone' ); ?><span>+381 32 342 281</span></a>
-				<a href="tel:+381631093199"><?php lager032_icon( 'phone' ); ?><span>+381 63 109 31 99</span></a>
+				<span class="util-bar__phones">
+					<?php lager032_icon( 'phone' ); ?>
+					<a href="tel:+38132342281">+381 32 342 281</a>
+					<a href="tel:+381631093199">+381 63 109 31 99</a>
+				</span>
 				<a href="mailto:lager032@gmail.com"><?php lager032_icon( 'mail' ); ?><span>lager032@gmail.com</span></a>
 				<span class="util-bar__addr"><?php lager032_icon( 'pin' ); ?><span><?php esc_html_e( 'LAGER STR, Kneza Miloša 100, Čačak', 'lager032' ); ?></span></span>
 			</div>

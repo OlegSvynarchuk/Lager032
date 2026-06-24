@@ -310,8 +310,11 @@ a { color: inherit; }
 
 /* Utility bar */
 .util-bar { background: #112955; color: #fff; font-family: 'Montserrat', sans-serif; }
-.util-bar__inner { display: flex; align-items: center; justify-content: space-between; min-height: 50px; gap: 24px; }
-.util-bar__contacts { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; min-width: 0; }
+.util-bar__inner { display: flex; align-items: center; justify-content: flex-end; min-height: 50px; gap: 20px; }
+.util-bar__contacts { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; min-width: 0; justify-content: flex-end; }
+.util-bar__phones { display: inline-flex; align-items: center; gap: 9px; }
+.util-bar__phones a { color: #fff; text-decoration: none; font-weight: 600; font-size: 11px; }
+.util-bar__phones a:hover { text-decoration: underline; }
 .util-bar__contacts a, .util-bar__addr { display: inline-flex; align-items: center; gap: 7px; color: #fff; text-decoration: none; font-weight: 600; font-size: 11px; }
 .util-bar__contacts a:hover { text-decoration: underline; }
 .util-bar .icon { width: 14px; height: 14px; opacity: .9; flex: none; }
