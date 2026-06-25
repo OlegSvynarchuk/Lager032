@@ -172,7 +172,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 	<div class="container">
 		<div class="sec-head sec-head--center">
 			<span class="sec-eyebrow"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></span>
-			<h2 class="sec-title"><?php esc_html_e( 'Stupite u kontakt sa nama', 'lager032' ); ?></h2>
+			<h2 class="sec-title"><?php esc_html_e( 'Za sva pitanja kontaktirajte nas', 'lager032' ); ?></h2>
 		</div>
 
 		<div class="contact__grid">
