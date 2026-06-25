@@ -597,7 +597,7 @@ a { color: inherit; }
 
 /* Kontakt */
 .contact { padding: 80px 0; background: #fff; }
-.contact__grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; margin-top: 36px; }
+.contact__grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; margin-top: 60px; }
 .cinfo { display: flex; gap: 14px; margin-bottom: 22px; }
 .cinfo__ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 8px; background: var(--c-navy); color: #fff; flex: none; }
 .cinfo__ic .icon { width: 18px; height: 18px; }
