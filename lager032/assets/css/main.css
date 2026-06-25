@@ -448,7 +448,7 @@ a { color: inherit; }
 /* ==========================================================================
    REDESIGN 2026-06-12 — Footer (Figma node 110:2027 footer)
    ========================================================================== */
-.sitefoot { background: #fff; color: #94A3B8; border-top: 1px solid var(--c-line); }
+.sitefoot { background: #fff; color: #94A3B8; box-shadow: 0 -5px 20px rgba(15,28,54,.08); }
 .sitefoot__cols {
 	display: grid;
 	grid-template-columns: 1.7fr 0.8fr 1fr 1.2fr;
@@ -457,9 +457,9 @@ a { color: inherit; }
 	padding-bottom: 44px;
 }
 .footbrand { display: inline-flex; align-items: center; text-decoration: none; }
-.footbrand__logo { height: 52px; width: auto; display: block; }
+.footbrand__logo { height: 62px; width: auto; display: block; }
 .sitefoot__blurb { margin: 18px 0 0; color: #94A3B8; font-size: 13px; line-height: 1.6; max-width: 300px; }
-.sitefoot__cert { display: block; margin-top: 22px; height: 92px; width: auto; }
+.sitefoot__cert { display: block; margin: 24px auto 0; height: 92px; width: auto; }
 
 .sitefoot__title { margin: 4px 0 18px; color: #112955; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
 .sitefoot__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
