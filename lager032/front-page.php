@@ -75,7 +75,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 				array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'cat-segeri.jpg', 'seger' ),
 				array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'cat-krstovi.jpg', 'krst-kardana' ),
 				array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'cat-masti.jpg', 'masti' ),
-				array( 'Würth', 'Lepak, sprejevi, polusintetička ulja', 'cat-wurth.jpg', '' ),
+				array( 'Kućišta', 'Pernasta, četvrtasta kućišta', 'cat-kucista.jpg', '' ),
 				array( 'Lanci i Lančanici', 'Standardni i specijalni lanci', 'cat-lanci.jpg', 'lanci-i-lancanici' ),
 				array( 'Hilzne', 'Adapterske i zaključne hilzne', 'cat-hilzne.jpg', 'hilzna' ),
 				array( 'KM Navrtke', 'Za montažu ležajeva', 'cat-navrtke.jpg', 'navrtka' ),
