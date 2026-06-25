@@ -456,9 +456,9 @@ a { color: inherit; }
 	padding-top: 56px;
 	padding-bottom: 44px;
 }
-.sitefoot__brand { max-width: 260px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-.footbrand { display: inline-flex; align-items: center; text-decoration: none; }
-.footbrand__logo { height: 62px; width: auto; display: block; }
+.sitefoot__brand { width: 258px; max-width: 100%; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+.footbrand { display: block; width: 100%; text-decoration: none; }
+.footbrand__logo { width: 100%; height: auto; display: block; }
 .sitefoot__blurb { margin: 18px 0 0; color: #94A3B8; font-size: 13px; line-height: 1.6; }
 .sitefoot__cert { display: block; margin: 24px 0 0; height: 92px; width: auto; align-self: center; }
 
