@@ -538,7 +538,15 @@ a { color: inherit; }
 .catcard__body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px; color: #fff; }
 .catcard__name { display: block; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.2; text-transform: uppercase; letter-spacing: .3px; color: #fff; }
 .catcard__desc { display: block; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; line-height: 1.35; }
-.catcard:hover { box-shadow: 0 14px 30px rgba(15,28,54,.25); }
+/* Hover: gradient turns red + "Preuzmi katalog" button reveals (no box-shadow) */
+.catcard:hover .catcard__shade { background: linear-gradient(180deg, rgba(0,0,0,0) 20%, rgba(200,0,29,0.72) 100%); }
+.catcard__cta {
+	position: absolute; top: 14px; right: 14px; z-index: 3; max-width: 96px; text-align: center;
+	background: #d60000; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 11px;
+	line-height: 1.25; text-transform: uppercase; letter-spacing: .3px; padding: 8px 12px; border-radius: 4px;
+	opacity: 0; transform: translateY(-4px); transition: opacity .2s ease, transform .2s ease; pointer-events: none;
+}
+.catcard:hover .catcard__cta { opacity: 1; transform: translateY(0); }
 
 /* Proizvodi */
 .catalog { padding: 72px 0; background: #F6F8FC; }
