@@ -14,10 +14,10 @@
 	--gutter: 6.944vw; /* 100/1440 (Figma) — content holds the 1240/1440 proportion at any width */
 
 	/* Redesign palette (Figma 2026-06-12) */
-	--c-navy: #1B3E7A;
+	--c-navy: #112955;
 	--c-ink: #0F1C36;
-	--c-red: #C8001D;
-	--c-red-dark: #a80018;
+	--c-red: #d60000;
+	--c-red-dark: #b00000;
 	--c-muted: #5A6A8A;
 	--c-accent: #8EC5FF;
 	--c-panel: #E4ECF8;

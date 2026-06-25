@@ -111,8 +111,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 <section class="about">
 	<div class="container about__inner">
 		<div class="about__media">
-			<img src="<?php echo esc_url( $home_img . '/about-magacin.jpg' ); ?>" alt="<?php esc_attr_e( 'LAGER magacin', 'lager032' ); ?>" loading="lazy">
-			<div class="about__badge"><strong>25+</strong><span><?php esc_html_e( 'godina na tržištu', 'lager032' ); ?></span></div>
+			<img src="<?php echo esc_url( $home_img . '/about-magacin.jpg?v=' . filemtime( get_template_directory() . '/assets/img/home/about-magacin.jpg' ) ); ?>" alt="<?php esc_attr_e( 'LAGER magacin', 'lager032' ); ?>" loading="lazy">
 		</div>
 		<div class="about__content">
 			<span class="sec-eyebrow"><?php esc_html_e( 'O Nama', 'lager032' ); ?></span>
