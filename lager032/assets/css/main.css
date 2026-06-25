@@ -539,7 +539,7 @@ a { color: inherit; }
 .catcard__name { display: block; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.2; text-transform: uppercase; letter-spacing: .3px; color: #fff; }
 .catcard__desc { display: block; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; line-height: 1.35; }
 /* Hover: gradient turns red + "Preuzmi katalog" button reveals (no box-shadow) */
-.catcard:hover .catcard__shade { background: linear-gradient(180deg, rgba(0,0,0,0) 20%, rgba(200,0,29,0.72) 100%); }
+.catcard:hover .catcard__shade { background: linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(200,0,29,0.55) 100%); }
 .catcard__cta {
 	position: absolute; top: 14px; right: 14px; z-index: 3; max-width: 96px; text-align: center;
 	background: #d60000; color: #fff; font-family: 'Montserrat', sans-serif; font-weight: 600; font-size: 11px;
