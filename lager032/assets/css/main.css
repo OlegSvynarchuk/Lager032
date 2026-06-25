@@ -532,12 +532,12 @@ a { color: inherit; }
 /* Kategorije */
 .cats { padding: 100px 0 72px; background: #fff; }
 .cats .sec-head { margin-bottom: 64px; }
-.cats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-.catcard { position: relative; display: block; aspect-ratio: 29 / 25; border-radius: 10px; overflow: hidden; background-size: cover; background-position: center; text-decoration: none; }
-.catcard__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,41,85,0) 28%, rgba(17,41,85,.92) 100%); }
-.catcard__body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px 18px; color: #fff; }
-.catcard__name { display: block; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: .4px; color: #ff3b3b; }
-.catcard__desc { display: block; font-size: 12px; color: #d6deea; margin-top: 3px; line-height: 1.35; }
+.cats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 27px 20px; }
+.catcard { position: relative; display: block; aspect-ratio: 295 / 240; border-radius: 10px; overflow: hidden; background-size: cover; background-position: center; text-decoration: none; }
+.catcard__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 25%, rgba(27,62,122,0.67) 100%); }
+.catcard__body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px; color: #fff; }
+.catcard__name { display: block; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.2; text-transform: uppercase; letter-spacing: .3px; color: #fff; }
+.catcard__desc { display: block; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 12px; color: rgba(255,255,255,.7); margin-top: 4px; line-height: 1.35; }
 .catcard:hover { box-shadow: 0 14px 30px rgba(15,28,54,.25); }
 
 /* Proizvodi */
