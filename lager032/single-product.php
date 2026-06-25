@@ -31,30 +31,7 @@ while ( have_posts() ) :
 	$brand    = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0] : '';
 
 	// Illustrative visual: subcategory image → parent category → any category → placeholder.
-	$cat_list = ( $pcats && ! is_wp_error( $pcats ) ) ? $pcats : array();
-	$vis_id   = 0;
-	foreach ( $cat_list as $pc ) { // prefer a subcategory's own image, else its parent's
-		if ( $pc->parent ) {
-			$vis_id = (int) get_term_meta( $pc->term_id, 'thumbnail_id', true );
-			if ( ! $vis_id ) {
-				$vis_id = (int) get_term_meta( $pc->parent, 'thumbnail_id', true );
-			}
-			if ( $vis_id ) {
-				break;
-			}
-		}
-	}
-	if ( ! $vis_id ) {
-		foreach ( $cat_list as $pc ) {
-			$vis_id = (int) get_term_meta( $pc->term_id, 'thumbnail_id', true );
-			if ( $vis_id ) {
-				break;
-			}
-		}
-	}
-	if ( ! $vis_id ) {
-		$vis_id = (int) get_option( 'lager_cat_placeholder_id' );
-	}
+	$vis_id  = lager_product_category_image_id( $pid );
 	$vis_src = $vis_id ? wp_get_attachment_image_url( $vis_id, 'large' ) : wc_placeholder_img_src( 'large' );
 	?>
 
@@ -148,11 +125,13 @@ while ( have_posts() ) :
 				if ( $related ) {
 					echo '<div class="single__related"><h2 class="single__h2">' . esc_html__( 'Slični proizvodi', 'lager032' ) . '</h2><div class="relgrid">';
 					foreach ( $related as $rp ) {
-						$rid = $rp->get_id();
+						$rid     = $rp->get_id();
+						$rel_img = lager_product_category_image_id( $rid );
+						$rel_src = $rel_img ? wp_get_attachment_image( $rel_img, 'woocommerce_thumbnail' ) : '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="">';
 						printf(
 							'<a class="relcard" href="%1$s"><span class="relcard__media">%2$s</span><span class="relcard__name">%3$s</span><span class="relcard__price">%4$s<small class="price-pdv">sa PDV-om</small></span></a>',
 							esc_url( get_permalink( $rid ) ),
-							$rp->get_image( 'woocommerce_thumbnail' ), // phpcs:ignore
+							$rel_src, // phpcs:ignore
 							esc_html( $rp->get_name() ),
 							wp_kses_post( $rp->get_price_html() )
 						);

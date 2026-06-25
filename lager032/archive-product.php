@@ -495,7 +495,12 @@ if ( $search ) {
 							$instockp = $product->is_in_stock();
 							?>
 							<article class="prow">
-								<a class="prow__media" href="<?php the_permalink(); ?>"><?php echo $product->get_image( 'woocommerce_thumbnail' ); // phpcs:ignore ?></a>
+								<a class="prow__media" href="<?php the_permalink(); ?>"><?php
+									$prow_img = lager_product_category_image_id( get_the_ID() );
+									echo $prow_img
+										? wp_get_attachment_image( $prow_img, 'woocommerce_thumbnail', false, array( 'alt' => the_title_attribute( array( 'echo' => false ) ) ) ) // phpcs:ignore
+										: '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="" loading="lazy">';
+								?></a>
 								<div class="prow__main">
 									<?php if ( $brand || $sku ) : ?><span class="prow__tag"><?php echo esc_html( trim( $brand . ( $sku ? ' · ' . $sku : '' ), ' ·' ) ); ?></span><?php endif; ?>
 									<h3 class="prow__name"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
