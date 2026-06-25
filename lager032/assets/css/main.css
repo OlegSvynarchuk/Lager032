@@ -572,7 +572,7 @@ a { color: inherit; }
 
 /* O Nama */
 .about { padding: 80px 0; background: #fff; }
-.about__inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; padding-inline: 100px; }
+.about__inner { display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: center; padding-inline: calc(var(--gutter) + 100px); }
 .about__media { position: relative; }
 .about__media img { width: 100%; border-radius: 14px; }
 .about__badge { position: absolute; right: -14px; bottom: -14px; background: var(--c-red); color: #fff; border-radius: 12px; padding: 14px 18px; text-align: center; box-shadow: 0 12px 24px rgba(200,0,29,.25); }
