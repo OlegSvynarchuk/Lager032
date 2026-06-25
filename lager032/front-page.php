@@ -143,30 +143,26 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 <section class="brands">
 	<div class="container">
 		<div class="sec-head sec-head--center">
-			<span class="sec-eyebrow"><?php esc_html_e( 'Sertifikati', 'lager032' ); ?></span>
-			<h2 class="sec-title"><?php esc_html_e( 'Ovlašćeni distributer vodećih brendova', 'lager032' ); ?></h2>
-			<p class="sec-sub"><?php esc_html_e( 'Sarađujemo isključivo sa originalnim proizvođačima i ovlašćenim distributerima, garantujući autentičnost i kvalitet svakog proizvoda.', 'lager032' ); ?></p>
+			<h2 class="sec-title"><?php esc_html_e( 'Veliki asortiman najvećih brendova', 'lager032' ); ?></h2>
 		</div>
-		<div class="brands__grid">
-			<?php
-			$brands = array(
-				array( 'FAG', 'Schaeffler Group — Nemačka' ),
-				array( 'SKF', 'Sverige Kullager-Fabriken — Švedska' ),
-				array( 'SNR', 'NTN-SNR — Francuska' ),
-				array( 'Timken', 'The Timken Company — SAD' ),
-				array( 'ZVL', 'ZVL Slovakia — Slovačka' ),
-				array( 'Suptex', 'Suptex Seals — Srbija' ),
-				array( 'WBF', 'WBF Bearings — Nemačka' ),
-				array( 'Gates', 'Gates Corporation — SAD' ),
-			);
-			foreach ( $brands as $b ) {
-				printf(
-					'<div class="brandcard"><span class="brandcard__logo">%1$s</span><span class="brandcard__name">%1$s</span><span class="brandcard__desc">%2$s</span></div>',
-					esc_html( $b[0] ),
-					esc_html( $b[1] )
+		<div class="brands__slider">
+			<div class="brands__track">
+				<?php
+				$brand_logos = array(
+					array( 'brand-skf.png', 'SKF' ),
+					array( 'brand-wurth.png', 'Würth' ),
+					array( 'brand-ntn-snr.png', 'NTN / SNR' ),
 				);
-			}
-			?>
+				foreach ( $brand_logos as $bl ) {
+					printf(
+						'<div class="brands__cell"><img class="brands__logo" src="%1$s" alt="%2$s" loading="lazy"></div>',
+						esc_url( $home_img . '/' . $bl[0] ),
+						esc_attr( $bl[1] )
+					);
+				}
+				?>
+			</div>
+			<div class="brands__dots" aria-hidden="true"></div>
 		</div>
 	</div>
 </section>
