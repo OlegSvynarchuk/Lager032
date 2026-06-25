@@ -10,8 +10,8 @@
 	--red-dark: #b00000;
 	--ink: #1c290d;          /* nav text */
 	--white: #fff;
-	--container: 1920px;
-	--gutter: clamp(16px, 3.33vw, 64px);
+	--container: none;
+	--gutter: 6.944vw; /* 100/1440 (Figma) — content holds the 1240/1440 proportion at any width */
 
 	/* Redesign palette (Figma 2026-06-12) */
 	--c-navy: #1B3E7A;
