@@ -372,12 +372,12 @@ a { color: inherit; }
 .megacat__sub { color: var(--c-muted); font-weight: 600; font-size: 12px; }
 
 /* Categories with subcategories: caret + hover flyout to the right */
-.megacat--has-sub { position: relative; }
+.megacat--has-sub { position: relative; padding: 0; }
 .megacat--has-sub > .megacat__main { position: relative; padding-right: 22px; }
-.megacat--has-sub > .megacat__main::after { content: '\203A'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--c-muted); font-weight: 700; font-size: 16px; line-height: 1; }
+.megacat--has-sub > .megacat__main::after { content: '\203A'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%) rotate(90deg); color: var(--c-muted); font-weight: 700; font-size: 16px; line-height: 1; }
 .submenu {
-	position: absolute; left: 100%; top: -8px; display: none;
-	grid-auto-flow: column; grid-template-rows: repeat(12, auto); gap: 1px 4px;
+	position: absolute; left: 0; top: 100%; margin-top: 4px; display: none;
+	grid-auto-flow: row; grid-template-rows: none; gap: 2px;
 	min-width: 220px; background: #fff; border: 1px solid var(--c-line); border-radius: 8px;
 	box-shadow: 0 18px 50px rgba(15,28,54,.18); padding: 10px; z-index: 70;
 }
