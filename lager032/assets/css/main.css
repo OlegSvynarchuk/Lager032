@@ -511,19 +511,19 @@ a { color: inherit; }
 
 /* Hero */
 /* header (util-bar 36 + masthead 65) + hero + KPI band (~72) = 100vh */
-.hero { position: relative; min-height: calc(100vh - 173px); background-size: cover; background-position: center; color: #fff; display: flex; flex-direction: column; justify-content: center; }
+.hero { position: relative; min-height: 460px; background-size: cover; background-position: center; color: #fff; display: flex; flex-direction: column; justify-content: center; }
 .hero__overlay { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(15,28,54,.92) 0%, rgba(15,28,54,.78) 45%, rgba(27,62,122,.55) 100%); }
 .hero__inner { position: relative; z-index: 2; padding-top: 72px; padding-bottom: 56px; }
 .hero__content { max-width: 760px; text-align: left; }
-.hero__eyebrow { display: inline-block; background: var(--c-red); color: #fff; font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 999px; margin-bottom: 22px; }
-.hero__title { margin: 0; font-family: 'Lato', sans-serif; font-weight: 700; font-size: 50px; line-height: 1.1; }
+.hero__eyebrow { display: none; }
+.hero__title { margin: 0; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 40px; line-height: 1.15; }
 .hero__title span { display: block; }
 .hero__lead { margin: 20px 0 0; max-width: 560px; font-size: 17px; line-height: 1.6; color: #cdd6e6; }
 .hero__cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-.hero__stats { background: #0C1D3D; color: #fff; }
-.hero__stats-inner { max-width: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-top: 18px; padding-bottom: 18px; }
-.herostat { display: flex; align-items: center; justify-content: center; gap: 12px; }
-.herostat .icon { width: 22px; height: 22px; color: var(--c-accent); flex: none; }
+.hero__stats { background: #0f1c36; color: #fff; }
+.hero__stats-inner { max-width: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; padding-top: 20px; padding-bottom: 20px; }
+.herostat { display: flex; align-items: center; justify-content: flex-start; gap: 12px; }
+.herostat .icon { width: 40px; height: 40px; padding: 9px; box-sizing: border-box; background: #d60000; border-radius: 4px; color: #fff; flex: none; }
 .herostat strong { display: block; font-size: 18px; line-height: 1.1; }
 .herostat span { font-size: 12px; color: #aebbd2; }
 
