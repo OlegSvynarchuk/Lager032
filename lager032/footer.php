@@ -30,15 +30,12 @@ $foot_cats = array(
 
 		<div class="sitefoot__brand">
 			<a class="footbrand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-				<span class="footbrand__badge">L032</span>
-				<span class="footbrand__text">
-					<span class="footbrand__name">LAGER STR</span>
-					<span class="footbrand__sub"><?php esc_html_e( 'Čačak, Srbija', 'lager032' ); ?></span>
-				</span>
+				<img class="footbrand__logo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png?v=' . filemtime( get_template_directory() . '/assets/img/logo.png' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 			</a>
 			<p class="sitefoot__blurb">
 				<?php esc_html_e( 'Specijalizovana prodavnica ležajeva i industrijske opreme. 25+ godina iskustva i poverenja.', 'lager032' ); ?>
 			</p>
+			<img class="sitefoot__cert" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/cert-badge.png' ); ?>" alt="<?php esc_attr_e( 'Bonitetna ocena AAA 2018', 'lager032' ); ?>" loading="lazy">
 		</div>
 
 		<div class="sitefoot__col">
