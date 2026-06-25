@@ -216,3 +216,40 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   are a touch different from the rest of the site's current navy/red — can roll
   these out site-wide for full consistency if wanted.
 - Committed and deployed to the dev site.
+
+=====================================================================
+2026-06-25
+=====================================================================
+- HOMEPAGE rebuilt section by section to the new Figma design (each section
+  pulled straight from Figma — layout, spacing, fonts, colors, images):
+    * HERO: the photo now fills the whole hero height; the header and the
+      stats band (KPIs) sit cleanly above/below it; applied the design's exact
+      blue gradient overlay; removed the old eyebrow line.
+    * CATEGORY GRID ("Naša ponuda obuhvata:"): redesigned cards with their own
+      images; on hover the card shows a red wash + a "Preuzmi katalog" prompt
+      (replaced the old box-shadow hover). Swapped a duplicate category for one
+      not already shown.
+    * O NAMA (About): new content + photo, padding matched to the design.
+    * BRANDS: a proper logo SLIDER (carousel) — the brand logos are centered
+      with even spacing and auto-rotate, with paging dots (4 brands for now).
+    * CONTACT: more breathing room under the "Za sva pitanja kontaktirajte
+      nas" heading.
+    * FOOTER: rebuilt to the new design — four columns (brand + certificate
+      badge, Navigacija, Kategorije, Kontakt), a soft top shadow, and the link
+      colors corrected to match the design.
+- PAGE PROPORTIONS: set the page margins as a RATIO (not fixed pixels) so the
+  layout breathes correctly on every screen size while matching the design's
+  spacing at the reference width.
+- LOGO: cropped the empty space around the logo image so it fills its space and
+  lines up properly; refreshed it on the site (header + footer).
+- MEGA-MENU tidy-up: items with subcategories now line up with the rest, their
+  chevrons point down, and the subcategory list drops DOWN (not out to the
+  side) aligned under the parent.
+- PRODUCT-GROUP IMAGES: took the 46 images supplied for the product groups,
+  matched each to the right category/subcategory (handling slightly different
+  names), optimized them, and set them as the official category images.
+- Products now SHOW THEIR CATEGORY IMAGE everywhere a product appears — the
+  single product page, the shop list at /prodavnica/, and the "Slični
+  proizvodi" cards — instead of a blank placeholder. (A product uses its
+  subcategory image, falling back to the parent category, then the placeholder.)
+- Committed and deployed everything to the dev site.

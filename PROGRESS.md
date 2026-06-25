@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-17.
+> Last updated: 2026-06-25.
 
 ---
 
@@ -635,3 +635,70 @@ width); top bar wraps < 768px (address hidden, search goes fluid).
 
 Note: rebased on top of the teammate's thank-you/e-mails/admin-columns commits - no conflicts (header
 files were untouched by that work).
+
+---
+
+## Session log — 2026-06-25 — homepage redesign + product-group images
+
+Continued the Figma redesign (file key `rkOC41hpF2Dx1HR93xt0Fb`), node by node, from header
+through the whole homepage + footer; then wired the real category images into the storefront.
+
+**Container proportions (relative, not absolute).** Design canvas = 1440px, left edge of logo
+to page = 100px. Set `--gutter: 6.944vw` (= 100/1440) and `--container: none` so the inset
+scales with the viewport instead of a fixed max-width. Container-width dividers use
+`::before { left: var(--gutter); right: var(--gutter) }`.
+
+**Homepage sections** (`front-page.php` + `assets/css/main.css`, each pulled from its Figma node):
+- **Hero** (`185:2099`): image fills the hero height; header + KPI stats band extracted
+  above/below; exact overlay `linear-gradient(105deg, rgba(27,62,122,.93) 7.74%, rgba(27,62,122,.8)
+  54.23%, rgba(10,20,50,.65) 92.26%)`; `min-height: calc(100vh - 136px - 80px)`; eyebrow removed.
+- **Category grid** (`47:2495`): 12 `.catcard`s, own images, `aspect-ratio:295/240`. Hover swaps the
+  navy shade for a lighter red wash and reveals a `.catcard__cta` ("Preuzmi katalog"); removed the old
+  box-shadow hover. Replaced a duplicate category card.
+- **O nama** (`47:2434`): new copy + `about-magacin.jpg` (cache-busted `?v=filemtime`); badge removed;
+  `.about__inner { padding-inline: calc(var(--gutter) + 100px) }` ("inside container" = keep gutter
+  AND add 100px each side).
+- **Brands** (`231:2260` + `227:2251`): JS carousel (`assets/js/main.js` IIFE) — responsive perView
+  1/2/3/4, paging dots only when >1 page, auto-rotate 4500ms; single page centers cells (`justify-content:
+  center; gap:30px`). 4 logos, no arrows.
+- **Contact** (`231:2264`): extra space under the heading.
+- **Footer** (`224:2152`): white, 4 columns (brand + cert badge, Navigacija, Kategorije, Kontakt) +
+  legal bar; soft top shadow `0 -5px 20px rgba(15,28,54,.08)`; logo fills its 258px column (so its
+  center = column center, cert badge centered under it); links gray `#94a3b8` → navy on hover.
+
+**Logo crop.** The PNG had transparent padding → looked misaligned. Cropped to the pixel bbox
+(System.Drawing LockBits) so the artwork fills the canvas; re-uploaded; header + footer use
+`logo.png?v=filemtime` cache-busting.
+
+**Mega-menu fixes.** Items with subcategories had double padding (wrapper + inner) → wrapper
+`padding:0` so they align with the rest; chevron points **down** (`rotate(90deg)`); subcategory
+submenu drops **down** under the parent (`.submenu { left:0; top:100%; grid-auto-flow:row }`),
+not flying out to the right.
+
+**Global color tokens** unified to the design: `--c-navy:#112955`, `--c-red:#d60000`,
+`--c-red-dark:#b00000`, `--c-ink:#0F1C36`.
+
+**Product-group images → category thumbnails.** 46 supplied images (`Slike za grupe proizvoda`,
+mostly AVIF) mapped to categories/subcategories by fuzzy name match (e.g. `autoprogram`→`Auto
+program`, `Kuglice`→`Kuglica`, the two kućišta variants). Server has GD with AVIF decode
+(`imagecreatefromavif`) but ImageMagick has **no avif delegate** and System.Drawing can't decode
+AVIF — so a temp server script (`_catimport.php`) decoded each via GD, flattened white, re-encoded
+JPEG q88, `wp_upload_bits` → `wp_insert_attachment` → metadata, and
+`update_term_meta($tid,'thumbnail_id',$att)`. **46/46 imported** (attachments 4961–5006). WooCommerce
+category image = term meta `thumbnail_id` (NOT a post "featured image"). Temp files cleaned up.
+
+**Products now show their category image** (they have no photos of their own). New shared helper
+`lager_product_category_image_id($pid)` in `functions.php`: **subcategory image → parent category →
+any category → `lager_cat_placeholder_id`** (returns attachment ID). Used in:
+- `single-product.php` — main illustrative visual + "Slični proizvodi" cards (refactored off the old
+  inline block).
+- `archive-product.php` — the shop/category `.prow` rows (was `$product->get_image()` → Woo
+  placeholder), now `wp_get_attachment_image(..., 'woocommerce_thumbnail')` with responsive srcset.
+
+Verified live: `/prodavnica/` rows all render `kategorija-*.jpg`, **zero placeholders**; a sample
+product shows its subcategory image. All deployed (scp → `php -l` → `chmod 644` → `wp cache flush`).
+
+### Open / next
+- Real **bank account #** + PIB/Matični broj (still placeholders) · O Nama / Sertifikati / Kontakt
+  pages (nav `#`) · roll the design's navy/red tokens fully site-wide (header already uses them) ·
+  go-live (indexing off, 301 old URLs).
