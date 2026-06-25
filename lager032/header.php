@@ -63,7 +63,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 		<div class="container masthead__inner">
 
 			<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-				<img class="brand__img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png' ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+				<img class="brand__img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png?v=' . filemtime( get_template_directory() . '/assets/img/logo.png' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 			</a>
 
 			<button class="navtoggle" aria-label="<?php esc_attr_e( 'Meni', 'lager032' ); ?>" aria-expanded="false">
