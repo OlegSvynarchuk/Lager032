@@ -529,12 +529,12 @@ a { color: inherit; }
 
 /* Kategorije */
 .cats { padding: 72px 0; background: #fff; }
-.cats__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-.catcard { position: relative; display: block; aspect-ratio: 360 / 210; border-radius: 12px; overflow: hidden; background-size: cover; background-position: center; text-decoration: none; }
-.catcard__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12,29,61,0) 35%, rgba(12,29,61,.85) 100%); }
-.catcard__body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 18px 20px; color: #fff; }
-.catcard__name { display: block; font-weight: 700; font-size: 18px; }
-.catcard__count { display: block; font-size: 13px; color: #cdd6e6; margin-top: 2px; }
+.cats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.catcard { position: relative; display: block; aspect-ratio: 29 / 25; border-radius: 10px; overflow: hidden; background-size: cover; background-position: center; text-decoration: none; }
+.catcard__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,41,85,0) 28%, rgba(17,41,85,.92) 100%); }
+.catcard__body { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 16px 18px; color: #fff; }
+.catcard__name { display: block; font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: .4px; color: #ff3b3b; }
+.catcard__desc { display: block; font-size: 12px; color: #d6deea; margin-top: 3px; line-height: 1.35; }
 .catcard:hover { box-shadow: 0 14px 30px rgba(15,28,54,.25); }
 
 /* Proizvodi */
@@ -606,7 +606,7 @@ a { color: inherit; }
 
 /* ---- Homepage responsive ---- */
 @media (max-width: 1024px) {
-	.cats__grid { grid-template-columns: repeat(2, 1fr); }
+	.cats__grid { grid-template-columns: repeat(3, 1fr); }
 	.catalog__grid { grid-template-columns: repeat(3, 1fr); }
 	.brands__grid { grid-template-columns: repeat(3, 1fr); }
 	.hero__title { font-size: 42px; }
@@ -620,6 +620,7 @@ a { color: inherit; }
 	.hero__stats-inner { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 680px) {
+	.cats__grid { grid-template-columns: repeat(2, 1fr); }
 	.catalog__grid { grid-template-columns: repeat(2, 1fr); }
 	.brands__grid { grid-template-columns: repeat(2, 1fr); }
 	.sec-head { flex-direction: column; align-items: flex-start; }
@@ -628,7 +629,6 @@ a { color: inherit; }
 	.about__features { grid-template-columns: 1fr; }
 }
 @media (max-width: 460px) {
-	.cats__grid { grid-template-columns: 1fr; }
 	.cform__row { grid-template-columns: 1fr; }
 }
 

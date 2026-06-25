@@ -61,27 +61,29 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 <!-- ========================= KATEGORIJE ========================= -->
 <section class="cats">
 	<div class="container">
-		<div class="sec-head">
-			<div>
-				<span class="sec-eyebrow"><?php esc_html_e( 'Asortiman', 'lager032' ); ?></span>
-				<h2 class="sec-title"><?php esc_html_e( 'Kategorije proizvoda', 'lager032' ); ?></h2>
-			</div>
-			<a class="sec-link" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Svi proizvodi', 'lager032' ); ?> <?php lager032_icon( 'arrow' ); ?></a>
+		<div class="sec-head sec-head--center">
+			<h2 class="sec-title"><?php esc_html_e( 'Naša ponuda obuhvata:', 'lager032' ); ?></h2>
 		</div>
 
 		<div class="cats__grid">
 			<?php
-			// label, count (design copy), image file, product_cat slug ('' = shop)
+			// label, subtitle, image file, product_cat slug ('' = shop)
 			$cats = array(
-				array( 'Ležajevi', '1.200+ artikala', 'cat-lezajevi.jpg', 'lezaj' ),
-				array( 'Semerinzi', '320+ artikala', 'cat-semerinzi.jpg', 'semering' ),
-				array( 'Remenje', '180+ artikala', 'cat-remenje.jpg', 'remen' ),
-				array( 'Lanci i Lančanici', '240+ artikala', 'cat-lanci.jpg', 'lanci-i-lancanici' ),
-				array( 'Masti', '60+ artikala', 'cat-masti.jpg', 'masti' ),
-				array( 'Kućišta', '400+ artikala', 'cat-kucista.jpg', '' ),
+				array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'cat-lezajevi.jpg', 'lezaj' ),
+				array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'cat-semerinzi.jpg', 'semering' ),
+				array( 'Remenje', 'Klinasti, rebrasti, zupčasti', 'cat-remenje.jpg', 'remen' ),
+				array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'cat-segeri.jpg', 'seger' ),
+				array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'cat-krstovi.jpg', 'krst-kardana' ),
+				array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'cat-masti.jpg', 'masti' ),
+				array( 'Würth', 'Lepak, sprejevi, polusintetička ulja', 'cat-wurth.jpg', '' ),
+				array( 'Lanci i Lančanici', 'Standardni i specijalni lanci', 'cat-lanci.jpg', 'lanci-i-lancanici' ),
+				array( 'Hilzne', 'Adapterske i zaključne hilzne', 'cat-hilzne.jpg', 'hilzna' ),
+				array( 'KM Navrtke', 'Za montažu ležajeva', 'cat-navrtke.jpg', 'navrtka' ),
+				array( 'MB Podloške', 'Sigurnosne podloške za navrtke', 'cat-podloske.jpg', '' ),
+				array( 'Kuglice', 'Čelične i inoks kuglice', 'cat-kuglice.jpg', 'kuglica' ),
 			);
 			foreach ( $cats as $c ) {
-				list( $label, $count, $img, $slug ) = $c;
+				list( $label, $subtitle, $img, $slug ) = $c;
 				$url = $shop_url;
 				if ( $slug ) {
 					$term = get_term_by( 'slug', $slug, 'product_cat' );
@@ -93,11 +95,11 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 					}
 				}
 				printf(
-					'<a class="catcard" href="%1$s" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__count">%4$s</span></span></a>',
+					'<a class="catcard" href="%1$s" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
 					esc_url( $url ),
 					esc_url( $home_img . '/' . $img ),
 					esc_html( $label ),
-					esc_html( $count )
+					esc_html( $subtitle )
 				);
 			}
 			?>
