@@ -456,11 +456,11 @@ a { color: inherit; }
 	padding-top: 56px;
 	padding-bottom: 44px;
 }
-.sitefoot__brand { max-width: 260px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.sitefoot__brand { max-width: 260px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
 .footbrand { display: inline-flex; align-items: center; text-decoration: none; }
 .footbrand__logo { height: 62px; width: auto; display: block; }
 .sitefoot__blurb { margin: 18px 0 0; color: #94A3B8; font-size: 13px; line-height: 1.6; }
-.sitefoot__cert { display: block; margin: 24px 0 0; height: 92px; width: auto; }
+.sitefoot__cert { display: block; margin: 24px 0 0; height: 92px; width: auto; align-self: center; }
 
 .sitefoot__title { margin: 4px 0 18px; color: #112955; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
 .sitefoot__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
