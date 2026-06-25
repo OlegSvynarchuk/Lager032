@@ -30,8 +30,28 @@ while ( have_posts() ) :
 	$brands   = wp_get_post_terms( $pid, 'product_brand', array( 'fields' => 'names' ) );
 	$brand    = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0] : '';
 
-	// Illustrative visual: category image → shared placeholder → Woo placeholder.
-	$vis_id = $cat ? (int) get_term_meta( $cat->term_id, 'thumbnail_id', true ) : 0;
+	// Illustrative visual: subcategory image → parent category → any category → placeholder.
+	$cat_list = ( $pcats && ! is_wp_error( $pcats ) ) ? $pcats : array();
+	$vis_id   = 0;
+	foreach ( $cat_list as $pc ) { // prefer a subcategory's own image, else its parent's
+		if ( $pc->parent ) {
+			$vis_id = (int) get_term_meta( $pc->term_id, 'thumbnail_id', true );
+			if ( ! $vis_id ) {
+				$vis_id = (int) get_term_meta( $pc->parent, 'thumbnail_id', true );
+			}
+			if ( $vis_id ) {
+				break;
+			}
+		}
+	}
+	if ( ! $vis_id ) {
+		foreach ( $cat_list as $pc ) {
+			$vis_id = (int) get_term_meta( $pc->term_id, 'thumbnail_id', true );
+			if ( $vis_id ) {
+				break;
+			}
+		}
+	}
 	if ( ! $vis_id ) {
 		$vis_id = (int) get_option( 'lager_cat_placeholder_id' );
 	}
