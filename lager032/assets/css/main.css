@@ -530,7 +530,8 @@ a { color: inherit; }
 .herostat span { font-size: 12px; color: #aebbd2; }
 
 /* Kategorije */
-.cats { padding: 72px 0; background: #fff; }
+.cats { padding: 100px 0 72px; background: #fff; }
+.cats .sec-head { margin-bottom: 64px; }
 .cats__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .catcard { position: relative; display: block; aspect-ratio: 29 / 25; border-radius: 10px; overflow: hidden; background-size: cover; background-position: center; text-decoration: none; }
 .catcard__shade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(17,41,85,0) 28%, rgba(17,41,85,.92) 100%); }
