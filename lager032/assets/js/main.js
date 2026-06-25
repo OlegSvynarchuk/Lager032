@@ -471,23 +471,30 @@
 		function render() {
 			var pv = perView();
 			var pages = Math.ceil(cells.length / pv);
-			var basis = (pages === 1) ? (100 / cells.length) : (100 / pv);
+			dots.innerHTML = '';
+			if (pages <= 1) {
+				// All logos fit: centre them as a group with a 30px gap, no paging.
+				cells.forEach(function (c) { c.style.flex = '0 0 auto'; });
+				track.style.justifyContent = 'center';
+				track.style.gap = '30px';
+				track.style.transform = 'none';
+				dots.style.display = 'none';
+				return;
+			}
+			track.style.justifyContent = 'flex-start';
+			track.style.gap = '0px';
+			var basis = 100 / pv;
 			cells.forEach(function (c) { c.style.flex = '0 0 ' + basis + '%'; });
 			if (page >= pages) { page = 0; }
 			track.style.transform = 'translateX(' + (-page * 100) + '%)';
-			dots.innerHTML = '';
-			if (pages > 1) {
-				for (var i = 0; i < pages; i++) {
-					var b = document.createElement('button');
-					b.type = 'button';
-					b.className = 'brands__dot' + (i === page ? ' is-active' : '');
-					(function (idx) { b.addEventListener('click', function () { page = idx; render(); restart(); }); })(i);
-					dots.appendChild(b);
-				}
-				dots.style.display = '';
-			} else {
-				dots.style.display = 'none';
+			for (var i = 0; i < pages; i++) {
+				var b = document.createElement('button');
+				b.type = 'button';
+				b.className = 'brands__dot' + (i === page ? ' is-active' : '');
+				(function (idx) { b.addEventListener('click', function () { page = idx; render(); restart(); }); })(i);
+				dots.appendChild(b);
 			}
+			dots.style.display = '';
 		}
 		function nextPage() {
 			var pages = Math.ceil(cells.length / perView());
