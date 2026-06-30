@@ -1,3 +1,4 @@
+
 /* ==========================================================================
    Lager032 — main stylesheet
    Tokens taken from Figma "Home" (node 47:2419).
@@ -782,13 +783,22 @@ section.archive { padding: 24px 0 48px; background: #F6F8FC; min-height: 60vh; }
 .prow__name a { color: var(--c-ink); text-decoration: none; }
 .prow__name a:hover { color: var(--c-navy); }
 .prow__desc { margin: 6px 0 0; color: var(--c-muted); font-size: 13px; line-height: 1.45; }
+/* Product card meta badges + SKU (Friday card redesign) */
+.prow__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.prow__brand, .prow__cat { display: inline-block; font-size: 11px; font-weight: 700; line-height: 1; text-transform: uppercase; letter-spacing: .3px; padding: 4px 8px; border-radius: 5px; }
+.prow__brand { color: #fff; background: var(--c-navy); }
+.prow__cat { color: var(--c-navy); background: var(--c-panel); }
+.prow__sku { display: inline-block; margin-top: 6px; color: var(--c-muted); font-size: 12px; }
+.prow__sku code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--c-ink); background: var(--c-input); padding: 1px 6px; border-radius: 4px; }
 .prow__side { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 150px; }
+.prow__pdv { font-weight: 400; font-size: 11px; color: var(--c-muted); }
 .prow__price { display: flex; flex-direction: column; align-items: flex-end; color: var(--c-navy); font-weight: 700; font-size: 18px; }
 .prow__price small { font-weight: 400; font-size: 11px; color: var(--c-muted); }
 .prow__stock { font-size: 12px; font-weight: 600; }
 .prow__stock.is-in { color: #1a7a3c; }
 .prow__stock.is-out { color: #b00020; }
-.prow__buy { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+.prow__buy { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; align-items: stretch; }
+.prow__buyrow { display: flex; align-items: center; gap: 8px; }
 .qtybox { display: inline-flex; align-items: center; border: 1px solid var(--c-line); border-radius: 8px; overflow: hidden; background: #fff; }
 .qtybox__btn { width: 30px; height: 36px; border: 0; background: none; color: var(--c-navy); font-size: 18px; line-height: 1; cursor: pointer; }
 .qtybox__btn:hover { background: var(--c-input); }
