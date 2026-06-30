@@ -18,7 +18,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 ?>
 
 <!-- ============================ HERO ============================ -->
-<section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/hero.jpg' ); ?>')">
+<section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/hero.jpg?v=' . filemtime( get_template_directory() . '/assets/img/home/hero.jpg' ) ); ?>')">
 	<div class="hero__overlay" aria-hidden="true"></div>
 	<div class="container hero__inner">
 		<div class="hero__content">
