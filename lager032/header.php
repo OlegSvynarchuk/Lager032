@@ -73,8 +73,9 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 			<nav class="mainnav" aria-label="<?php esc_attr_e( 'Glavni meni', 'lager032' ); ?>">
 				<ul class="mainnav__list">
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Početna', 'lager032' ); ?></a></li>
-					<li><a href="#"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
-					<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/o-nama/' ) ); ?>"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/katalog/' ) ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/kontakt/' ) ); ?>"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></a></li>
 				</ul>
 
 				<?php
