@@ -151,7 +151,8 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 				$brand_logos = array(
 					array( 'skf.png', 'SKF' ),
 					array( 'ina-fag.png', 'INA / FAG' ),
-					array( 'ntn-snr.png', 'NTN / SNR' ),
+					array( 'ntn.png', 'NTN' ),
+					array( 'snr.png', 'SNR' ),
 					array( 'timken.png', 'Timken' ),
 					array( 'wurth.png', 'Würth' ),
 					array( 'optibelt.png', 'Optibelt' ),
