@@ -586,9 +586,9 @@ a { color: inherit; }
 
 /* Brendovi — paged carousel (4 per view), dash pagination underneath, no arrows */
 .brands { padding: 72px 0; background: #fff; }
-.brands__slider { overflow: hidden; margin: 44px auto 0; max-width: 920px; }
+.brands__slider { overflow: hidden; margin: 68px auto 0; max-width: 1040px; }
 .brands__track { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; transition: transform .5s ease; }
-.brands__cell { flex: 0 0 25%; max-width: 25%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0 12px; }
+.brands__cell { flex: 0 0 20%; max-width: 20%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0 12px; }
 /* Logos are pre-trimmed to a common content height, so a fixed display height keeps
    them visually consistent; very wide wordmarks fall back to the cell width. */
 .brands__logo { height: 64px; width: auto; max-width: 100%; object-fit: contain; display: block; }

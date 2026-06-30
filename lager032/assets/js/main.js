@@ -464,9 +464,10 @@
 		function perView() {
 			var w = slider.clientWidth;
 			if (w < 480) return 1;
-			if (w < 768) return 2;
-			if (w < 1024) return 3;
-			return 4;
+			if (w < 700) return 2;
+			if (w < 920) return 3;
+			if (w < 1000) return 4;
+			return 5;
 		}
 		function pageCount(pv) { return Math.max(1, Math.ceil(cells.length / pv)); }
 		function render() {
