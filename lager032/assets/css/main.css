@@ -612,6 +612,25 @@ a { color: inherit; }
 .contact--page { padding-top: 64px; }
 .contact__map { margin-top: 48px; border-radius: 14px; overflow: hidden; border: 1px solid var(--c-line); box-shadow: 0 10px 30px rgba(15,28,54,.06); }
 .contact__map iframe { display: block; width: 100%; height: 420px; border: 0; }
+
+/* O nama page — alternating About block (image on the right) */
+.about--reverse .about__inner { grid-template-columns: 1.1fr 1fr; }
+.about--reverse .about__media { order: 2; }
+.about--reverse .about__content { order: 1; }
+
+/* Katalog page — embedded PDF viewer + download */
+.katalog { padding: 64px 0 80px; background: #fff; }
+.katalog__head { display: flex; align-items: center; gap: 22px; margin-bottom: 30px; flex-wrap: wrap; }
+.katalog__icon { display: grid; place-items: center; width: 58px; height: 58px; border-radius: 12px; background: var(--c-navy); color: #fff; flex: none; }
+.katalog__icon .icon { width: 26px; height: 26px; }
+.katalog__headtext { flex: 1 1 240px; }
+.katalog__title { color: var(--c-navy); font-size: clamp(24px, 3vw, 34px); line-height: 1.15; margin: 0; }
+.katalog__sub { color: var(--c-muted); font-size: 16px; margin: 8px 0 0; }
+.katalog__btn { flex: none; }
+.katalog__viewer { border-radius: 14px; overflow: hidden; border: 1px solid var(--c-line); box-shadow: 0 10px 30px rgba(15,28,54,.06); background: #eef1f8; }
+.katalog__viewer iframe { display: block; width: 100%; height: 82vh; min-height: 560px; border: 0; }
+.katalog__fallback { margin-top: 16px; text-align: center; color: var(--c-muted); font-size: 14px; }
+.katalog__fallback a { color: var(--c-red); font-weight: 600; }
 .cform { display: flex; flex-direction: column; gap: 16px; }
 .cform__row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .cform label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600; color: var(--c-ink); }
