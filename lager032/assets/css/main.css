@@ -584,45 +584,15 @@ a { color: inherit; }
 .feat strong { display: block; color: var(--c-navy); font-size: 15px; margin-bottom: 4px; }
 .feat p { margin: 0; color: var(--c-muted); font-size: 13px; line-height: 1.5; }
 
-/* Brendovi — continuous logo marquee (auto-scrolls; pauses + colorizes on hover) */
-.brands { padding: 72px 0; background: #fff; overflow: hidden; }
-.brands__viewport {
-	margin-top: 44px;
-	overflow: hidden;
-	-webkit-mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
-	        mask-image: linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
-}
-.brands__track {
-	display: flex;
-	align-items: center;
-	width: max-content;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	animation: brands-marquee 50s linear infinite;
-}
-.brands__cell { flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 0 40px; }
-.brands__logo {
-	height: 52px;
-	width: auto;
-	max-width: 175px;
-	object-fit: contain;
-	display: block;
-	filter: grayscale(1);
-	opacity: .8;
-	transition: filter .3s ease, opacity .3s ease;
-}
-/* Hovering the strip pauses it and reveals the brand colours. */
-.brands__viewport:hover .brands__track { animation-play-state: paused; }
-.brands__viewport:hover .brands__logo { filter: none; opacity: 1; }
-@keyframes brands-marquee {
-	from { transform: translateX(0); }
-	to   { transform: translateX(-50%); }
-}
-@media (prefers-reduced-motion: reduce) {
-	.brands__track { animation: none; flex-wrap: wrap; justify-content: center; gap: 16px 40px; width: auto; }
-	.brands__logo { filter: none; opacity: 1; }
-}
+/* Brendovi — paged carousel (4 per view), dash pagination underneath, no arrows */
+.brands { padding: 72px 0; background: #fff; }
+.brands__slider { overflow: hidden; margin-top: 44px; }
+.brands__track { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; transition: transform .5s ease; }
+.brands__cell { flex: 0 0 25%; max-width: 25%; display: flex; align-items: center; justify-content: center; box-sizing: border-box; padding: 0 22px; }
+.brands__logo { max-height: 60px; max-width: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+.brands__dots { display: flex; justify-content: center; gap: 11px; margin-top: 40px; }
+.brands__dot { width: 42px; height: 6px; border: 0; background: #112955; opacity: .85; cursor: pointer; padding: 0; border-radius: 1px; transition: background .2s ease, opacity .2s ease; }
+.brands__dot.is-active { background: #d60000; opacity: 1; }
 
 /* Kontakt */
 .contact { padding: 80px 0; background: #fff; }

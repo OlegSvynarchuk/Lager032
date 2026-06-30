@@ -452,7 +452,56 @@
 		});
 	})();
 
-	// Brands logo strip is a pure-CSS continuous marquee (see .brands__track) — no JS needed.
+	// Brands logo carousel — paged (4/3/2/1 per view), dash pagination, auto-advance, no arrows.
+	(function () {
+		var slider = document.querySelector('.brands__slider');
+		if (!slider) return;
+		var track = slider.querySelector('.brands__track');
+		var dots = slider.querySelector('.brands__dots');
+		var cells = Array.prototype.slice.call(track.children);
+		if (!cells.length) return;
+		var page = 0, timer = null;
+		function perView() {
+			var w = slider.clientWidth;
+			if (w < 480) return 1;
+			if (w < 768) return 2;
+			if (w < 1024) return 3;
+			return 4;
+		}
+		function pageCount(pv) { return Math.max(1, Math.ceil(cells.length / pv)); }
+		function render() {
+			var pv = perView();
+			var pages = pageCount(pv);
+			if (page >= pages) { page = pages - 1; }
+			var basis = 100 / pv;
+			cells.forEach(function (c) { c.style.flex = '0 0 ' + basis + '%'; c.style.maxWidth = basis + '%'; });
+			// Clamp so the final page still shows a full row of logos (no scrolling past the end).
+			var offset = Math.min(page * pv, Math.max(0, cells.length - pv));
+			track.style.transform = 'translateX(' + (-offset * basis) + '%)';
+			dots.innerHTML = '';
+			if (pages <= 1) { dots.style.display = 'none'; return; }
+			dots.style.display = 'flex';
+			for (var i = 0; i < pages; i++) {
+				var b = document.createElement('button');
+				b.type = 'button';
+				b.setAttribute('aria-label', 'Strana ' + (i + 1));
+				b.className = 'brands__dot' + (i === page ? ' is-active' : '');
+				(function (idx) { b.addEventListener('click', function () { page = idx; render(); restart(); }); })(i);
+				dots.appendChild(b);
+			}
+		}
+		function nextPage() {
+			var pages = pageCount(perView());
+			if (pages > 1) { page = (page + 1) % pages; render(); }
+		}
+		function restart() { if (timer) { clearInterval(timer); } timer = setInterval(nextPage, 4500); }
+		render();
+		restart();
+		slider.addEventListener('mouseenter', function () { if (timer) { clearInterval(timer); timer = null; } });
+		slider.addEventListener('mouseleave', restart);
+		var rt;
+		window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(render, 150); });
+	})();
 
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');

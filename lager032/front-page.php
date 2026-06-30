@@ -145,38 +145,35 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 		<div class="sec-head sec-head--center">
 			<h2 class="sec-title"><?php esc_html_e( 'Veliki asortiman najvećih brendova', 'lager032' ); ?></h2>
 		</div>
-	</div>
-	<div class="brands__viewport">
-		<ul class="brands__track">
-			<?php
-			$brand_logos = array(
-				array( 'skf.png', 'SKF' ),
-				array( 'ina-fag.png', 'INA / FAG' ),
-				array( 'ntn-snr.png', 'NTN / SNR' ),
-				array( 'timken.png', 'Timken' ),
-				array( 'wurth.png', 'Würth' ),
-				array( 'optibelt.png', 'Optibelt' ),
-				array( 'goodyear.png', 'Goodyear Belts' ),
-				array( 'zvl-zkl.png', 'ZVL / ZKL' ),
-				array( 'loctite.png', 'Loctite' ),
-				array( 'kyk.png', 'KYK' ),
-				array( 'cx.png', 'CX' ),
-				array( 'suptex.png', 'Suptex' ),
-				array( 'unibelt.png', 'UniBelt' ),
-			);
-			// Output the set twice so the marquee loops seamlessly (2nd copy is decorative).
-			for ( $pass = 0; $pass < 2; $pass++ ) {
+		<div class="brands__slider">
+			<ul class="brands__track">
+				<?php
+				$brand_logos = array(
+					array( 'skf.png', 'SKF' ),
+					array( 'ina-fag.png', 'INA / FAG' ),
+					array( 'ntn-snr.png', 'NTN / SNR' ),
+					array( 'timken.png', 'Timken' ),
+					array( 'wurth.png', 'Würth' ),
+					array( 'optibelt.png', 'Optibelt' ),
+					array( 'goodyear.png', 'Goodyear Belts' ),
+					array( 'zvl-zkl.png', 'ZVL / ZKL' ),
+					array( 'loctite.png', 'Loctite' ),
+					array( 'kyk.png', 'KYK' ),
+					array( 'cx.png', 'CX' ),
+					array( 'suptex.png', 'Suptex' ),
+					array( 'unibelt.png', 'UniBelt' ),
+				);
 				foreach ( $brand_logos as $bl ) {
 					printf(
-						'<li class="brands__cell"%3$s><img class="brands__logo" src="%1$s" alt="%2$s" loading="lazy"></li>',
+						'<li class="brands__cell"><img class="brands__logo" src="%1$s" alt="%2$s" loading="lazy"></li>',
 						esc_url( $home_img . '/brands/' . $bl[0] ),
-						0 === $pass ? esc_attr( $bl[1] ) : '',
-						0 === $pass ? '' : ' aria-hidden="true"'
+						esc_attr( $bl[1] )
 					);
 				}
-			}
-			?>
-		</ul>
+				?>
+			</ul>
+			<div class="brands__dots" aria-hidden="true"></div>
+		</div>
 	</div>
 </section>
 
