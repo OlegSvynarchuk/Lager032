@@ -452,60 +452,7 @@
 		});
 	})();
 
-	// Brands logo slider — paged + responsive, auto-rotates only when >1 page, no arrows.
-	(function () {
-		var slider = document.querySelector('.brands__slider');
-		if (!slider) return;
-		var track = slider.querySelector('.brands__track');
-		var dots = slider.querySelector('.brands__dots');
-		var cells = Array.prototype.slice.call(track.children);
-		if (!cells.length) return;
-		var page = 0, timer = null;
-		function perView() {
-			var w = slider.clientWidth;
-			if (w < 480) return 1;
-			if (w < 768) return 2;
-			if (w < 1024) return 3;
-			return 4;
-		}
-		function render() {
-			var pv = perView();
-			var pages = Math.ceil(cells.length / pv);
-			dots.innerHTML = '';
-			if (pages <= 1) {
-				// All logos fit: centre them as a group with a 30px gap, no paging.
-				cells.forEach(function (c) { c.style.flex = '0 0 auto'; });
-				track.style.justifyContent = 'center';
-				track.style.gap = '30px';
-				track.style.transform = 'none';
-				dots.style.display = 'none';
-				return;
-			}
-			track.style.justifyContent = 'flex-start';
-			track.style.gap = '0px';
-			var basis = 100 / pv;
-			cells.forEach(function (c) { c.style.flex = '0 0 ' + basis + '%'; });
-			if (page >= pages) { page = 0; }
-			track.style.transform = 'translateX(' + (-page * 100) + '%)';
-			for (var i = 0; i < pages; i++) {
-				var b = document.createElement('button');
-				b.type = 'button';
-				b.className = 'brands__dot' + (i === page ? ' is-active' : '');
-				(function (idx) { b.addEventListener('click', function () { page = idx; render(); restart(); }); })(i);
-				dots.appendChild(b);
-			}
-			dots.style.display = '';
-		}
-		function nextPage() {
-			var pages = Math.ceil(cells.length / perView());
-			if (pages > 1) { page = (page + 1) % pages; render(); }
-		}
-		function restart() { if (timer) { clearInterval(timer); } timer = setInterval(nextPage, 4500); }
-		render();
-		restart();
-		var rt;
-		window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(render, 150); });
-	})();
+	// Brands logo strip is a pure-CSS continuous marquee (see .brands__track) — no JS needed.
 
 	// Mobile nav toggle.
 	var toggle = document.querySelector('.navtoggle');
