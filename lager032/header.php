@@ -75,7 +75,6 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Početna', 'lager032' ); ?></a></li>
 					<li><a href="#"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
 					<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
-					<li><a href="#"><?php esc_html_e( 'Sertifikati', 'lager032' ); ?></a></li>
 				</ul>
 
 				<?php
