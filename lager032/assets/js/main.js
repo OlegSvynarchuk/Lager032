@@ -149,6 +149,7 @@
 				html += '<a class="sr-row" href="' + it.url + '">'
 					+ '<img class="sr-img" src="' + it.img + '" alt="" loading="lazy">'
 					+ '<span class="sr-main"><span class="sr-title">' + hl(it.title, q) + '</span>'
+					+ (it.cat ? '<span class="sr-cat">' + esc(it.cat) + '</span>' : '')
 					+ '<span class="sr-meta">' + (it.sku ? 'Šifra: ' + esc(it.sku) : '') + '</span></span>'
 					+ '<span class="sr-side"><span class="sr-price">' + esc(it.price) + '<small>' + (LagerSearch.i18n.withPdv || '') + '</small></span>'
 					+ (it.inStock ? '<button type="button" class="sr-add" data-id="' + it.id + '" aria-label="' + LagerSearch.i18n.add + '">' + cartIcon() + '</button>' : '<span class="sr-out">' + LagerSearch.i18n.outStock + '</span>')
