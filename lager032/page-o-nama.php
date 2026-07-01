@@ -68,7 +68,7 @@ $render_about = function ( $reverse, $img, $lead, $features ) {
 ?>
 
 <!-- ============================ HERO ============================ -->
-<section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/hero-onama.jpg' ); ?>')">
+<section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/about-magacin.jpg?v=' . filemtime( get_template_directory() . '/assets/img/home/about-magacin.jpg' ) ); ?>')">
 	<div class="hero__overlay" aria-hidden="true"></div>
 	<div class="container hero__inner">
 		<div class="hero__content">
