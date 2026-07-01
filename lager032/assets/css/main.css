@@ -690,7 +690,7 @@ section.archive { padding: 24px 0 48px; background: #F6F8FC; min-height: 60vh; }
 .catnav { order: 1; }
 .filters__form { background: #fff; border: 1px solid var(--c-line); border-radius: 10px; padding: 16px; overflow: hidden; }
 /* Navy header bar (Figma 106:2038) — full-bleed to the card edges via negative margins. */
-.filters__top { display: flex; align-items: center; gap: 8px; margin: -16px -16px 14px; padding: 12px 16px; background: var(--c-navy); color: #fff; font-family: 'Roboto Condensed', 'Inter', sans-serif; font-weight: 700; font-size: 15px; border-radius: 10px 10px 0 0; }
+.filters__top { display: flex; align-items: center; gap: 8px; margin: -16px -16px 14px; padding: 12px 16px; background: #1b3e7a; color: #fff; font-family: 'Roboto Condensed', 'Inter', sans-serif; font-weight: 700; font-size: 15px; border-radius: 10px 10px 0 0; }
 .filters__top .icon { width: 16px; height: 16px; color: #fff; }
 .filters__search { position: relative; margin-bottom: 8px; }
 .filters__search .icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--c-muted); }
