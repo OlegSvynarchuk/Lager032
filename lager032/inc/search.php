@@ -50,6 +50,10 @@ function lager032_ajax_search() {
 		wp_send_json( array( 'results' => array(), 'total' => 0 ) );
 	}
 
+	// Paging for the dropdown's infinite scroll.
+	$offset = isset( $_GET['offset'] ) ? max( 0, absint( wp_unslash( $_GET['offset'] ) ) ) : 0;
+	$per    = 20;
+
 	global $wpdb;
 	$like   = '%' . $wpdb->esc_like( $q ) . '%';
 	$starts = $wpdb->esc_like( $q ) . '%';
@@ -77,8 +81,8 @@ function lager032_ajax_search() {
 		   WHEN m.meta_value LIKE %s THEN 1
 		   WHEN p.post_title LIKE %s THEN 2
 		   ELSE 3 END ), p.post_title ASC
-		 LIMIT 24",
-		$like, $like, $nlike, $nlike, $q, $starts, $starts
+		 LIMIT %d OFFSET %d",
+		$like, $like, $nlike, $nlike, $q, $starts, $starts, $per, $offset
 	) );
 
 	$results = array();
@@ -115,7 +119,7 @@ function lager032_ajax_search() {
 	// Also suggest matching categories (product names are codes, so a word like
 	// "semering" won't hit any product title — but it should surface the category).
 	$cats      = array();
-	$cat_terms = get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'number' => 40, 'orderby' => 'count', 'order' => 'DESC', 'name__like' => $q ) );
+	$cat_terms = ( 0 === $offset ) ? get_terms( array( 'taxonomy' => 'product_cat', 'hide_empty' => false, 'number' => 40, 'orderby' => 'count', 'order' => 'DESC', 'name__like' => $q ) ) : array();
 	if ( ! is_wp_error( $cat_terms ) && $cat_terms ) {
 		// Collapse to the matched parent: drop any term whose ancestor also matched
 		// (so "leza" shows just "Ležaj", not its 22 children). Subcategory-only matches stay.

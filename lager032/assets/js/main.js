@@ -97,7 +97,7 @@
 		box.className = 'searchresults';
 		box.setAttribute('hidden', '');
 		form.appendChild(box);
-		var timer, controller, items = [], active = -1, lastQ = '';
+		var timer, controller, items = [], active = -1, lastQ = '', loaded = 0, total = 0, loading = false, curQ = '';
 
 		input.addEventListener('input', function () {
 			var q = input.value.trim();
@@ -158,10 +158,46 @@
 			});
 			html += '<a class="sr-all" href="' + data.viewAll + '">' + LagerSearch.i18n.viewAll + ' (' + data.total + ') ›</a>';
 			box.innerHTML = html;
-			box.querySelectorAll('.sr-add').forEach(function (btn) {
+			loaded = items.length; total = data.total || 0; curQ = q;
+			bindAdds(box);
+			if (!box._scrollBound) { box._scrollBound = true; box.addEventListener('scroll', function () { if (box.scrollTop + box.clientHeight >= box.scrollHeight - 80) loadMore(); }); }
+			show();
+		}
+		function rowHtml(it, q) {
+			return '<a class="sr-row" href="' + it.url + '">'
+				+ '<img class="sr-img" src="' + it.img + '" alt="" loading="lazy">'
+				+ '<span class="sr-main">'
+				+ (it.cat ? '<span class="sr-catname">' + esc(it.cat) + '</span>' : '')
+				+ '<span class="sr-title">' + hl(it.title, q) + '</span>'
+				+ '<span class="sr-meta">' + (it.sku ? 'Šifra: ' + esc(it.sku) : '') + '</span></span>'
+				+ '<span class="sr-side"><span class="sr-price">' + esc(it.price) + '<small>' + (LagerSearch.i18n.withPdv || '') + '</small></span>'
+				+ (it.inStock ? '<button type="button" class="sr-add" data-id="' + it.id + '" aria-label="' + LagerSearch.i18n.add + '">' + cartIcon() + '</button>' : '<span class="sr-out">' + LagerSearch.i18n.outStock + '</span>')
+				+ '</span></a>';
+		}
+		function bindAdds(scope) {
+			scope.querySelectorAll('.sr-add').forEach(function (btn) {
+				if (btn._bound) return; btn._bound = true;
 				btn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); quickAdd(btn); });
 			});
-			show();
+		}
+		function loadMore() {
+			if (loading || !curQ || loaded >= total) return;
+			loading = true;
+			var reqQ = curQ, reqOffset = loaded;
+			fetch(LagerSearch.ajax + '?action=lager_search&nonce=' + encodeURIComponent(LagerSearch.nonce) + '&q=' + encodeURIComponent(reqQ) + '&offset=' + reqOffset)
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					loading = false;
+					if (reqQ !== curQ) return;
+					var more = data.results || [];
+					if (!more.length) { loaded = total; return; }
+					var frag = ''; more.forEach(function (it) { frag += rowHtml(it, reqQ); });
+					var allLink = box.querySelector('.sr-all');
+					if (allLink) { allLink.insertAdjacentHTML('beforebegin', frag); } else { box.insertAdjacentHTML('beforeend', frag); }
+					loaded += more.length;
+					bindAdds(box);
+				})
+				.catch(function () { loading = false; });
 		}
 
 		function quickAdd(btn) {
