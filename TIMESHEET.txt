@@ -253,3 +253,57 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   proizvodi" cards — instead of a blank placeholder. (A product uses its
   subcategory image, falling back to the parent category, then the placeholder.)
 - Committed and deployed everything to the dev site.
+
+=====================================================================
+2026-06-30
+=====================================================================
+- BRANDS SECTION rebuilt as a real logo CAROUSEL (from the supplied logo
+  pack): identified and added all 14 brand logos (SKF, INA/FAG, NTN, SNR,
+  Timken, Würth, Optibelt, Goodyear, ZVL/ZKL, Loctite, KYK, CX, Suptex,
+  UniBelt). Each logo was cropped/cleaned and normalized so they all look the
+  same size. Shows 5 per slide with pagination dots (matches the designer's
+  layout).
+- Removed the "Sertifikati" item from the header menu and the footer menu.
+- Client images: put the new HERO photo and the O NAMA photo on the homepage;
+  updated the category pictures for Ležaj-igličasti, Ležaj-linearni, Ležaj za
+  kućišta and Masti (these show on the product list).
+- MENU LINKS fixed: "O nama", "Katalog" and "Kontakt" in the header and footer
+  now open their real pages; put "Kontakt" back in the header.
+- Fixed the Kontakt page MAP (it was showing as a tiny box) and restored the
+  styling of the Katalog page (PDF viewer) and the O nama page.
+- HOUSEKEEPING/RECOVERY: found that a batch of work done on Friday lived only
+  on the live server (not saved in our version history), which caused a couple
+  of pages to briefly lose their styling. Took a full copy of the live site,
+  restored the affected styles, and saved all of that Friday work into version
+  control so it can't be lost or overwritten again.
+- Committed and deployed everything to the dev site.
+
+=====================================================================
+2026-07-01
+=====================================================================
+- MEGA-MENU: long subcategory lists (e.g. Ležajevi) now open in TWO columns so
+  they fit neatly; fixed the sub-menu disappearing when you moved the mouse
+  onto it.
+- HEADER: bigger cart icon with the item-count badge pinned to its corner;
+  centered the "25+/5.000+/…" stats band under the hero.
+- LIVE SEARCH improved a lot:
+    * each result now shows the product's category/subcategory;
+    * the dropdown loads more results as you scroll (instead of a fixed few);
+    * you can now search by CATEGORY name — typing "lezaj" lists all the
+      bearings, not just the category — and it works WITHOUT Serbian special
+      letters (lezaj = Ležaj, semering = Semering, etc.).
+- PRODAVNICA (shop) restyled to the new designs:
+    * sidebar filters (navy "Filteri" header, on-stock toggle switch, tidy
+      inputs and price slider);
+    * the "showing X of Y" bar above the list;
+    * the product cards (brand tag, category, code, price, add-to-cart);
+    * pagination and the price-range slider — all in the site's blue.
+- SINGLE PRODUCT page, the "Slični proizvodi" cards, the CART drawer and the
+  CHECKOUT (/korpa/) product images all restyled to match the designs.
+- HOMEPAGE catalog cards: clicking a category now OPENS THE PDF CATALOG in a
+  new tab, jumped to that category's page (e.g. Ležajevi → page 4). Renamed the
+  button to "Pogledaj katalog".
+- Committed and deployed everything to the dev site.
+  NOTE: catalog page jumps use the printed page numbers — if the PDF has a
+  cover page they may be off by a page or two; one small setting corrects all
+  of them once confirmed.

@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-25.
+> Last updated: 2026-07-01.
 
 ---
 
@@ -702,3 +702,68 @@ product shows its subcategory image. All deployed (scp → `php -l` → `chmod 6
 - Real **bank account #** + PIB/Matični broj (still placeholders) · O Nama / Sertifikati / Kontakt
   pages (nav `#`) · roll the design's navy/red tokens fully site-wide (header already uses them) ·
   go-live (indexing off, 301 old URLs).
+
+---
+
+## Session log — 2026-06-30 — brands carousel, nav, client images + SERVER/GIT DRIFT recovery
+
+**⚠️ Server/git drift (important — see memory `deploy-check-server-first`).** A full day of
+**Friday 2026-06-26** work by the team lived **only on the live server, never committed** —
+`archive-product.php` (product-card redesign: `.prow__meta/brand/cat/sku`), `functions.php`,
+`single-product.php`, `inc/cart.php`, `inc/enqueue.php`, `inc/icons.php`, `inc/search.php`,
+`woocommerce/checkout/review-order.php`, and new page templates `page-kontakt/katalog/o-nama.php`
+(+ `hero-onama.jpg`). Deploying local (Jun-25-state) `main.css` over the server **clobbered the
+Friday CSS** → Kontakt map, Katalog viewer, O-nama blocks, product-card badges lost styling.
+**Recovery:** snapshotted the whole live theme to `_server-snapshot-2026-06-30/`; the Friday CSS was
+unrecoverable (no backup/bookmarks), so **reconstructed** the affected rules from the live markup;
+**adopted the server-only PHP files into git** as we touched them. Lesson: always diff live-vs-git
+before any deploy (compare with `diff --strip-trailing-cr`, not raw md5 — CRLF vs LF).
+
+**Brands carousel** (`front-page.php` + JS + CSS): iterated marquee → paged carousel per Figma
+`227:2251`. 14 logos processed with System.Drawing (LockBits bbox trim, normalize to common content
+height, split combined NTN/SNR). Final: **5 per slide** desktop, dash pagination, clamp-to-end.
+**Nav:** removed Sertifikati (header+footer); pointed O nama/Katalog/Kontakt to real pages
+(`/o-nama/ /katalog/ /kontakt/`); restored Kontakt in header. **Client images:** new hero + O nama
+(about-magacin.jpg); category thumbnails for terms 20/23/35/50 re-imported server-side (GD, replace
+`thumbnail_id`, old attachment trashed). **CSS restores:** `.contact__map iframe` (was collapsing to
+304×154), `.katalog__*` PDF viewer, `.about--reverse`, product-card `.prow__meta/brand/cat/sku/pdv/buyrow`.
+
+---
+
+## Session log — 2026-07-01 — search overhaul + full Figma restyle of shop/product/cart
+
+**Megamenu:** long submenus wrap to 2 columns (`.submenu--wide` when >8 kids); removed the 4px
+`margin-top` gap that made the flyout unreachable on hover. **Header:** cart icon 24px + absolute
+corner badge; centered KPI stats.
+
+**Live search** (`inc/search.php` + `main.js`) — adopted Friday's `inc/search.php` into git, then:
+- show product category under the title (`.sr-catname`, own class to avoid the `.sr-cat`
+  category-suggestion collision);
+- **infinite scroll**: endpoint takes `offset` (`LIMIT %d OFFSET %d`, 20/batch); JS scroll handler
+  appends until `loaded >= total`; "Prikaži sve rezultate" sticky at bottom;
+- **match products by category name** via `EXISTS (term_relationships…t.name LIKE)` in both the id
+  query and the COUNT — so `lezaj` returns all 2585 bearings, not just 3 title hits;
+- **diacritic-insensitive** `hl()`/matching (DB collation `utf8mb4_unicode_520_ci` already folds
+  č/ć/ž/š/đ; JS `fold()` mirrors it for highlighting).
+
+**Figma restyle (CSS-only unless noted):**
+- Sidebar filter `106:2038`: navy `#1b3e7a` Filteri header (full-bleed via negative margins),
+  availability as a pill toggle (`input[name=instock]` appearance:none), monospace brand names
+  (`:has(input[name="fbrand[]"])`), 4px `#eef1f8` inputs. Note: node uses old navy `#1b3e7a`, not the
+  global `#112955` token — hard-coded here; "Svi proizvodi"/"Primeni filtere" also set to `#1b3e7a`.
+- Results bar `106:2213`: white card, dark-bold count numbers + muted od/artikala.
+- Product card `231:2487`: `#e4ecf8` brand badge, gray `#7b7b7b` category, mono Šifra code, 16px
+  title, buy column fixed **170px** (fit-content kept the padded ~250px), full-width stepper until
+  in-cart trash appears. Dodaj/pagination/price-range all `#1b3e7a`.
+- Single product `47:2295` (adopted Friday `single-product.php`): 36px title, red 28px price, stacked
+  meta with colons, 49px qty stepper; category moved above title as a grey eyebrow.
+- Related card `47:2336`: navy badge → grey line between title/stock; media `#dde4f0`, green stock pill.
+- Cart drawer (adopted Friday `inc/cart.php`): product-card style, **64px square** thumb, stepper own
+  row. Korpa order table thumbs 56px + 6px radius.
+
+**Homepage catalog deep-links:** each category card opens `…/katalog-2022-2023.pdf#page=N` in a new
+tab (per-category page map from the client's TOC; `$catalog_off` adjusts if the PDF cover shifts
+printed vs physical pages). Button relabelled "Pogledaj katalog".
+
+**Reconciled into git this session:** `page-kontakt/katalog/o-nama.php`, `hero-onama.jpg`,
+`inc/search.php`, `single-product.php`, `inc/cart.php` (all were server-only Friday versions).
