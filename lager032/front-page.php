@@ -67,36 +67,28 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 
 		<div class="cats__grid">
 			<?php
-			// label, subtitle, image file, product_cat slug ('' = shop)
+			// label, subtitle, image file, catalog page (Str. in katalog-2022-2023.pdf)
+			$catalog_url = trailingslashit( wp_get_upload_dir()['baseurl'] ) . 'katalog-2022-2023.pdf';
+			$catalog_off = 0; // if the PDF cover shifts printed vs physical pages, bump this once for all cards
 			$cats = array(
-				array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'cat-lezajevi.jpg', 'lezaj' ),
-				array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'cat-semerinzi.jpg', 'semering' ),
-				array( 'Remenje', 'Klinasti, rebrasti, zupčasti', 'cat-remenje.jpg', 'remen' ),
-				array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'cat-segeri.jpg', 'seger' ),
-				array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'cat-krstovi.jpg', 'krst-kardana' ),
-				array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'cat-masti.jpg', 'masti' ),
-				array( 'Kućišta', 'Pernasta, četvrtasta kućišta', 'cat-kucista.jpg', '' ),
-				array( 'Lanci i Lančanici', 'Standardni i specijalni lanci', 'cat-lanci.jpg', 'lanci-i-lancanici' ),
-				array( 'Hilzne', 'Adapterske i zaključne hilzne', 'cat-hilzne.jpg', 'hilzna' ),
-				array( 'KM Navrtke', 'Za montažu ležajeva', 'cat-navrtke.jpg', 'navrtka' ),
-				array( 'MB Podloške', 'Sigurnosne podloške za navrtke', 'cat-podloske.jpg', '' ),
-				array( 'Kuglice', 'Čelične i inoks kuglice', 'cat-kuglice.jpg', 'kuglica' ),
+				array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'cat-lezajevi.jpg', 4 ),
+				array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'cat-semerinzi.jpg', 38 ),
+				array( 'Remenje', 'Klinasti, rebrasti, zupčasti', 'cat-remenje.jpg', 54 ),
+				array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'cat-segeri.jpg', 58 ),
+				array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'cat-krstovi.jpg', 60 ),
+				array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'cat-masti.jpg', 61 ),
+				array( 'Kućišta', 'Pernasta, četvrtasta kućišta', 'cat-kucista.jpg', 23 ),
+				array( 'Lanci i Lančanici', 'Standardni i specijalni lanci', 'cat-lanci.jpg', 66 ),
+				array( 'Hilzne', 'Adapterske i zaključne hilzne', 'cat-hilzne.jpg', 70 ),
+				array( 'KM Navrtke', 'Za montažu ležajeva', 'cat-navrtke.jpg', 71 ),
+				array( 'MB Podloške', 'Sigurnosne podloške za navrtke', 'cat-podloske.jpg', 71 ),
+				array( 'Kuglice', 'Čelične i inoks kuglice', 'cat-kuglice.jpg', 72 ),
 			);
 			foreach ( $cats as $c ) {
-				list( $label, $subtitle, $img, $slug ) = $c;
-				$url = $shop_url;
-				if ( $slug ) {
-					$term = get_term_by( 'slug', $slug, 'product_cat' );
-					if ( $term && ! is_wp_error( $term ) ) {
-						$link = get_term_link( $term );
-						if ( ! is_wp_error( $link ) ) {
-							$url = $link;
-						}
-					}
-				}
+				list( $label, $subtitle, $img, $page ) = $c;
 				printf(
-					'<a class="catcard" href="%1$s" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__cta">Preuzmi katalog</span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
-					esc_url( $url ),
+					'<a class="catcard" href="%1$s" target="_blank" rel="noopener" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__cta">Preuzmi katalog</span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
+					esc_url( $catalog_url . '#page=' . ( (int) $page + $catalog_off ) ),
 					esc_url( $home_img . '/' . $img ),
 					esc_html( $label ),
 					esc_html( $subtitle )
