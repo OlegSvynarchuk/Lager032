@@ -378,19 +378,21 @@ a { color: inherit; }
 .megacat--has-sub > .megacat__main::after { content: '\203A'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%) rotate(90deg); color: var(--c-muted); font-weight: 700; font-size: 16px; line-height: 1; }
 .submenu {
 	position: absolute; left: 0; top: 100%; margin-top: 4px; display: none;
-	flex-direction: column; flex-wrap: wrap; align-content: flex-start; max-height: 430px; gap: 2px 6px;
+	grid-auto-flow: row; gap: 2px; min-width: 232px;
 	background: #fff; border: 1px solid var(--c-line); border-radius: 8px;
 	box-shadow: 0 18px 50px rgba(15,28,54,.18); padding: 10px; z-index: 70;
 }
-/* Long lists wrap into a 2nd column (menu-width panel); short lists stay a single column. */
-.megacat--has-sub:hover > .submenu, .megacat--has-sub:focus-within > .submenu { display: flex; }
-.submenu__item, .submenu__all { display: block; width: 244px; padding: 6px 10px; border-radius: 4px; color: var(--c-ink); font-size: 13px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.megacat--has-sub:hover > .submenu, .megacat--has-sub:focus-within > .submenu { display: grid; }
+/* Long lists: two columns in a wider (menu-width) panel; short lists stay single column. */
+.submenu--wide { grid-template-columns: 1fr 1fr; gap: 2px 8px; width: 512px; max-width: calc(100vw - 32px); }
+.submenu--wide .submenu__all { grid-column: 1 / -1; }
+.submenu__item, .submenu__all { display: block; padding: 6px 10px; border-radius: 4px; color: var(--c-ink); font-size: 13px; text-decoration: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .submenu__item:hover, .submenu__all:hover { background: var(--c-input); color: var(--c-navy); }
 .submenu__all { color: var(--c-red); font-weight: 600; }
 
 /* Below desktop, render the flyout inline (single column) instead of off-screen to the side. */
 @media (max-width: 1023px) {
-	.submenu { position: static; grid-auto-flow: row; grid-template-rows: none; min-width: 0; box-shadow: none; border: 0; padding: 2px 0 6px 14px; }
+	.submenu, .submenu--wide { position: static; grid-template-columns: 1fr; width: auto; min-width: 0; box-shadow: none; border: 0; padding: 2px 0 6px 14px; }
 }
 
 /* Primary nav */

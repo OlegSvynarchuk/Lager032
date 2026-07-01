@@ -137,7 +137,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 										esc_html( $label ),
 										esc_html( $sub )
 									);
-									echo '<div class="submenu" role="menu">';
+									echo '<div class="submenu' . ( count( $kids ) > 8 ? ' submenu--wide' : '' ) . '" role="menu">';
 									printf(
 										'<a class="submenu__all" href="%1$s">%2$s</a>',
 										esc_url( $url ),
