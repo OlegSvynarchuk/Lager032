@@ -855,7 +855,7 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .single__media img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 8px; }
 .single__refnote { display: block; margin-top: 12px; color: var(--c-muted); font-size: 12px; }
 
-.single__cat { display: inline-block; margin: 0 0 4px; color: var(--c-red); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; text-decoration: none; }
+.single__cat { display: inline-block; margin: 0 0 4px; color: var(--c-muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; text-decoration: none; }
 .single__cat:hover { text-decoration: underline; }
 .single__title { margin: 0 0 12px; color: #112955; font-size: 36px; font-weight: 700; line-height: 1.25; }
 .single__price { display: flex; align-items: baseline; gap: 8px; color: var(--c-red); font-weight: 700; font-size: 28px; }
