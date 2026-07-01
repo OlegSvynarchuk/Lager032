@@ -924,7 +924,7 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .sr-add.is-loading { opacity: .5; pointer-events: none; }
 .sr-add.is-added { background: #1a7a3c; color: #fff; border-color: #1a7a3c; }
 .sr-out { color: #b00020; font-size: 11px; font-weight: 600; white-space: nowrap; }
-.sr-all { display: block; text-align: center; padding: 10px; margin-top: 4px; border-top: 1px solid var(--c-line); color: var(--c-red); font-weight: 600; font-size: 13px; text-decoration: none; }
+.sr-all { position: sticky; bottom: -6px; display: block; text-align: center; padding: 10px; margin-top: 4px; border-top: 1px solid var(--c-line); background: #fff; color: var(--c-red); font-weight: 600; font-size: 13px; text-decoration: none; }
 .sr-all:hover { background: var(--c-input); }
 .sr-cat { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 8px; text-decoration: none; color: var(--c-navy); font-size: 13px; font-weight: 600; }
 .sr-cat svg { color: var(--c-muted); flex: none; }
