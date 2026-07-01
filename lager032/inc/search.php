@@ -74,7 +74,11 @@ function lager032_ajax_search() {
 		 FROM {$wpdb->posts} p
 		 LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
 		 WHERE p.post_type = 'product' AND p.post_status = 'publish'
-		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )
+		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s
+		         OR EXISTS ( SELECT 1 FROM {$wpdb->term_relationships} tr
+		           JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'product_cat'
+		           JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+		           WHERE tr.object_id = p.ID AND t.name LIKE %s ) )
 		 GROUP BY p.ID
 		 ORDER BY ( CASE
 		   WHEN m.meta_value = %s THEN 0
@@ -82,7 +86,7 @@ function lager032_ajax_search() {
 		   WHEN p.post_title LIKE %s THEN 2
 		   ELSE 3 END ), p.post_title ASC
 		 LIMIT %d OFFSET %d",
-		$like, $like, $nlike, $nlike, $q, $starts, $starts, $per, $offset
+		$like, $like, $nlike, $nlike, $like, $q, $starts, $starts, $per, $offset
 	) );
 
 	$results = array();
@@ -112,8 +116,12 @@ function lager032_ajax_search() {
 		 FROM {$wpdb->posts} p
 		 LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
 		 WHERE p.post_type = 'product' AND p.post_status = 'publish'
-		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )",
-		$like, $like, $nlike, $nlike
+		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s
+		         OR EXISTS ( SELECT 1 FROM {$wpdb->term_relationships} tr
+		           JOIN {$wpdb->term_taxonomy} tt ON tt.term_taxonomy_id = tr.term_taxonomy_id AND tt.taxonomy = 'product_cat'
+		           JOIN {$wpdb->terms} t ON t.term_id = tt.term_id
+		           WHERE tr.object_id = p.ID AND t.name LIKE %s ) )",
+		$like, $like, $nlike, $nlike, $like
 	) );
 
 	// Also suggest matching categories (product names are codes, so a word like

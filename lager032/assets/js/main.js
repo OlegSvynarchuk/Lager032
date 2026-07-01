@@ -149,7 +149,7 @@
 				html += '<a class="sr-row" href="' + it.url + '">'
 					+ '<img class="sr-img" src="' + it.img + '" alt="" loading="lazy">'
 					+ '<span class="sr-main">'
-					+ (it.cat ? '<span class="sr-catname">' + esc(it.cat) + '</span>' : '')
+					+ (it.cat ? '<span class="sr-catname">' + hl(it.cat, q) + '</span>' : '')
 					+ '<span class="sr-title">' + hl(it.title, q) + '</span>'
 					+ '<span class="sr-meta">' + (it.sku ? 'Šifra: ' + esc(it.sku) : '') + '</span></span>'
 					+ '<span class="sr-side"><span class="sr-price">' + esc(it.price) + '<small>' + (LagerSearch.i18n.withPdv || '') + '</small></span>'
@@ -167,7 +167,7 @@
 			return '<a class="sr-row" href="' + it.url + '">'
 				+ '<img class="sr-img" src="' + it.img + '" alt="" loading="lazy">'
 				+ '<span class="sr-main">'
-				+ (it.cat ? '<span class="sr-catname">' + esc(it.cat) + '</span>' : '')
+				+ (it.cat ? '<span class="sr-catname">' + hl(it.cat, q) + '</span>' : '')
 				+ '<span class="sr-title">' + hl(it.title, q) + '</span>'
 				+ '<span class="sr-meta">' + (it.sku ? 'Šifra: ' + esc(it.sku) : '') + '</span></span>'
 				+ '<span class="sr-side"><span class="sr-price">' + esc(it.price) + '<small>' + (LagerSearch.i18n.withPdv || '') + '</small></span>'
@@ -227,7 +227,8 @@
 		function hide() { box.setAttribute('hidden', ''); active = -1; }
 	}
 	function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
-	function hl(text, q) { var e = esc(text), i = e.toLowerCase().indexOf(esc(q).toLowerCase()); return i < 0 ? e : e.slice(0, i) + '<mark>' + e.slice(i, i + q.length) + '</mark>' + e.slice(i + q.length); }
+	function fold(s) { return s.toLowerCase().replace(/[žŽ]/g, 'z').replace(/[šŠ]/g, 's').replace(/[čćČĆ]/g, 'c').replace(/[đĐ]/g, 'd'); }
+	function hl(text, q) { var e = esc(text), fe = fold(e), fq = fold(esc(q)), i = fq ? fe.indexOf(fq) : -1; return i < 0 ? e : e.slice(0, i) + '<mark>' + e.slice(i, i + fq.length) + '</mark>' + e.slice(i + fq.length); }
 	function cartIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM7.2 14h9.45a1 1 0 0 0 .96-.73L20 6H6.2l-.6-3H2v2h2l2.6 11.6A2 2 0 0 0 8.55 18H19v-2H8.42l.18-.8z"/></svg>'; }
 
 	// Archive rows: quantity stepper + add that quantity to cart (AJAX, header badge updates).
