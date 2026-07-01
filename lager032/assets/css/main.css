@@ -855,15 +855,16 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .single__media img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 8px; }
 .single__refnote { display: block; margin-top: 12px; color: var(--c-muted); font-size: 12px; }
 
-.single__cat { display: inline-block; color: var(--c-red); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; text-decoration: none; }
+.single__cat { display: inline-block; margin: 0 0 4px; color: var(--c-red); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; text-decoration: none; }
 .single__cat:hover { text-decoration: underline; }
-.single__title { margin: 8px 0 12px; color: #112955; font-size: 36px; font-weight: 700; line-height: 1.25; }
+.single__title { margin: 0 0 12px; color: #112955; font-size: 36px; font-weight: 700; line-height: 1.25; }
 .single__price { display: flex; align-items: baseline; gap: 8px; color: var(--c-red); font-weight: 700; font-size: 28px; }
 .single__price small { font-weight: 400; font-size: 13px; color: var(--c-muted); }
 /* Meta (Šifra / Kategorija / Proizvođač / Dostupnost) — Figma 47:2295: stacked, label navy, value gray, with a divider above. */
-.single__meta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; margin: 20px 0; padding-top: 20px; border-top: 1px solid var(--c-line); }
+.single__meta { display: flex; flex-direction: column; gap: 4px; font-size: 12px; margin: 16px 0; }
 .single__meta p { margin: 0; }
 .single__meta-k { color: #112955; font-weight: 500; }
+.single__meta-k::after { content: ':'; }
 .single__meta-v { color: #7b7b7b; }
 .single__meta-v.is-in { color: #1a7a3c; font-weight: 600; }
 .single__meta-v.is-out { color: #b00020; font-weight: 600; }
@@ -878,7 +879,7 @@ section.single { padding: 28px 0 64px; background: #fff; } /* section.single, no
 .qty__btn:hover { background: var(--c-input); }
 .qty input { width: 48px; height: 49px; border: 0; background: #fff; text-align: center; font-size: 18px; font-weight: 700; color: #112955; -moz-appearance: textfield; }
 .qty input::-webkit-outer-spin-button, .qty input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.single__add { flex: 1; border-radius: 4px; padding: 12px 28px; font-size: 16px; font-weight: 700; }
+.single__add { flex: 0 0 auto; border-radius: 4px; padding: 12px 28px; font-size: 16px; font-weight: 700; }
 .single__note { margin-top: 18px; color: #424242; font-size: 14px; line-height: 1.5; }
 .single__ask { display: inline-block; margin-top: 16px; color: var(--c-red); font-weight: 600; font-size: 14px; text-decoration: none; }
 .single__ask:hover { text-decoration: underline; }
