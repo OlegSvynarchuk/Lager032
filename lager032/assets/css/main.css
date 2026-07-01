@@ -377,7 +377,7 @@ a { color: inherit; }
 .megacat--has-sub > .megacat__main { position: relative; padding-right: 22px; }
 .megacat--has-sub > .megacat__main::after { content: '\203A'; position: absolute; right: 10px; top: 50%; transform: translateY(-50%) rotate(90deg); color: var(--c-muted); font-weight: 700; font-size: 16px; line-height: 1; }
 .submenu {
-	position: absolute; left: 0; top: 100%; margin-top: 4px; display: none;
+	position: absolute; left: 0; top: 100%; display: none;
 	grid-auto-flow: row; gap: 2px; min-width: 232px;
 	background: #fff; border: 1px solid var(--c-line); border-radius: 8px;
 	box-shadow: 0 18px 50px rgba(15,28,54,.18); padding: 10px; z-index: 70;
