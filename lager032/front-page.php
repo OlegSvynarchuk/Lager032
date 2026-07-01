@@ -87,7 +87,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 			foreach ( $cats as $c ) {
 				list( $label, $subtitle, $img, $page ) = $c;
 				printf(
-					'<a class="catcard" href="%1$s" target="_blank" rel="noopener" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__cta">Preuzmi katalog</span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
+					'<a class="catcard" href="%1$s" target="_blank" rel="noopener" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__cta">Pogledaj katalog</span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
 					esc_url( $catalog_url . '#page=' . ( (int) $page + $catalog_off ) ),
 					esc_url( $home_img . '/' . $img ),
 					esc_html( $label ),
