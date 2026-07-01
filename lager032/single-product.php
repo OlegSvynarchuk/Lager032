@@ -109,11 +109,11 @@ while ( have_posts() ) :
 						?>
 						<div class="relcard">
 							<a class="relcard__media" href="<?php echo esc_url( $rlink ); ?>">
-								<?php if ( $r_badge ) : ?><span class="relcard__badge"><?php echo esc_html( $r_badge ); ?></span><?php endif; ?>
 								<?php echo $rel_src; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</a>
 							<div class="relcard__body">
 								<a class="relcard__name" href="<?php echo esc_url( $rlink ); ?>"><?php echo esc_html( $r_title ); ?></a>
+								<?php if ( $r_badge ) : ?><span class="relcard__cat"><?php echo esc_html( $r_badge ); ?></span><?php endif; ?>
 								<span class="relcard__stock <?php echo $r_instk ? 'is-in' : 'is-out'; ?>"><?php echo $r_instk ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
 								<div class="relcard__foot">
 									<span class="relcard__price"><?php echo wp_kses_post( $rp->get_price_html() ); ?><small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></span>
