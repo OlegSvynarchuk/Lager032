@@ -147,7 +147,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 			<h2 class="sec-title"><?php esc_html_e( 'Veliki asortiman najvećih brendova', 'lager032' ); ?></h2>
 		</div>
 		<div class="brands__slider">
-			<div class="brands__track">
+			<ul class="brands__track">
 				<?php
 				$brand_defaults = array(
 						array( lager_theme_img( '/assets/img/home/brand-01.png' ), 'Würth' ),

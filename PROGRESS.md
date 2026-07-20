@@ -2,7 +2,7 @@
 
 > Working notes for the Lager032 WooCommerce migration. Commit this file so both
 > laptops stay in sync. See [workflow.md](workflow.md) for the full SSH/deploy reference.
-> Last updated: 2026-06-25.
+> Last updated: 2026-07-01.
 
 ---
 

@@ -137,6 +137,7 @@ function lager_minicart_body_html() {
 			}
 			echo '<a class="minicart__name" href="' . esc_url( $link ) . '">' . esc_html( $mc_title ) . '</a>';
 			echo '<span class="minicart__unit">' . wp_kses_post( wc_price( wc_get_price_to_display( $product ) ) ) . '</span>';
+			echo '</div>'; // close .minicart__info so the image squares to the specs only
 			echo '<div class="minicart__controls">';
 			echo '<div class="qtybox qtybox--mini">';
 			echo '<button type="button" class="qtybox__btn" data-dir="-1" aria-label="' . esc_attr__( 'Smanji', 'lager032' ) . '">&minus;</button>';
@@ -144,7 +145,6 @@ function lager_minicart_body_html() {
 			echo '<button type="button" class="qtybox__btn" data-dir="1" aria-label="' . esc_attr__( 'Povećaj', 'lager032' ) . '">+</button>';
 			echo '</div>';
 			echo '<span class="minicart__price">' . wp_kses_post( $cart->get_product_subtotal( $product, $qty ) ) . '</span>';
-			echo '</div>';
 			echo '</div>';
 			echo '<button type="button" class="minicart__remove" aria-label="' . esc_attr__( 'Ukloni', 'lager032' ) . '">&times;</button>';
 			echo '</li>';
