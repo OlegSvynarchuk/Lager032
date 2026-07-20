@@ -253,3 +253,48 @@ Site: https://lager032.pixels2pixels.ch  (dev)
   proizvodi" cards — instead of a blank placeholder. (A product uses its
   subcategory image, falling back to the parent category, then the placeholder.)
 - Committed and deployed everything to the dev site.
+
+=====================================================================
+2026-06-26
+=====================================================================
+- SHOP PAGE (/prodavnica/) redesigned to the new Figma design:
+    * Restyled the FILTER sidebar (colors, fonts, borders, spacing) — navy
+      "Filteri" header bar, compact search and price fields, cleaner section
+      titles and options.
+    * Restyled the results bar above the list (white card; "7–12 od 12
+      artikala" now bold/legible; tidier sort control).
+    * Rebuilt each PRODUCT CARD: brand + category on top, product code
+      (šifra) under the title, removed the empty description, and the buy
+      column reordered to price → VAT note → stock → "Dodaj u korpu" → a
+      quantity +/- selector beneath it. Fixed the +/- control.
+    * BRAND: the data has no brand field, so the brand shown on a card is
+      derived from the product name only when the last word matches a known
+      brand list (SKF, FAG, INA, SNR, WBW, ZVL, Gates, Würth, …) — otherwise
+      no brand is shown (no false guesses).
+- HEADER: the category mega-menu's long sub-category lists (e.g. Ležajevi,
+  ~22) now show in TWO COLUMNS at the menu's full width so labels don't
+  overlap. The cart icon now shows the item count as a small red badge in the
+  corner that updates live as you add/remove. Replaced the email icon (was a
+  plain rectangle) with a proper envelope.
+- CART: the slide-out cart and the cart/checkout page now show each product's
+  category image plus its brand/category. On the cart page removed the "Šifra"
+  column to give the items more room.
+- SINGLE PRODUCT page restyled to the new design: larger title, price in red,
+  clean detail rows (code, category, manufacturer, availability), a bigger
+  quantity selector + "Dodaj u korpu" button, and the "Slični proizvodi" items
+  rebuilt as proper product cards.
+- HOMEPAGE "O nama": fixed the photo looking too small on mid-size laptops
+  (the side spacing now scales with screen width) and set the photo to a fixed
+  square-ish shape.
+- NEW PAGES built and linked in the menu:
+    * O NAMA (/o-nama/) — hero + company info with the four key points.
+    * KATALOG (/katalog/) — the 2022/2023 PDF catalog embedded in a viewer
+      with a "Preuzmi PDF" download button.
+    * KONTAKT (/kontakt/) — contact details, a working contact form, and a
+      map of the Čačak location.
+- LIVE SEARCH: the type-ahead results now show each product's category image
+  and its category name.
+- Checked ALL links across the site (header, footer, homepage, every page) —
+  all working; only "Sertifikati" is still a placeholder (no content yet).
+- Added "Prodavnica" to the footer navigation.
+- Committed and deployed everything to the dev site.

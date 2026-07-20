@@ -18,7 +18,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 ?>
 
 <!-- ============================ HERO ============================ -->
-<section class="hero" style="background-image:url('<?php echo esc_url( $home_img . '/hero.jpg' ); ?>')">
+<section class="hero" style="background-image:url('<?php echo esc_url( lager_site_image( 'lager_hero_home', $home_img . '/hero.jpg' ) ); ?>')">
 	<div class="hero__overlay" aria-hidden="true"></div>
 	<div class="container hero__inner">
 		<div class="hero__content">
@@ -29,7 +29,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 			</h1>
 			<p class="hero__lead"><?php esc_html_e( 'Više od 25 godina iskustva u snabdevanju ležajevima, semerinzima, remenjima i celokupnom industrijskom opremom od vodećih svetskih proizvođača.', 'lager032' ); ?></p>
 			<div class="hero__cta">
-				<a class="btn btn--red" href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Pregledaj katalog', 'lager032' ); ?> <?php lager032_icon( 'arrow' ); ?></a>
+				<a class="btn btn--red" href="<?php echo esc_url( home_url( '/katalog/' ) ); ?>"><?php esc_html_e( 'Pregledaj katalog', 'lager032' ); ?> <?php lager032_icon( 'arrow' ); ?></a>
 				<a class="btn btn--ghost" href="tel:+38132342281"><?php esc_html_e( 'Pozovite nas', 'lager032' ); ?></a>
 			</div>
 		</div>
@@ -67,42 +67,43 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 
 		<div class="cats__grid">
 			<?php
-			// label, subtitle, image file, product_cat slug ('' = shop)
-			$cats = array(
-				array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'cat-lezajevi.jpg', 'lezaj' ),
-				array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'cat-semerinzi.jpg', 'semering' ),
-				array( 'Remenje', 'Klinasti, rebrasti, zupčasti', 'cat-remenje.jpg', 'remen' ),
-				array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'cat-segeri.jpg', 'seger' ),
-				array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'cat-krstovi.jpg', 'krst-kardana' ),
-				array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'cat-masti.jpg', 'masti' ),
-				array( 'Kućišta', 'Pernasta, četvrtasta kućišta', 'cat-kucista.jpg', '' ),
-				array( 'Lanci i Lančanici', 'Standardni i specijalni lanci', 'cat-lanci.jpg', 'lanci-i-lancanici' ),
-				array( 'Hilzne', 'Adapterske i zaključne hilzne', 'cat-hilzne.jpg', 'hilzna' ),
-				array( 'KM Navrtke', 'Za montažu ležajeva', 'cat-navrtke.jpg', 'navrtka' ),
-				array( 'MB Podloške', 'Sigurnosne podloške za navrtke', 'cat-podloske.jpg', '' ),
-				array( 'Kuglice', 'Čelične i inoks kuglice', 'cat-kuglice.jpg', 'kuglica' ),
-			);
-			foreach ( $cats as $c ) {
-				list( $label, $subtitle, $img, $slug ) = $c;
-				$url = $shop_url;
-				if ( $slug ) {
+			// Client-supplied category banners (title + info baked into the image) -> shown
+				// whole (no text overlay). Rows of 4: label, image basename (catimg-*.jpg), cat slug.
+				$cats = array(
+					array( 'Ležajevi', 'lezaj', 'lezaj' ),
+					array( 'Remenje i remenice', 'remen', 'remen' ),
+					array( 'Semerinzi', 'semering', 'semering' ),
+					array( 'Lanci i lančanici', 'lanci', 'lanci-i-lancanici' ),
+					array( 'Masti', 'masti', 'masti' ),
+					array( 'Segeri', 'seger', 'seger' ),
+					array( 'KM Navrtke i MB Podloške', 'navrtka', 'navrtka' ),
+					array( 'Krstovi kardana', 'krst', 'krst-kardana' ),
+					array( 'Spojnice', 'spojnice', 'spojnice' ),
+					array( 'Ulja', 'ulja', 'ulja' ),
+					array( 'Loctite', 'loctite', 'loctite' ),
+					array( 'Würth', 'wurth', 'wurth' ),
+				);
+				foreach ( $cats as $c ) {
+					list( $label, $img, $slug ) = $c;
+					$url  = $shop_url;
 					$term = get_term_by( 'slug', $slug, 'product_cat' );
 					if ( $term && ! is_wp_error( $term ) ) {
 						$link = get_term_link( $term );
 						if ( ! is_wp_error( $link ) ) {
 							$url = $link;
+							if ( function_exists( 'lager_category_guide_url' ) && ( $lg = lager_category_guide_url( $term->term_id ) ) ) { $url = $lg; }
 						}
 					}
+					$tile_fallback = $home_img . '/catimg-' . $img . '.jpg?v=' . (int) @filemtime( get_template_directory() . '/assets/img/home/catimg-' . $img . '.jpg' );
+					$tile_src      = function_exists( 'lager_category_tile_image' ) ? lager_category_tile_image( $term, $tile_fallback ) : $tile_fallback;
+					printf(
+						'<a class="catcard" href="%1$s"><img src="%2$s" alt="%3$s" loading="lazy"></a>',
+						esc_url( $url ),
+						esc_url( $tile_src ),
+						esc_attr( $label )
+					);
 				}
-				printf(
-					'<a class="catcard" href="%1$s" style="background-image:url(\'%2$s\')"><span class="catcard__shade" aria-hidden="true"></span><span class="catcard__cta">Preuzmi katalog</span><span class="catcard__body"><span class="catcard__name">%3$s</span><span class="catcard__desc">%4$s</span></span></a>',
-					esc_url( $url ),
-					esc_url( $home_img . '/' . $img ),
-					esc_html( $label ),
-					esc_html( $subtitle )
-				);
-			}
-			?>
+				?>
 		</div>
 	</div>
 </section>
@@ -111,7 +112,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 <section class="about">
 	<div class="container about__inner">
 		<div class="about__media">
-			<img src="<?php echo esc_url( $home_img . '/about-magacin.jpg?v=' . filemtime( get_template_directory() . '/assets/img/home/about-magacin.jpg' ) ); ?>" alt="<?php esc_attr_e( 'LAGER magacin', 'lager032' ); ?>" loading="lazy">
+			<img src="<?php echo esc_url( lager_site_image( 'lager_about_img', $home_img . '/about-magacin.jpg?v=' . filemtime( get_template_directory() . '/assets/img/home/about-magacin.jpg' ) ) ); ?>" alt="<?php esc_attr_e( 'LAGER magacin', 'lager032' ); ?>" loading="lazy">
 		</div>
 		<div class="about__content">
 			<span class="sec-eyebrow"><?php esc_html_e( 'O Nama', 'lager032' ); ?></span>
@@ -148,19 +149,39 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 		<div class="brands__slider">
 			<div class="brands__track">
 				<?php
-				$brand_logos = array(
-					array( 'brand-skf.png', 'SKF' ),
-					array( 'brand-wurth.png', 'Würth' ),
-					array( 'brand-ntn-snr.png', 'NTN / SNR' ),
-				);
-				foreach ( $brand_logos as $bl ) {
-					printf(
-						'<div class="brands__cell"><img class="brands__logo" src="%1$s" alt="%2$s" loading="lazy"></div>',
-						esc_url( $home_img . '/' . $bl[0] ),
-						esc_attr( $bl[1] )
+				$brand_defaults = array(
+						array( lager_theme_img( '/assets/img/home/brand-01.png' ), 'Würth' ),
+						array( lager_theme_img( '/assets/img/home/brand-02.png' ), 'Loctite' ),
+						array( lager_theme_img( '/assets/img/home/brand-03.png' ), 'SKF' ),
+						array( lager_theme_img( '/assets/img/home/brand-04.png' ), 'NTN' ),
+						array( lager_theme_img( '/assets/img/home/brand-05.png' ), 'SNR' ),
+						array( lager_theme_img( '/assets/img/home/brand-06.png' ), 'Goodyear' ),
+						array( lager_theme_img( '/assets/img/home/brand-07.png' ), 'Suptex' ),
+						array( lager_theme_img( '/assets/img/home/brand-08.png' ), 'CX' ),
+						array( lager_theme_img( '/assets/img/home/brand-09.png' ), 'UniBelt' ),
+						array( lager_theme_img( '/assets/img/home/brand-10.png' ), 'INA' ),
+						array( lager_theme_img( '/assets/img/home/brand-11.png' ), 'FAG' ),
+						array( lager_theme_img( '/assets/img/home/brand-12.png' ), 'KYK' ),
+						array( lager_theme_img( '/assets/img/home/brand-13.png' ), 'Optibelt' ),
+						array( lager_theme_img( '/assets/img/home/brand-14.png' ), 'Timken' ),
+						array( lager_theme_img( '/assets/img/home/brand-15.png' ), 'ZVL / ZKL' ),
 					);
-				}
-				?>
+					$slots = defined( 'LAGER_BRAND_SLOTS' ) ? LAGER_BRAND_SLOTS : count( $brand_defaults );
+					$brand_logos = array();
+					for ( $bi = 1; $bi <= $slots; $bi++ ) {
+						$def = isset( $brand_defaults[ $bi - 1 ] ) ? $brand_defaults[ $bi - 1 ] : array( '', 'Brend' );
+						$custom = get_theme_mod( 'lager_brand_' . $bi, '' );
+						$bsrc = $custom ? $custom : $def[0];
+						if ( $bsrc ) { $brand_logos[] = array( $bsrc, $def[1] ); }
+					}
+					foreach ( $brand_logos as $bl ) {
+						printf(
+							'<div class="brands__cell"><img class="brands__logo" src="%1$s" alt="%2$s" loading="lazy"></div>',
+							esc_url( $bl[0] ),
+							esc_attr( $bl[1] )
+						);
+					}
+					?>
 			</div>
 			<div class="brands__dots" aria-hidden="true"></div>
 		</div>

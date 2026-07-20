@@ -63,7 +63,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 		<div class="container masthead__inner">
 
 			<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-				<img class="brand__img" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png?v=' . filemtime( get_template_directory() . '/assets/img/logo.png' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+				<img class="brand__img" src="<?php echo esc_url( lager_site_image( 'lager_logo', lager_theme_img( '/assets/img/logo.png' ) ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 			</a>
 
 			<button class="navtoggle" aria-label="<?php esc_attr_e( 'Meni', 'lager032' ); ?>" aria-expanded="false">
@@ -73,9 +73,9 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 			<nav class="mainnav" aria-label="<?php esc_attr_e( 'Glavni meni', 'lager032' ); ?>">
 				<ul class="mainnav__list">
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Početna', 'lager032' ); ?></a></li>
-					<li><a href="#"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
-					<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
-					<li><a href="#"><?php esc_html_e( 'Sertifikati', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/o-nama/' ) ); ?>"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/katalog/' ) ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
+					<li><a href="<?php echo esc_url( home_url( '/kontakt/' ) ); ?>"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></a></li>
 				</ul>
 
 				<?php
@@ -93,7 +93,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 					array( 'KM Navrtke & MB Podloške', 'Za montažu ležajeva', 'navrtka' ),
 					array( 'Kuglice', 'Čelične i inoks kuglice', 'kuglica' ),
 					array( 'Kućišta', 'Pernasta, četvrtasta kućišta', '' ),
-					array( 'Linearne tehnologije', 'Vođice, klizači, šine', '' ),
+					array( 'Klinovi', 'Mašinski klinovi i žljebovi', 'klin' ),
 				);
 				?>
 				<div class="shopcats">
@@ -137,7 +137,9 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 										esc_html( $label ),
 										esc_html( $sub )
 									);
-									echo '<div class="submenu" role="menu">';
+									// Long subcategory lists (e.g. Ležaj ~22) wrap into 2 columns so the flyout isn't excessively tall.
+									$submenu_cls = ( count( $kids ) > 8 ) ? ' submenu--cols' : '';
+									printf( '<div class="submenu%s" role="menu">', esc_attr( $submenu_cls ) );
 									printf(
 										'<a class="submenu__all" href="%1$s">%2$s</a>',
 										esc_url( $url ),

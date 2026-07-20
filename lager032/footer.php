@@ -30,22 +30,22 @@ $foot_cats = array(
 
 		<div class="sitefoot__brand">
 			<a class="footbrand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-				<img class="footbrand__logo" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/logo.png?v=' . filemtime( get_template_directory() . '/assets/img/logo.png' ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+				<img class="footbrand__logo" src="<?php echo esc_url( lager_site_image( 'lager_logo', lager_theme_img( '/assets/img/logo.png' ) ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
 			</a>
 			<p class="sitefoot__blurb">
 				<?php esc_html_e( 'Specijalizovana prodavnica ležajeva i industrijske opreme. 25+ godina iskustva i poverenja.', 'lager032' ); ?>
 			</p>
-			<img class="sitefoot__cert" src="<?php echo esc_url( get_template_directory_uri() . '/assets/img/cert-badge.png' ); ?>" alt="<?php esc_attr_e( 'Bonitetna ocena AAA 2018', 'lager032' ); ?>" loading="lazy">
+			<img class="sitefoot__cert" src="<?php echo esc_url( lager_site_image( 'lager_cert', lager_theme_img( '/assets/img/cert-badge.png' ) ) ); ?>" alt="<?php esc_attr_e( 'Bonitetna ocena AAA 2018', 'lager032' ); ?>" loading="lazy">
 		</div>
 
 		<div class="sitefoot__col">
 			<h4 class="sitefoot__title"><?php esc_html_e( 'Navigacija', 'lager032' ); ?></h4>
 			<ul class="sitefoot__list">
 				<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Početna', 'lager032' ); ?></a></li>
-				<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
-				<li><a href="#"><?php esc_html_e( 'O Nama', 'lager032' ); ?></a></li>
-				<li><a href="#"><?php esc_html_e( 'Sertifikati', 'lager032' ); ?></a></li>
-				<li><a href="#"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></a></li>
+				<li><a href="<?php echo esc_url( $shop_url ); ?>"><?php esc_html_e( 'Prodavnica', 'lager032' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( '/katalog/' ) ); ?>"><?php esc_html_e( 'Katalog', 'lager032' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( '/o-nama/' ) ); ?>"><?php esc_html_e( 'O Nama', 'lager032' ); ?></a></li>
+				<li><a href="<?php echo esc_url( home_url( '/kontakt/' ) ); ?>"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></a></li>
 			</ul>
 		</div>
 

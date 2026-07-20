@@ -59,27 +59,15 @@ while ( have_posts() ) :
 
 				<!-- Buy box / data -->
 				<div class="single__buy">
-					<?php if ( $cat ) : ?>
-						<a class="single__cat" href="<?php echo esc_url( get_term_link( $cat ) ); ?>"><?php echo esc_html( $cat->name ); ?></a>
-					<?php endif; ?>
 					<h1 class="single__title"><?php the_title(); ?></h1>
 
+					<div class="single__price"><?php echo wp_kses_post( $product->get_price_html() ); ?><small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></div>
+
 					<div class="single__meta">
-						<?php if ( $sku ) : ?><span><?php esc_html_e( 'Šifra:', 'lager032' ); ?> <strong><?php echo esc_html( $sku ); ?></strong></span><?php endif; ?>
-						<?php if ( $brand ) : ?><span><?php esc_html_e( 'Proizvođač:', 'lager032' ); ?> <strong><?php echo esc_html( $brand ); ?></strong></span><?php endif; ?>
-					</div>
-
-					<div class="single__price"><?php echo wp_kses_post( $product->get_price_html() ); ?> <small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></div>
-
-					<div class="single__stock <?php echo $instock ? 'is-in' : 'is-out'; ?>">
-						<?php lager032_icon( $instock ? 'check' : 'box' ); ?>
-						<?php
-						if ( $instock ) {
-							esc_html_e( 'Na stanju', 'lager032' );
-						} else {
-							esc_html_e( 'Nema na stanju', 'lager032' );
-						}
-						?>
+						<?php if ( $sku ) : ?><p><span class="single__meta-k"><?php esc_html_e( 'Šifra', 'lager032' ); ?></span> <span class="single__meta-v"><?php echo esc_html( $sku ); ?></span></p><?php endif; ?>
+						<?php if ( $cat ) : ?><p><span class="single__meta-k"><?php esc_html_e( 'Kategorija', 'lager032' ); ?></span> <span class="single__meta-v"><?php echo esc_html( $cat->name ); ?></span></p><?php endif; ?>
+						<?php if ( $brand ) : ?><p><span class="single__meta-k"><?php esc_html_e( 'Proizvođač', 'lager032' ); ?></span> <span class="single__meta-v"><?php echo esc_html( $brand ); ?></span></p><?php endif; ?>
+						<p><span class="single__meta-k"><?php esc_html_e( 'Dostupnost', 'lager032' ); ?></span> <span class="single__meta-v <?php echo $instock ? 'is-in' : 'is-out'; ?>"><?php echo $instock ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span></p>
 					</div>
 
 					<?php if ( $instock ) : ?>
@@ -94,22 +82,8 @@ while ( have_posts() ) :
 						</form>
 					<?php endif; ?>
 
-					<a class="single__ask" href="#kontakt"><?php esc_html_e( 'Pozovite za upit i dostupnost', 'lager032' ); ?></a>
-					<p class="single__hint"><?php esc_html_e( 'Za upit navedite šifru artikla — naš tim potvrđuje dostupnost i dimenzije.', 'lager032' ); ?></p>
+					<p class="single__note"><?php esc_html_e( 'Isporuke vršimo brzom poštom ili preuzimanjem u našem magacinu.', 'lager032' ); ?></p>
 				</div>
-			</div>
-
-			<!-- Specs (grows as data improves: dimensions, tip, zaptivanje…) -->
-			<div class="single__specs">
-				<h2 class="single__h2"><?php esc_html_e( 'Specifikacija', 'lager032' ); ?></h2>
-				<table class="spectable">
-					<tbody>
-						<?php if ( $cat ) : ?><tr><th><?php esc_html_e( 'Kategorija', 'lager032' ); ?></th><td><?php echo esc_html( $cat->name ); ?></td></tr><?php endif; ?>
-						<?php if ( $sku ) : ?><tr><th><?php esc_html_e( 'Šifra', 'lager032' ); ?></th><td><?php echo esc_html( $sku ); ?></td></tr><?php endif; ?>
-						<?php if ( $brand ) : ?><tr><th><?php esc_html_e( 'Proizvođač', 'lager032' ); ?></th><td><?php echo esc_html( $brand ); ?></td></tr><?php endif; ?>
-						<tr><th><?php esc_html_e( 'Stanje', 'lager032' ); ?></th><td><?php echo $instock ? esc_html( null !== $stock_q ? $stock_q . ' kom' : __( 'Na stanju', 'lager032' ) ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></td></tr>
-					</tbody>
-				</table>
 			</div>
 
 			<!-- Slični proizvodi -->
@@ -125,16 +99,31 @@ while ( have_posts() ) :
 				if ( $related ) {
 					echo '<div class="single__related"><h2 class="single__h2">' . esc_html__( 'Slični proizvodi', 'lager032' ) . '</h2><div class="relgrid">';
 					foreach ( $related as $rp ) {
-						$rid     = $rp->get_id();
-						$rel_img = lager_product_category_image_id( $rid );
-						$rel_src = $rel_img ? wp_get_attachment_image( $rel_img, 'woocommerce_thumbnail' ) : '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="">';
-						printf(
-							'<a class="relcard" href="%1$s"><span class="relcard__media">%2$s</span><span class="relcard__name">%3$s</span><span class="relcard__price">%4$s<small class="price-pdv">sa PDV-om</small></span></a>',
-							esc_url( get_permalink( $rid ) ),
-							$rel_src, // phpcs:ignore
-							esc_html( $rp->get_name() ),
-							wp_kses_post( $rp->get_price_html() )
-						);
+						$rid      = $rp->get_id();
+						$rlink    = get_permalink( $rid );
+						$rel_img  = lager_product_category_image_id( $rid );
+						$rel_src  = $rel_img ? wp_get_attachment_image( $rel_img, 'woocommerce_thumbnail' ) : '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="">';
+						$r_badge  = function_exists( 'lager_product_primary_category_name' ) ? lager_product_primary_category_name( $rid ) : '';
+						$r_title  = function_exists( 'lager_extract_brand' ) ? lager_extract_brand( $rp->get_name() )['title'] : $rp->get_name();
+						$r_instk  = $rp->is_in_stock();
+						?>
+						<div class="relcard">
+							<a class="relcard__media" href="<?php echo esc_url( $rlink ); ?>">
+								<?php if ( $r_badge ) : ?><span class="relcard__badge"><?php echo esc_html( $r_badge ); ?></span><?php endif; ?>
+								<?php echo $rel_src; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							</a>
+							<div class="relcard__body">
+								<a class="relcard__name" href="<?php echo esc_url( $rlink ); ?>"><?php echo esc_html( $r_title ); ?></a>
+								<span class="relcard__stock <?php echo $r_instk ? 'is-in' : 'is-out'; ?>"><?php echo $r_instk ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
+								<div class="relcard__foot">
+									<span class="relcard__price"><?php echo wp_kses_post( $rp->get_price_html() ); ?><small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></span>
+									<?php if ( $r_instk ) : ?>
+									<button type="button" class="btn btn--navy btn--sm prow__add relcard__add" data-id="<?php echo esc_attr( $rid ); ?>"><?php lager032_icon( 'cart' ); ?> <span><?php esc_html_e( 'Dodaj', 'lager032' ); ?></span></button>
+									<?php endif; ?>
+								</div>
+							</div>
+						</div>
+						<?php
 					}
 					echo '</div></div>';
 				}

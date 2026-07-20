@@ -14,7 +14,7 @@ $cart = WC()->cart;
 <table class="shop_table woocommerce-checkout-review-order-table lager-order-table">
 	<thead>
 		<tr>
-			<th class="lo-sifra"><?php esc_html_e( 'Šifra', 'lager032' ); ?></th>
+			<th class="lo-img" aria-hidden="true"></th>
 			<th class="lo-kat"><?php esc_html_e( 'Kategorija', 'lager032' ); ?></th>
 			<th class="lo-naziv"><?php esc_html_e( 'Naziv', 'lager032' ); ?></th>
 			<th class="lo-cena"><?php esc_html_e( 'Cena', 'lager032' ); ?></th>
@@ -30,17 +30,27 @@ $cart = WC()->cart;
 				continue;
 			}
 			$pid  = $cart_item['product_id'];
-			$sku  = $_product->get_sku();
 			$cats = get_the_terms( $pid, 'product_cat' );
 			$cat  = ( $cats && ! is_wp_error( $cats ) ) ? $cats[0]->name : '—';
 			$link = $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '';
 			$name = $_product->get_name();
 			?>
 			<tr class="cart_item" data-id="<?php echo esc_attr( $pid ); ?>" data-qty="<?php echo esc_attr( $cart_item['quantity'] ); ?>">
-				<td class="lo-sifra" data-label="<?php esc_attr_e( 'Šifra', 'lager032' ); ?>"><?php echo esc_html( $sku ? $sku : '—' ); ?></td>
+				<td class="lo-img">
+					<?php
+					// Illustrative image: product's subcategory/category image (same logic as the shop list).
+					$lo_img_id = function_exists( 'lager_product_category_image_id' ) ? lager_product_category_image_id( $pid ) : 0;
+					$lo_img    = $lo_img_id
+						? wp_get_attachment_image( $lo_img_id, 'woocommerce_thumbnail', false, array( 'alt' => $name ) )
+						: '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="" loading="lazy">';
+					echo $link
+						? '<a class="lo-thumb" href="' . esc_url( $link ) . '">' . $lo_img . '</a>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						: '<span class="lo-thumb">' . $lo_img . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
+				</td>
 				<td class="lo-kat" data-label="<?php esc_attr_e( 'Kategorija', 'lager032' ); ?>"><?php echo esc_html( $cat ); ?></td>
 				<td class="lo-naziv" data-label="<?php esc_attr_e( 'Naziv', 'lager032' ); ?>">
-					<?php echo $link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $name ) . '</a>' : esc_html( $name ); ?>
+					<?php echo $link ? '<a class="lo-name" href="' . esc_url( $link ) . '">' . esc_html( $name ) . '</a>' : '<span class="lo-name">' . esc_html( $name ) . '</span>'; ?>
 				</td>
 				<td class="lo-cena" data-label="<?php esc_attr_e( 'Cena', 'lager032' ); ?>"><?php echo wp_kses_post( wc_price( wc_get_price_to_display( $_product ) ) ); ?></td>
 				<td class="lo-kol" data-label="<?php esc_attr_e( 'Količina', 'lager032' ); ?>">

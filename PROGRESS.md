@@ -702,3 +702,80 @@ product shows its subcategory image. All deployed (scp → `php -l` → `chmod 6
 - Real **bank account #** + PIB/Matični broj (still placeholders) · O Nama / Sertifikati / Kontakt
   pages (nav `#`) · roll the design's navy/red tokens fully site-wide (header already uses them) ·
   go-live (indexing off, 301 old URLs).
+
+---
+
+## Session log — 2026-06-26 — archive/single/cart redesign + new pages (O nama · Katalog · Kontakt)
+
+Pulled the teammate's commits, then a long polish/redesign pass off Figma (file `rkOC41hpF2Dx1HR93xt0Fb`),
+node by node. All deployed (scp → `chmod 644` → `php -l` → `wp cache flush`); site is the public dev link.
+
+**Product archive (`/prodavnica/`)**
+- Removed the "Katalog" `sec-eyebrow` from the archive head (it's the shop, not a catalog).
+- **Filter sidebar** restyled to design (node `106:2038`): navy "Filteri" header bar (Roboto Condensed),
+  compact search input (12px, 4px radius), section titles, options (12px semibold), price Od/Do inputs;
+  borders → `.8px rgba(27,62,122,.15)`, radius 10px. Style-only — structure unchanged. (scoped `--fl` var.)
+- **Results bar** (node `106:2213`): white bordered card; two-tone count (bold dark numbers + muted
+  "od…artikala", via `<strong>` in the printf); restyled Sortiraj label + select.
+- **Product card `.prow`** rebuilt (node `231:2487`): top line = **brand badge + category** (subcategory
+  precedence); **šifra moved under the title** (monospace); **description removed**; right column reordered
+  to price · sa PDV · stock (green dot) · **Dodaj u korpu** button · qty −/＋ stepper **below** it. Image
+  flush-left `object-contain`. Fixed the stepper so the **+** isn't clipped (`flex:none` btns, input `flex:1`).
+- **Brand derivation** (no brand field in data): new `lager_extract_brand()` — takes the **trailing title
+  token only if it matches a whitelist** (SKF/FAG/INA/SNR/WBW/ZVL/Gates/Würth…), strips it from the title;
+  `product_brand` taxonomy still wins if ever populated. Filterable via `lager_brand_whitelist`. Plus
+  `lager_product_primary_category_name()` (subcategory precedence). Both in `functions.php`.
+
+**Header / nav**
+- **"Svi proizvodi" mega-dropdown**: long subcategory lists (>8, i.e. Ležaj ~22) now wrap into **2 columns**
+  sized to the parent dropdown width (540px), `minmax(0,1fr)` + column-gap so labels stop overlapping.
+- **Cart icon badge**: count is now a **red circle absolutely on the icon's top-right corner** (navy ring),
+  shown only when non-empty; cart icon bumped to 23px. **Live-updates** via a new `span.cartbtn__count`
+  WooCommerce fragment (was only refreshing on reload).
+- Mail **icon** swapped to a proper outlined **envelope** (was a solid rectangle) — header + footer.
+
+**Cart drawer + cart page**
+- Drawer items now show the **category/subcategory image** (`lager_product_category_image_id`) + the same
+  **brand badge + category** meta as the list.
+- Cart/checkout (`/korpa/` `review-order.php`): added a **category-image column** beside the name; **removed
+  the Šifra column** (frees space); "Naziv" label sits above the name (own image column).
+
+**Single product** (node `47:2291`) — restyled to the new design:
+- Buy box: 36px navy title · **red 28px Oxygen price** · divider · label/value meta (Šifra/Kategorija/
+  Proizvođač/Dostupnost, green when in stock) · **49px qty stepper + full navy "Dodaj u korpu"** · delivery
+  note. **Specs table removed** (design dropped it; fields live in the meta).
+- **Slični proizvodi** rebuilt as the design's vertical **ProductCard** (category badge, image on `#dde4f0`,
+  green "Na stanju" pill, price + sa PDV, working navy **Dodaj**). Added the **Oxygen** font to the enqueue.
+
+**O nama** (homepage About): extra side padding made **fluid** (`clamp`, full 100px ~1920 → 0 by ~1280) so
+the image isn't crowded at ~1500; image locked to the design's **square-ish 500×402** (`aspect-ratio` +
+`object-cover`).
+
+**New pages** (all WordPress pages + `page-{slug}.php` templates, auto-applied; nav wired):
+- **`/o-nama/`** (node `234:2793`) — `page-o-nama.php`: homepage hero reused with a **new image**
+  (`hero-onama.jpg`, exported from Figma) + KPI band, then **two alternating About blocks** (image left,
+  then `.about--reverse` image right). Page ID 5007.
+- **`/katalog/`** — `page-katalog.php`: themed "Preuzmite katalog 2022/2023" panel (download icon) + **embedded
+  PDF viewer** (iframe) + **Preuzmi PDF** button. PDF in **wp-content/uploads** (`katalog-2022-2023.pdf`,
+  4.76 MB / 73 pp) so it's swappable without a deploy. Page ID 5008. Nav "Katalog" (header+footer) repointed
+  here (was the shop). Added a `download` icon.
+- **`/kontakt/`** — `page-kontakt.php`: contact info + the working `lager_contact` form (reused) + **Google
+  Maps embed** (no API key) for Kneza Miloša 100, Čačak. Page ID 5009. Added "Kontakt" to header nav.
+
+**Live search** (`inc/search.php` + `main.js`): result rows now use the **category/subcategory image** (same
+as single product) and show the **category** in the meta line (`Kategorija · Šifra: …`).
+
+**Footer**: "Navigacija" links fixed/extended — Početna · **Prodavnica** (new, under Početna) · Katalog ·
+O Nama · Sertifikati · Kontakt; O Nama/Kontakt now point to the real pages.
+
+**Site-wide link audit**: checked header, footer, homepage, all templates + live HTTP 200 on every target.
+All valid **except `Sertifikati`** (header + footer still `#`) — **left as-is by decision** (no certificate
+content yet; per-category "Preuzmi katalog" CTAs also intentionally inert).
+
+### Closed this session
+- O Nama / Katalog / Kontakt pages built + linked (were nav `#`).
+
+### Open / next
+- **Sertifikati** page (still `#`, on hold) · real **bank account #** + PIB/Matični broj · roll navy/red
+  tokens fully site-wide · **mobile QA pass** (designs were desktop-only 1440 — mobile is best-judgment) ·
+  go-live (indexing off, 301 old URLs).

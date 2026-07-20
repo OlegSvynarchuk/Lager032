@@ -278,7 +278,6 @@ if ( $search ) {
 		?>
 
 		<div class="archive__head">
-			<span class="sec-eyebrow"><?php esc_html_e( 'Katalog', 'lager032' ); ?></span>
 			<h1 class="archive__title"><?php echo esc_html( $page_title ); ?></h1>
 		</div>
 
@@ -442,7 +441,7 @@ if ( $search ) {
 					<span class="results__count">
 						<?php
 						/* translators: 1: from, 2: to, 3: total. */
-						printf( esc_html__( '%1$d–%2$d od %3$d artikala', 'lager032' ), (int) $from, (int) $to, (int) $total );
+						printf( wp_kses_post( __( '<strong>%1$d–%2$d</strong> od <strong>%3$d</strong> artikala', 'lager032' ) ), (int) $from, (int) $to, (int) $total );
 						?>
 					</span>
 					<label class="results__sort">
@@ -488,41 +487,54 @@ if ( $search ) {
 							if ( ! $product ) {
 								continue;
 							}
-							$brands   = wp_get_post_terms( get_the_ID(), 'product_brand', array( 'fields' => 'names' ) );
-							$cats     = wp_get_post_terms( get_the_ID(), 'product_cat', array( 'fields' => 'names' ) );
-							$brand    = ( $brands && ! is_wp_error( $brands ) ) ? $brands[0] : ( ( $cats && ! is_wp_error( $cats ) ) ? $cats[0] : '' );
+							$pid_ = get_the_ID();
+							// Brand: prefer the product_brand taxonomy if ever populated; otherwise derive
+							// it from a trailing whitelisted token in the title (and strip it from the title).
+							$btax = wp_get_post_terms( $pid_, 'product_brand', array( 'fields' => 'names' ) );
+							if ( $btax && ! is_wp_error( $btax ) ) {
+								$brand       = $btax[0];
+								$clean_title = get_the_title();
+							} else {
+								$be          = lager_extract_brand( get_the_title() );
+								$brand       = $be['brand'];
+								$clean_title = $be['title'];
+							}
+							$cat_name = lager_product_primary_category_name( $pid_ ); // subcategory precedence
 							$sku      = $product->get_sku();
 							$instockp = $product->is_in_stock();
 							?>
 							<article class="prow">
 								<a class="prow__media" href="<?php the_permalink(); ?>"><?php
-									$prow_img = lager_product_category_image_id( get_the_ID() );
+									$prow_img = lager_product_category_image_id( $pid_ );
 									echo $prow_img
 										? wp_get_attachment_image( $prow_img, 'woocommerce_thumbnail', false, array( 'alt' => the_title_attribute( array( 'echo' => false ) ) ) ) // phpcs:ignore
 										: '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="" loading="lazy">';
 								?></a>
 								<div class="prow__main">
-									<?php if ( $brand || $sku ) : ?><span class="prow__tag"><?php echo esc_html( trim( $brand . ( $sku ? ' · ' . $sku : '' ), ' ·' ) ); ?></span><?php endif; ?>
-									<h3 class="prow__name"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
-									<?php
-									$short = $product->get_short_description();
-									if ( $short ) {
-										echo '<p class="prow__desc">' . esc_html( wp_trim_words( wp_strip_all_tags( $short ), 22 ) ) . '</p>';
-									}
-									?>
+									<?php if ( $brand || $cat_name ) : ?>
+									<div class="prow__meta">
+										<?php if ( $brand ) : ?><span class="prow__brand"><?php echo esc_html( $brand ); ?></span><?php endif; ?>
+										<?php if ( $cat_name ) : ?><span class="prow__cat"><?php echo esc_html( $cat_name ); ?></span><?php endif; ?>
+									</div>
+									<?php endif; ?>
+									<h3 class="prow__name"><a href="<?php the_permalink(); ?>"><?php echo esc_html( $clean_title ); ?></a></h3>
+									<?php if ( $sku ) : ?><span class="prow__sku"><?php esc_html_e( 'Šifra:', 'lager032' ); ?> <code><?php echo esc_html( $sku ); ?></code></span><?php endif; ?>
 								</div>
 								<div class="prow__side">
-									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?><small class="price-pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small></span>
+									<span class="prow__price"><?php echo wp_kses_post( $product->get_price_html() ); ?></span>
+									<small class="prow__pdv"><?php esc_html_e( 'sa PDV-om', 'lager032' ); ?></small>
 									<span class="prow__stock <?php echo $instockp ? 'is-in' : 'is-out'; ?>"><?php echo $instockp ? esc_html__( 'Na stanju', 'lager032' ) : esc_html__( 'Nema na stanju', 'lager032' ); ?></span>
 									<?php if ( $instockp ) : ?>
 									<div class="prow__buy">
-										<div class="qtybox">
-											<button type="button" class="qtybox__btn" data-dir="-1" aria-label="<?php esc_attr_e( 'Smanji', 'lager032' ); ?>">&minus;</button>
-											<input type="number" class="qtybox__input" value="1" min="1" step="1" inputmode="numeric" aria-label="<?php esc_attr_e( 'Količina', 'lager032' ); ?>">
-											<button type="button" class="qtybox__btn" data-dir="1" aria-label="<?php esc_attr_e( 'Povećaj', 'lager032' ); ?>">+</button>
+										<button type="button" class="btn btn--navy btn--block prow__add" data-id="<?php echo esc_attr( $pid_ ); ?>"><?php lager032_icon( 'cart' ); ?> <span><?php esc_html_e( 'Dodaj u korpu', 'lager032' ); ?></span></button>
+										<div class="prow__buyrow">
+											<div class="qtybox">
+												<button type="button" class="qtybox__btn" data-dir="-1" aria-label="<?php esc_attr_e( 'Smanji', 'lager032' ); ?>">&minus;</button>
+												<input type="number" class="qtybox__input" value="1" min="1" step="1" inputmode="numeric" aria-label="<?php esc_attr_e( 'Količina', 'lager032' ); ?>">
+												<button type="button" class="qtybox__btn" data-dir="1" aria-label="<?php esc_attr_e( 'Povećaj', 'lager032' ); ?>">+</button>
+											</div>
+											<button type="button" class="prow__remove" data-id="<?php echo esc_attr( $pid_ ); ?>" aria-label="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>" title="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>"><?php lager032_icon( 'trash' ); ?></button>
 										</div>
-										<button type="button" class="btn btn--navy btn--sm prow__add" data-id="<?php echo esc_attr( get_the_ID() ); ?>"><?php lager032_icon( 'cart' ); ?> <span><?php esc_html_e( 'Dodaj', 'lager032' ); ?></span></button>
-										<button type="button" class="prow__remove" data-id="<?php echo esc_attr( get_the_ID() ); ?>" aria-label="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>" title="<?php esc_attr_e( 'Ukloni iz korpe', 'lager032' ); ?>"><?php lager032_icon( 'trash' ); ?></button>
 									</div>
 									<?php endif; ?>
 								</div>

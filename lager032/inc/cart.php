@@ -104,9 +104,38 @@ function lager_minicart_body_html() {
 			$qty  = (int) $ci['quantity'];
 			$link = get_permalink( $pid );
 			echo '<li class="minicart__item" data-id="' . esc_attr( $pid ) . '" data-qty="' . esc_attr( $qty ) . '">';
-			echo '<a class="minicart__img" href="' . esc_url( $link ) . '">' . $product->get_image( 'woocommerce_thumbnail' ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			$mc_img_id = function_exists( 'lager_product_category_image_id' ) ? lager_product_category_image_id( $pid ) : 0;
+		$mc_img    = $mc_img_id
+			? wp_get_attachment_image( $mc_img_id, 'woocommerce_thumbnail', false, array( 'alt' => $product->get_name() ) )
+			: '<img src="' . esc_url( wc_placeholder_img_src( 'woocommerce_thumbnail' ) ) . '" alt="" loading="lazy">';
+		echo '<a class="minicart__img" href="' . esc_url( $link ) . '">' . $mc_img . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			// Brand + category, same as the product list: product_brand taxonomy if set, else a trailing
+			// whitelisted brand token (stripped from the title); category uses subcategory precedence.
+			$mc_btax = wp_get_post_terms( $pid, 'product_brand', array( 'fields' => 'names' ) );
+			if ( $mc_btax && ! is_wp_error( $mc_btax ) ) {
+				$mc_brand = $mc_btax[0];
+				$mc_title = $product->get_name();
+			} elseif ( function_exists( 'lager_extract_brand' ) ) {
+				$mc_be    = lager_extract_brand( $product->get_name() );
+				$mc_brand = $mc_be['brand'];
+				$mc_title = $mc_be['title'];
+			} else {
+				$mc_brand = '';
+				$mc_title = $product->get_name();
+			}
+			$mc_cat = function_exists( 'lager_product_primary_category_name' ) ? lager_product_primary_category_name( $pid ) : '';
 			echo '<div class="minicart__info">';
-			echo '<a class="minicart__name" href="' . esc_url( $link ) . '">' . esc_html( $product->get_name() ) . '</a>';
+			if ( $mc_brand || $mc_cat ) {
+				echo '<div class="minicart__meta">';
+				if ( $mc_brand ) {
+					echo '<span class="minicart__brand">' . esc_html( $mc_brand ) . '</span>';
+				}
+				if ( $mc_cat ) {
+					echo '<span class="minicart__cat">' . esc_html( $mc_cat ) . '</span>';
+				}
+				echo '</div>';
+			}
+			echo '<a class="minicart__name" href="' . esc_url( $link ) . '">' . esc_html( $mc_title ) . '</a>';
 			echo '<span class="minicart__unit">' . wp_kses_post( wc_price( wc_get_price_to_display( $product ) ) ) . '</span>';
 			echo '<div class="minicart__controls">';
 			echo '<div class="qtybox qtybox--mini">';
@@ -132,8 +161,15 @@ function lager_minicart_body_html() {
 	return ob_get_clean();
 }
 
+/** Header cart-count badge markup (hidden when empty). Kept identical to header.php so the fragment swap is seamless. */
+function lager_cart_count_html() {
+	$count = ( function_exists( 'WC' ) && WC()->cart ) ? WC()->cart->get_cart_contents_count() : 0;
+	return '<span class="cartbtn__count"' . ( $count ? '' : ' hidden' ) . '>' . esc_html( $count ) . '</span>';
+}
+
 add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
-	$fragments['div.minicart__body'] = lager_minicart_body_html();
+	$fragments['div.minicart__body']  = lager_minicart_body_html();
+	$fragments['span.cartbtn__count'] = lager_cart_count_html();
 	return $fragments;
 } );
 

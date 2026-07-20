@@ -87,16 +87,15 @@ function lager032_ajax_search() {
 		if ( ! $product ) {
 			continue;
 		}
-		$img_id = $product->get_image_id();
-		if ( ! $img_id ) {
-			$img_id = (int) get_option( 'lager_cat_placeholder_id' );
-		}
-		$img = $img_id ? wp_get_attachment_image_url( $img_id, 'thumbnail' ) : wc_placeholder_img_src( 'thumbnail' );
+		// Illustrative image: product's subcategory/category image (same as single product + shop list).
+		$img_id = function_exists( 'lager_product_category_image_id' ) ? lager_product_category_image_id( $id ) : (int) get_option( 'lager_cat_placeholder_id' );
+		$img    = $img_id ? wp_get_attachment_image_url( $img_id, 'thumbnail' ) : wc_placeholder_img_src( 'thumbnail' );
 
 		$results[] = array(
 			'id'      => (int) $id,
 			'title'   => $product->get_name(),
 			'sku'     => $product->get_sku(),
+			'cat'     => function_exists( 'lager_product_primary_category_name' ) ? lager_product_primary_category_name( $id ) : '',
 			'url'     => get_permalink( $id ),
 			'price'   => html_entity_decode( wp_strip_all_tags( $product->get_price_html() ), ENT_QUOTES, 'UTF-8' ),
 			'inStock' => $product->is_in_stock(),
