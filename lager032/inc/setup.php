@@ -57,3 +57,24 @@ add_action( 'after_setup_theme', function () {
 add_action( 'after_setup_theme', function () {
 	$GLOBALS['content_width'] = 1200;
 } );
+
+/**
+ * Favicon — theme-level fallback.
+ *
+ * WordPress' own Site Icon (Settings → General) is the preferred home for this: it
+ * generates every size, incl. the Apple touch and Android icons. It needs a 512×512
+ * master, though, and the supplied artwork is 32×32 — so until a bigger one exists this
+ * outputs the classic tab icon. `has_site_icon()` guard: the moment a Site Icon IS set,
+ * WordPress' markup takes over and this stays out of the way (no duplicate tags).
+ */
+function lager_favicon_tag() {
+	if ( has_site_icon() ) {
+		return;
+	}
+	printf(
+		'<link rel="icon" href="%s" sizes="32x32">' . "\n",
+		esc_url( lager_theme_img( '/assets/img/favicon.png' ) )
+	);
+}
+add_action( 'wp_head', 'lager_favicon_tag' );
+add_action( 'admin_head', 'lager_favicon_tag' );

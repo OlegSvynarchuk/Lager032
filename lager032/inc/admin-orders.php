@@ -58,3 +58,51 @@ function lager_admin_order_column_content( $column, $order ) {
 }
 add_action( 'woocommerce_shop_order_list_table_custom_column', 'lager_admin_order_column_content', 10, 2 ); // HPOS
 add_action( 'manage_shop_order_posts_custom_column', 'lager_admin_order_column_content', 10, 2 );           // legacy
+
+/**
+ * Hide WooCommerce's automated order notes in the admin.
+ *
+ * The "Order notes" panel mixes staff notes with WooCommerce's own system entries
+ * ("Email 'New order' sent.", "Stock levels reduced: …", status changes) — untranslated
+ * English on an otherwise Serbian screen, which reads as noise to the shop owner.
+ *
+ * These are hidden, not deleted: WooCommerce marks them with a `system-note` class, so the
+ * audit trail stays intact in the database and reappears the moment this rule is removed.
+ * Manual notes and "Add private note" are untouched.
+ */
+add_action( 'admin_enqueue_scripts', function ( $hook ) {
+	$screen    = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	$is_order  = $screen && in_array( $screen->id, array( 'shop_order', 'woocommerce_page_wc-orders' ), true );
+	if ( ! $is_order && ! in_array( $hook, array( 'post.php', 'post-new.php' ), true ) ) {
+		return;
+	}
+	if ( ! $is_order ) {
+		return;
+	}
+	wp_register_style( 'lager-admin-orders', false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+	wp_enqueue_style( 'lager-admin-orders' );
+	wp_add_inline_style( 'lager-admin-orders', '.order_notes li.system-note { display: none; }' );
+} );
+
+/**
+ * Hide the "Custom fields" metabox on the order screen.
+ *
+ * It exposes raw internal meta (`is_vat_exempt: no` and similar) with editable inputs —
+ * meaningless to the shop owner and easy to break an order with by accident. The data is
+ * untouched; only the editor panel is removed.
+ *
+ * Runs at priority 999 because WordPress registers `postcustom` before firing this hook,
+ * and covers both the legacy screen and HPOS.
+ */
+add_action( 'add_meta_boxes', function ( $screen_id ) {
+	$order_screens = array( 'shop_order', 'woocommerce_page_wc-orders' );
+	if ( function_exists( 'wc_get_page_screen_id' ) ) {
+		$order_screens[] = wc_get_page_screen_id( 'shop-order' );
+	}
+	if ( ! in_array( $screen_id, $order_screens, true ) ) {
+		return;
+	}
+	foreach ( array( 'normal', 'advanced', 'side' ) as $context ) {
+		remove_meta_box( 'postcustom', $screen_id, $context );
+	}
+}, 999 );

@@ -29,3 +29,6 @@ _*.php
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Local DB backups (never commit — contains customer/order data)
+backups/

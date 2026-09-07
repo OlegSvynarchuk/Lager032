@@ -27,8 +27,25 @@ $max_price  = ( isset( $_GET['max_price'] ) && '' !== $_GET['max_price'] ) ? flo
 // WP's search machinery (incl. its single-result "redirect to the product" behaviour). The value
 // is still passed to WP_Query as `s` internally below.
 $search     = isset( $_GET['q'] ) ? sanitize_text_field( wp_unslash( $_GET['q'] ) ) : '';
-$orderby    = isset( $_GET['orderby'] ) ? sanitize_key( $_GET['orderby'] ) : 'date';
+// Default catalog order is "Naziv" (numbers first, then letters — see lager_title_order_sql()).
+$has_orderby = isset( $_GET['orderby'] );
+$orderby     = $has_orderby ? sanitize_key( $_GET['orderby'] ) : 'title';
 $paged      = max( 1, (int) get_query_var( 'paged' ), (int) get_query_var( 'page' ) );
+
+// ---- Per-category SEO text (admin-managed via ACF). Shown on the first page of a
+// product_cat archive only. With pagination → bottom of page (under the pager); without
+// pagination → right under the last product. Empty field → nothing renders. ----
+$pag        = false; // paginate_links() result is assigned later; init for a safe post-layout check.
+$seo_html   = ''; // bottom placement (with pagination).
+$seo_inline = ''; // in-results placement (no pagination), tighter spacing.
+if ( $is_cat && $current_term && 1 === (int) $paged ) {
+	$seo_text = function_exists( 'lager_category_seo_text' ) ? lager_category_seo_text( $current_term ) : '';
+	if ( $seo_text ) {
+		$inner      = wp_kses_post( $seo_text );
+		$seo_html   = '<div class="archive__seo">' . $inner . '</div>';
+		$seo_inline = '<div class="archive__seo archive__seo--inline">' . $inner . '</div>';
+	}
+}
 
 // ---- Build the query ----
 $tax_query = array(
@@ -122,6 +139,7 @@ $args = array(
 if ( null !== $search_ids ) {
 	$args['post__in'] = $search_ids ? $search_ids : array( 0 );
 }
+$title_order = false; // true → ORDER BY is taken over by lager_title_order_sql() below.
 switch ( $orderby ) {
 	case 'price':
 		$args['orderby']  = 'meta_value_num';
@@ -133,19 +151,30 @@ switch ( $orderby ) {
 		$args['meta_key'] = '_price'; // phpcs:ignore WordPress.DB.SlowDBQuery
 		$args['order']    = 'DESC';
 		break;
-	case 'title':
-		$args['orderby'] = 'title';
-		$args['order']   = 'ASC';
-		break;
-	default:
+	case 'date':
 		$args['orderby'] = 'date';
 		$args['order']   = 'DESC';
+		break;
+	default: // 'title' — catalog order: numbers ascending, then letters ascending.
+		$title_order = true;
 }
-if ( null !== $search_ids && 'date' === $orderby ) {
+if ( null !== $search_ids && ! $has_orderby ) {
 	$args['orderby'] = 'post__in'; // keep search-relevance order unless the user picked a sort
 	unset( $args['order'] );
+	$title_order = false;
+}
+
+if ( $title_order ) {
+	$title_order_cb = function ( $clauses ) {
+		$clauses['orderby'] = lager_title_order_sql( $GLOBALS['wpdb']->posts . '.post_title' );
+		return $clauses;
+	};
+	add_filter( 'posts_clauses', $title_order_cb );
 }
 $q = new WP_Query( $args );
+if ( $title_order ) {
+	remove_filter( 'posts_clauses', $title_order_cb );
+}
 
 $total    = (int) $q->found_posts;
 $per      = 12;
@@ -175,7 +204,7 @@ if ( '' !== $min_price ) {
 if ( '' !== $max_price ) {
 	$active['max_price'] = $max_price;
 }
-if ( 'date' !== $orderby ) {
+if ( $has_orderby ) {
 	$active['orderby'] = $orderby;
 }
 
@@ -293,8 +322,17 @@ if ( $search ) {
 
 		<div class="archive__layout">
 
+			<?php // Mobile only: filters + category rail are long, so they collapse behind this bar
+			// and the product list starts right below it (see .filtersbar in main.css / main.js). ?>
+			<div class="filtersdrop">
+			<button type="button" class="filtersbar" aria-expanded="false" aria-controls="archive-filters">
+				<?php lager032_icon( 'grid' ); ?>
+				<span><?php esc_html_e( 'Filteri i kategorije', 'lager032' ); ?></span>
+				<?php lager032_icon( 'chevron' ); ?>
+			</button>
+
 			<!-- FILTERS -->
-			<aside class="filters">
+			<aside class="filters" id="archive-filters">
 
 				<?php
 				// Persistent category navigation (links, not filters): every archive shows the full
@@ -434,6 +472,7 @@ if ( $search ) {
 					<?php endif; ?>
 				</form>
 			</aside>
+			</div><!-- .filtersdrop -->
 
 			<!-- RESULTS -->
 			<div class="results">
@@ -447,10 +486,10 @@ if ( $search ) {
 					<label class="results__sort">
 						<?php esc_html_e( 'Sortiraj:', 'lager032' ); ?>
 						<select onchange="this.form.submit()" name="orderby" form="sortform">
+							<option value="title" <?php selected( $orderby, 'title' ); ?>><?php esc_html_e( 'Naziv: A–Z', 'lager032' ); ?></option>
 							<option value="date" <?php selected( $orderby, 'date' ); ?>><?php esc_html_e( 'Najnovije', 'lager032' ); ?></option>
 							<option value="price" <?php selected( $orderby, 'price' ); ?>><?php esc_html_e( 'Cena: rastuće', 'lager032' ); ?></option>
 							<option value="price-desc" <?php selected( $orderby, 'price-desc' ); ?>><?php esc_html_e( 'Cena: opadajuće', 'lager032' ); ?></option>
-							<option value="title" <?php selected( $orderby, 'title' ); ?>><?php esc_html_e( 'Naziv: A–Z', 'lager032' ); ?></option>
 						</select>
 					</label>
 					<?php // Sort form carries current filters so changing sort keeps them. ?>
@@ -558,6 +597,10 @@ if ( $search ) {
 					if ( $pag ) {
 						echo '<nav class="archive__pager">' . wp_kses_post( $pag ) . '</nav>';
 					}
+					// No pagination → render the SEO text right under the last product (grey divider above it).
+					if ( ! $pag && $seo_inline ) {
+						echo $seo_inline; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with wp_kses_post() above.
+					}
 					?>
 				<?php else : ?>
 					<div class="results__empty">
@@ -568,6 +611,14 @@ if ( $search ) {
 			</div>
 
 		</div>
+
+		<?php
+		// With pagination, keep the SEO text at the very bottom (under the pager).
+		// Without pagination it renders inside .results, right under the last product.
+		if ( $pag && $seo_html ) :
+			echo $seo_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built with wp_kses_post() above.
+		endif;
+		?>
 	</div>
 </section>
 

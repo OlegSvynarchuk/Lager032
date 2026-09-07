@@ -1,6 +1,7 @@
 <?php
 /**
- * Live (AJAX) product search — typeahead by name + SKU, ranked.
+ * Live (AJAX) product search — typeahead by product designation (oznaka / post_title).
+ * The SKU is intentionally not searched: the client asked for oznaka-only matching.
  * Endpoint: admin-ajax.php?action=lager_search&q=…  →  JSON.
  *
  * @package Lager032
@@ -29,7 +30,7 @@ add_action( 'wp_enqueue_scripts', function () {
 			'placeholder' => __( 'Pretraži artikle...', 'lager032' ),
 			'viewAll'     => __( 'Prikaži sve rezultate', 'lager032' ),
 			'noResults'   => __( 'Nema rezultata za', 'lager032' ),
-			'noResultsHint' => __( 'Proverite šifru ili nas pozovite za upit.', 'lager032' ),
+			'noResultsHint' => __( 'Proverite oznaku ili nas pozovite za upit.', 'lager032' ),
 			'add'         => __( 'Dodaj u korpu', 'lager032' ),
 			'added'       => __( 'Dodato', 'lager032' ),
 			'inStock'     => __( 'Na stanju', 'lager032' ),
@@ -62,23 +63,17 @@ function lager032_ajax_search() {
 	}
 	$nlike = '%' . $wpdb->esc_like( $norm ) . '%';
 	$ntit  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(p.post_title),' ',''),'-',''),'.',''),'/','')";
-	$nsku  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(m.meta_value),' ',''),'-',''),'.',''),'/','')";
 
-	// Ranked: exact SKU → SKU starts-with → title starts-with → contains.
+	// Oznaka only — the SKU (šifra) is deliberately NOT searched; see lager_search_product_ids().
+	// Ranked: title starts-with first, then contains.
 	$ids = $wpdb->get_col( $wpdb->prepare(
 		"SELECT p.ID
 		 FROM {$wpdb->posts} p
-		 LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
 		 WHERE p.post_type = 'product' AND p.post_status = 'publish'
-		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )
-		 GROUP BY p.ID
-		 ORDER BY ( CASE
-		   WHEN m.meta_value = %s THEN 0
-		   WHEN m.meta_value LIKE %s THEN 1
-		   WHEN p.post_title LIKE %s THEN 2
-		   ELSE 3 END ), p.post_title ASC
+		   AND ( p.post_title LIKE %s OR {$ntit} LIKE %s )
+		 ORDER BY ( CASE WHEN p.post_title LIKE %s THEN 0 ELSE 1 END ), p.post_title ASC
 		 LIMIT 8",
-		$like, $like, $nlike, $nlike, $q, $starts, $starts
+		$like, $nlike, $starts
 	) );
 
 	$results = array();
@@ -104,12 +99,11 @@ function lager032_ajax_search() {
 	}
 
 	$total = (int) $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(DISTINCT p.ID)
+		"SELECT COUNT(*)
 		 FROM {$wpdb->posts} p
-		 LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
 		 WHERE p.post_type = 'product' AND p.post_status = 'publish'
-		   AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )",
-		$like, $like, $nlike, $nlike
+		   AND ( p.post_title LIKE %s OR {$ntit} LIKE %s )",
+		$like, $nlike
 	) );
 
 	// Also suggest matching categories (product names are codes, so a word like
@@ -174,7 +168,7 @@ add_filter( 'woocommerce_add_to_cart_fragments', function ( $fragments ) {
 } );
 
 /**
- * Product IDs matching a search query by title + SKU (raw AND code-normalized so
+ * Product IDs matching a search query by title / oznaka only (raw AND code-normalized so
  * "6205-2RS" = "6205 2RS" = "62052rs"), ranked. Used by the archive list so its search
  * matches the typeahead instead of WordPress' weaker default title search.
  *
@@ -196,19 +190,15 @@ function lager_search_product_ids( $q, $limit = 0 ) {
 	}
 	$nlike = '%' . $wpdb->esc_like( $norm ) . '%';
 	$ntit  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(p.post_title),' ',''),'-',''),'.',''),'/','')";
-	$nsku  = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER(m.meta_value),' ',''),'-',''),'.',''),'/','')";
+	// Oznaka only: the client asked for the search to match the product designation
+	// (post_title / the import's NazivId column) and nothing else — no SKU, no meta.
+	// The normalised comparison stays, so "6203 2RS", "6203-2rs" and "62032RS" all match.
 	$sql   = "SELECT p.ID
 		FROM {$wpdb->posts} p
-		LEFT JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_sku'
 		WHERE p.post_type = 'product' AND p.post_status = 'publish'
-		  AND ( p.post_title LIKE %s OR m.meta_value LIKE %s OR {$ntit} LIKE %s OR {$nsku} LIKE %s )
-		GROUP BY p.ID
-		ORDER BY ( CASE
-		  WHEN m.meta_value = %s THEN 0
-		  WHEN m.meta_value LIKE %s THEN 1
-		  WHEN p.post_title LIKE %s THEN 2
-		  ELSE 3 END ), p.post_title ASC";
-	$params = array( $like, $like, $nlike, $nlike, $q, $starts, $starts );
+		  AND ( p.post_title LIKE %s OR {$ntit} LIKE %s )
+		ORDER BY ( CASE WHEN p.post_title LIKE %s THEN 0 ELSE 1 END ), " . lager_title_order_sql( 'p.post_title' );
+	$params = array( $like, $nlike, $starts );
 	if ( $limit > 0 ) {
 		$sql     .= ' LIMIT %d';
 		$params[] = $limit;

@@ -93,8 +93,11 @@ $foot_cats = array(
 				);
 				?>
 			</p>
-			<?php // NOTE: PIB / Matični broj are placeholders from the mockup — confirm real values with client. ?>
-			<p class="sitefoot__legal-id"><?php esc_html_e( 'PIB: 109876543 · Matični broj: 65432198', 'lager032' ); ?></p>
+			<?php // PIB / MB taken from the client's own "Uslovi korišćenja i prodaje" text (2026-08-20). ?>
+			<p class="sitefoot__legal-id"><?php esc_html_e( 'PIB: 105368922 · Matični broj: 61008012', 'lager032' ); ?></p>
+			<p class="sitefoot__legal-links">
+				<a href="<?php echo esc_url( home_url( '/uslovi-koriscenja/' ) ); ?>"><?php esc_html_e( 'Uslovi korišćenja i prodaje', 'lager032' ); ?></a>
+			</p>
 		</div>
 	</div>
 </footer>
@@ -104,7 +107,7 @@ $foot_cats = array(
 <aside class="minicart" aria-label="<?php esc_attr_e( 'Korpa', 'lager032' ); ?>" hidden>
 	<div class="minicart__head">
 		<strong><?php esc_html_e( 'Vaša korpa', 'lager032' ); ?></strong>
-		<button type="button" class="minicart__close" aria-label="<?php esc_attr_e( 'Zatvori', 'lager032' ); ?>">&times;</button>
+		<button type="button" class="minicart__close" aria-label="<?php esc_attr_e( 'Zatvori korpu', 'lager032' ); ?>"><?php lager032_icon( 'close' ); ?></button>
 	</div>
 	<?php echo lager_minicart_body_html(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </aside>

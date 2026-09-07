@@ -49,17 +49,10 @@ $map_q = rawurlencode( 'Kneza Miloša 100, 32000 Čačak, Srbija' );
 			</div>
 
 			<div class="contact__form-wrap">
-				<?php
-				$kontakt = isset( $_GET['kontakt'] ) ? sanitize_key( $_GET['kontakt'] ) : '';
-				if ( 'ok' === $kontakt ) {
-					echo '<p class="formmsg formmsg--ok">' . esc_html__( 'Hvala! Vaša poruka je poslata. Javićemo se uskoro.', 'lager032' ) . '</p>';
-				} elseif ( 'greska' === $kontakt ) {
-					echo '<p class="formmsg formmsg--err">' . esc_html__( 'Došlo je do greške. Proverite podatke i pokušajte ponovo.', 'lager032' ) . '</p>';
-				}
-				?>
+				<?php lager_contact_notice(); ?>
 				<form class="cform" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="lager_contact">
-					<?php wp_nonce_field( 'lager_contact', 'lager_contact_nonce' ); ?>
+					<?php lager_contact_fields(); // nonce + honeypot + signed timestamp ?>
 					<div class="cform__row">
 						<label>
 							<span><?php esc_html_e( 'Ime i prezime', 'lager032' ); ?> *</span>

@@ -152,7 +152,10 @@ function lager_minicart_body_html() {
 		echo '</ul>';
 		echo '<div class="minicart__foot">';
 		echo '<div class="minicart__subtotal"><span>' . esc_html__( 'Ukupno', 'lager032' ) . '</span><strong>' . wp_kses_post( $cart->get_cart_subtotal() ) . '</strong></div>';
-		echo '<a class="btn btn--navy btn--block" href="' . esc_url( wc_get_cart_url() ) . '">' . esc_html__( 'Pogledaj korpu', 'lager032' ) . '</a>';
+		// /korpa/ (checkout) is this site's cart page — wc_get_cart_url() points at the
+		// unused /cart/ page, same as the header, tab-bar and add-to-cart notice targets.
+		$mc_cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : wc_get_cart_url();
+		echo '<a class="btn btn--navy btn--block" href="' . esc_url( $mc_cart_url ) . '">' . esc_html__( 'Pogledaj korpu', 'lager032' ) . '</a>';
 			echo '<button type="button" class="minicart__clear">' . esc_html__( 'Isprazni korpu', 'lager032' ) . '</button>';
 		echo '</div>';
 	}
@@ -185,3 +188,20 @@ function lager_ajax_clear_cart() {
 	) );
 }
 add_action( 'wc_ajax_lager_clear_cart', 'lager_ajax_clear_cart' );
+
+/**
+ * Stop a canonical redirect from adding the same product twice.
+ *
+ * WordPress 301s near-miss URLs to the real permalink and carries the query string with
+ * it, so `/proizvod/h-205/?add-to-cart=99` adds once, redirects to `/proizvod/h-205-wbf/
+ * ?add-to-cart=99`, and adds again — one click, two items. The theme never builds such
+ * links itself (list and single page add over AJAX), but stale, shared or mistyped URLs
+ * still arrive that way. Dropping the parameter from the redirect target leaves the first
+ * add intact and gives the second request nothing to do.
+ */
+add_filter( 'redirect_canonical', function ( $redirect_url ) {
+	if ( $redirect_url && isset( $_GET['add-to-cart'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only check on a WooCommerce-owned param.
+		return remove_query_arg( 'add-to-cart', $redirect_url );
+	}
+	return $redirect_url;
+} );

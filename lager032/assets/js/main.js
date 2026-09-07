@@ -254,7 +254,10 @@
 			})
 			.catch(function () { if (btn) btn.classList.remove('is-loading'); });
 	}
+	// Generic steppers (single product, etc.). Archive rows run their own cart-aware
+	// stepper below, so they are skipped here.
 	document.querySelectorAll('.qtybox').forEach(function (box) {
+		if (box.closest('.prow')) { return; }
 		var input = box.querySelector('.qtybox__input');
 		box.querySelectorAll('.qtybox__btn').forEach(function (b) {
 			b.addEventListener('click', function () {
@@ -263,6 +266,32 @@
 			});
 		});
 	});
+
+	// Every module that WRITES to the cart announces it here; the product list, the
+	// single-product buy box and the badges then re-read the server. Needed because a
+	// change made in the drawer never navigates, so nothing else would hear about it —
+	// the rows behind it would keep showing "U korpi" after the cart was emptied.
+	function cartChanged() { document.dispatchEvent(new CustomEvent('lager:cart-updated')); }
+
+	// Cart-count badges (header, mobile header, tab bar) share one class, so one pass
+	// updates them all. Used after a bfcache restore, where the markup is stale.
+	function syncCartBadges(items) {
+		var total = 0;
+		Object.keys(items || {}).forEach(function (k) { total += parseInt(items[k], 10) || 0; });
+		document.querySelectorAll('.cartbtn__count').forEach(function (el) {
+			el.textContent = total;
+			if (total > 0) { el.removeAttribute('hidden'); } else { el.setAttribute('hidden', ''); }
+		});
+	}
+
+	/**
+	 * Archive rows — two states, so the stepper and the button never show different numbers:
+	 *
+	 *   not in cart : stepper = how many to add (local, min 1) · button "Dodaj u korpu" commits
+	 *   in cart     : stepper = the live cart quantity (each +/- writes through, debounced)
+	 *                 button reads "U korpi (N)" and always matches the stepper
+	 *                 minus at 1 removes the item and returns the row to the first state
+	 */
 	(function () {
 		var addBtns = document.querySelectorAll('.prow__add');
 		if (!addBtns.length || !window.LagerSearch) return;
@@ -277,67 +306,137 @@
 				});
 			}
 		}
+
 		function markRow(btn, qty) {
 			var row = btn.closest('.prow'); if (!row) return;
 			var inCart = qty > 0;
 			row.classList.toggle('prow--incart', inCart);
 			var label = btn.querySelector('span');
-			if (label) label.textContent = inCart ? 'U korpi (' + qty + ')' : 'Dodaj';
+			if (label) {
+				if (!btn.dataset.labelDefault) { btn.dataset.labelDefault = label.textContent; }
+				label.textContent = inCart ? 'U korpi (' + qty + ')' : btn.dataset.labelDefault;
+			}
 			var inp = row.querySelector('.qtybox__input');
-			if (inp) inp.value = inCart ? qty : 1;
+			if (inp) {
+				inp.value = inCart ? qty : 1;
+				// In cart, minus may go to 0 (= remove); before that, 1 is the floor.
+				inp.min = inCart ? 0 : 1;
+			}
 		}
-		// On load: reflect the current cart on the list (highlight + quantity).
-		fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
-			.then(function (r) { return r.json(); })
-			.then(function (data) {
-				var items = (data && data.items) || {};
-				addBtns.forEach(function (btn) {
-					var id = btn.getAttribute('data-id');
-					if (items[id]) markRow(btn, items[id]);
+
+		var selfWrite = false;
+
+		// Write a product's quantity to the cart. 0 removes it.
+		// `addBtn` owns the product id; the .prow row is optional — related-product cards on
+		// the single-product page reuse .prow__add but have no row around them.
+		function setRowQty(addBtn, qty, btn) {
+			if (!addBtn) return Promise.resolve();
+			var row = addBtn.closest('.prow');
+			if (btn) btn.classList.add('is-loading');
+			if (row) row.classList.add('is-busy');
+			var body = new URLSearchParams();
+			body.append('product_id', addBtn.getAttribute('data-id'));
+			body.append('quantity', qty);
+			body.append('nonce', LagerSearch.nonce);
+			return fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+				.then(function (r) { return r.json(); })
+				.then(function (res) {
+					if (btn) btn.classList.remove('is-loading');
+					if (row) row.classList.remove('is-busy');
+					applyFragments(res);
+					markRow(addBtn, (res && typeof res.qty === 'number') ? res.qty : qty);
+					selfWrite = true; cartChanged(); selfWrite = false;
+				})
+				.catch(function () {
+					if (btn) btn.classList.remove('is-loading');
+					if (row) row.classList.remove('is-busy');
+					syncRows(); // desync is worse than a re-render: pull the truth back
 				});
-			}).catch(function () {});
-		// Click: SET the cart to the stepper quantity (add / update), keeping list ↔ cart in sync.
+		}
+
+		// Read the cart and mark EVERY row — including rows no longer in it, so a stale
+		// "U korpi" can't survive (e.g. after removing the item on the cart page).
+		function syncRows() {
+			return fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					var items = (data && data.items) || {};
+					addBtns.forEach(function (btn) { markRow(btn, items[btn.getAttribute('data-id')] || 0); });
+					syncCartBadges(items);
+				}).catch(function () {});
+		}
+		syncRows();
+		// Coming back via the browser's Back button restores the page from the bfcache, so
+		// nothing re-runs on its own and the row would still claim to be in the cart.
+		window.addEventListener('pageshow', function (e) { if (e.persisted) syncRows(); });
+		// A write from anywhere else (drawer, checkout table) re-marks the rows. `selfWrite`
+		// skips the round trip when this module was the one that made the change.
+		document.addEventListener('lager:cart-updated', function () { if (!selfWrite) syncRows(); });
+
+		// Cart-aware stepper. Once the row is in the cart, +/- IS the cart quantity, written
+		// through after a short pause so rapid taps make one request.
+		document.querySelectorAll('.prow .qtybox').forEach(function (box) {
+			var row = box.closest('.prow');
+			var input = box.querySelector('.qtybox__input');
+			var timer = null;
+			box.querySelectorAll('.qtybox__btn').forEach(function (b) {
+				b.addEventListener('click', function () {
+					var dir = parseInt(b.getAttribute('data-dir'), 10);
+					var inCart = row.classList.contains('prow--incart');
+					var v = (parseInt(input.value, 10) || 1) + dir;
+					if (!inCart) { input.value = v < 1 ? 1 : v; return; }
+					if (v < 0) { v = 0; }
+					input.value = v;
+					// Keep the button's number in step with the stepper while the write is pending.
+					var addBtn = row.querySelector('.prow__add');
+					var label = addBtn && addBtn.querySelector('span');
+					if (label && v > 0) { label.textContent = 'U korpi (' + v + ')'; }
+					clearTimeout(timer);
+					timer = setTimeout(function () { setRowQty(row.querySelector('.prow__add'), v, b); }, 350);
+				});
+			});
+			// Typing a quantity directly commits the same way.
+			if (input) {
+				input.addEventListener('change', function () {
+					if (!row.classList.contains('prow--incart')) { return; }
+					var v = parseInt(input.value, 10);
+					if (isNaN(v) || v < 0) { v = 0; }
+					setRowQty(row.querySelector('.prow__add'), v, null);
+				});
+			}
+		});
+
+		// "Dodaj u korpu" commits the chosen quantity.
 		addBtns.forEach(function (btn) {
 			btn.addEventListener('click', function () {
 				var row = btn.closest('.prow');
 				var inp = row ? row.querySelector('.qtybox__input') : null;
 				var qty = inp ? (parseInt(inp.value, 10) || 1) : 1;
-				btn.classList.add('is-loading');
-				var body = new URLSearchParams();
-				body.append('product_id', btn.getAttribute('data-id'));
-				body.append('quantity', qty);
-				body.append('nonce', LagerSearch.nonce);
-				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-					.then(function (r) { return r.json(); })
-					.then(function (res) {
-						btn.classList.remove('is-loading');
-						applyFragments(res);
-						markRow(btn, (res && typeof res.qty === 'number') ? res.qty : qty);
-						btn.classList.add('is-added'); setTimeout(function () { btn.classList.remove('is-added'); }, 1200);
-					})
-					.catch(function () { btn.classList.remove('is-loading'); });
+				if (qty < 1) { qty = 1; }
+				setRowQty(btn, qty, btn).then(function () {
+					btn.classList.add('is-added'); setTimeout(function () { btn.classList.remove('is-added'); }, 1200);
+				});
 			});
 		});
 
-		// Remove-from-cart button (visible on in-cart rows) — sets the quantity to 0.
+		// Trash removes the item outright.
 		document.querySelectorAll('.prow__remove').forEach(function (rb) {
 			rb.addEventListener('click', function () {
 				var row = rb.closest('.prow');
-				var addBtn = row ? row.querySelector('.prow__add') : null;
-				rb.classList.add('is-loading');
-				var body = new URLSearchParams();
-				body.append('product_id', rb.getAttribute('data-id'));
-				body.append('quantity', '0');
-				body.append('nonce', LagerSearch.nonce);
-				fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-					.then(function (r) { return r.json(); })
-					.then(function (res) {
-						rb.classList.remove('is-loading');
-						applyFragments(res);
-						if (addBtn) markRow(addBtn, (res && typeof res.qty === 'number') ? res.qty : 0);
-					})
-					.catch(function () { rb.classList.remove('is-loading'); });
+				if (row) setRowQty(row.querySelector('.prow__add'), 0, rb);
 			});
+		});
+	})();
+
+	// Pages with no product list still show a cart badge; refresh it after a bfcache restore.
+	(function () {
+		if (document.querySelector('.prow__add') || !window.LagerSearch || !LagerSearch.cartState) return;
+		window.addEventListener('pageshow', function (e) {
+			if (!e.persisted) return;
+			fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
+				.then(function (r) { return r.json(); })
+				.then(function (data) { syncCartBadges((data && data.items) || {}); })
+				.catch(function () {});
 		});
 	})();
 
@@ -350,6 +449,7 @@
 		var removeBtn = document.querySelector('.single__remove');
 		var labelEl = addBtn.querySelector('.single__add-label');
 		var labelDefault = labelEl ? labelEl.textContent : 'Dodaj u korpu';
+		var selfWrite = false;
 
 		function applyFragments(res) {
 			if (res && res.fragments) {
@@ -376,22 +476,40 @@
 			body.append('nonce', LagerSearch.nonce);
 			fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 				.then(function (r) { return r.json(); })
-				.then(function (res) { btn.classList.remove('is-loading'); applyFragments(res); mark((res && typeof res.qty === 'number') ? res.qty : qty); })
+				.then(function (res) {
+					btn.classList.remove('is-loading');
+					applyFragments(res);
+					mark((res && typeof res.qty === 'number') ? res.qty : qty);
+					selfWrite = true; cartChanged(); selfWrite = false;
+				})
 				.catch(function () { btn.classList.remove('is-loading'); });
 		}
-		fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
-			.then(function (r) { return r.json(); })
-			.then(function (data) { var items = (data && data.items) || {}; var id = addBtn.getAttribute('data-id'); if (items[id]) mark(items[id]); }).catch(function () {});
+		// mark(0) when absent as well — otherwise a row that has since been emptied keeps
+		// claiming "U korpi". Re-run on bfcache restore (Back from the cart) for the same reason.
+		function syncSingle() {
+			return fetch(LagerSearch.cartState + '&nonce=' + encodeURIComponent(LagerSearch.nonce))
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					var items = (data && data.items) || {};
+					mark(items[addBtn.getAttribute('data-id')] || 0);
+					syncCartBadges(items);
+				}).catch(function () {});
+		}
+		syncSingle();
+		window.addEventListener('pageshow', function (e) { if (e.persisted) syncSingle(); });
+		document.addEventListener('lager:cart-updated', function () { if (!selfWrite) syncSingle(); });
 		addBtn.addEventListener('click', function (e) { e.preventDefault(); setQty(qtyInput ? (parseInt(qtyInput.value, 10) || 1) : 1, addBtn); });
 		if (removeBtn) removeBtn.addEventListener('click', function (e) { e.preventDefault(); setQty(0, removeBtn); });
 	})();
 
 	// Mini-cart drawer.
 	(function () {
-		var cartBtn = document.querySelector('.cartbtn');
+		// Every cart button opens the drawer: .cartbtn is the desktop util-bar one, .mobcart
+		// the mobile header one. Both keep their href as the no-JS fallback.
+		var cartBtns = document.querySelectorAll('.cartbtn, .mobcart');
 		var drawer = document.querySelector('.minicart');
 		var overlay = document.querySelector('.minicart-overlay');
-		if (!cartBtn || !drawer || !overlay) return;
+		if (!cartBtns.length || !drawer || !overlay) return;
 
 		function applyFragments(res) {
 			if (res && res.fragments) {
@@ -406,7 +524,9 @@
 		function openCart() { drawer.hidden = false; overlay.hidden = false; requestAnimationFrame(function () { drawer.classList.add('is-open'); overlay.classList.add('is-open'); }); document.body.style.overflow = 'hidden'; }
 		function closeCart() { drawer.classList.remove('is-open'); overlay.classList.remove('is-open'); document.body.style.overflow = ''; setTimeout(function () { drawer.hidden = true; overlay.hidden = true; }, 260); }
 
-		cartBtn.addEventListener('click', function (e) { e.preventDefault(); openCart(); });
+		cartBtns.forEach(function (btn) {
+			btn.addEventListener('click', function (e) { e.preventDefault(); openCart(); });
+		});
 		overlay.addEventListener('click', closeCart);
 		document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && drawer.classList.contains('is-open')) closeCart(); });
 
@@ -420,7 +540,7 @@
 			body.append('nonce', LagerSearch.nonce);
 			fetch(LagerSearch.setQty, { method: 'POST', body: body, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 				.then(function (r) { return r.json(); })
-				.then(function (res) { applyFragments(res); })
+				.then(function (res) { applyFragments(res); cartChanged(); })
 				.catch(function () { if (btn) btn.removeAttribute('disabled'); });
 		}
 
@@ -447,7 +567,7 @@
 				cbody.append('nonce', LagerSearch.nonce);
 				fetch(LagerSearch.clearCart, { method: 'POST', body: cbody, headers: { 'X-Requested-With': 'XMLHttpRequest' } })
 					.then(function (r) { return r.json(); })
-					.then(function (res) { applyFragments(res); })
+					.then(function (res) { applyFragments(res); cartChanged(); })
 					.catch(function () { clr.removeAttribute('disabled'); });
 			}
 		});
@@ -502,8 +622,9 @@
 		var page = 0, timer = null;
 		function perView() {
 			var w = slider.clientWidth;
-			if (w < 480) return 1;
-			if (w < 700) return 2;
+			// Phones/small tablets show 3 across (design handoff) — one logo per page left
+			// 15 pagination dashes under a single logo.
+			if (w < 700) return 3;
 			if (w < 920) return 3;
 			if (w < 1000) return 4;
 			return 5;
@@ -545,13 +666,96 @@
 		window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(render, 150); });
 	})();
 
-	// Mobile nav toggle.
-	var toggle = document.querySelector('.navtoggle');
-	var masthead = document.querySelector('.masthead');
+	// Archive (mobile): one bar toggles the filter panel + category rail, which are
+	// hidden by default below 980px so the product list is the first thing on screen.
+	var fbar = document.querySelector('.filtersbar');
+	if (fbar) {
+		var fpanel = document.getElementById('archive-filters');
+		fbar.addEventListener('click', function () {
+			if (!fpanel) { return; }
+			fbar.setAttribute('aria-expanded', fpanel.classList.toggle('is-open') ? 'true' : 'false');
+		});
+	}
+
+	// ---- Mobile navigation (off-canvas drawer, per the design handoff) ----
+	// Two stacked drawers: the main menu, and the category panel sliding over it.
+	// Labels always stay links; the carets beside them do the opening.
+	var masthead  = document.querySelector('.masthead');
+	var toggle    = document.querySelector('.navtoggle');
+	var scrim     = document.querySelector('.navscrim');
+	var mega      = document.querySelector('.megamenu');
+	var shopCaret = document.querySelector('.shopcats__caret');
+
+	function closeCats() {
+		if (mega) { mega.classList.remove('is-open'); }
+		if (shopCaret) { shopCaret.setAttribute('aria-expanded', 'false'); }
+		document.querySelectorAll('.megacat--has-sub.is-open').forEach(function (cat) {
+			cat.classList.remove('is-open');
+			var c = cat.querySelector('.megacat__caret');
+			if (c) { c.setAttribute('aria-expanded', 'false'); }
+		});
+	}
+
+	function openNav() {
+		if (!masthead) { return; }
+		masthead.classList.add('is-open');
+		document.body.classList.add('nav-open');
+		if (scrim) { scrim.hidden = false; }
+		if (toggle) { toggle.setAttribute('aria-expanded', 'true'); }
+	}
+
+	function closeNav() {
+		if (!masthead) { return; }
+		masthead.classList.remove('is-open');
+		document.body.classList.remove('nav-open');
+		if (scrim) { scrim.hidden = true; }
+		if (toggle) { toggle.setAttribute('aria-expanded', 'false'); }
+		closeCats();
+	}
+
 	if (toggle && masthead) {
 		toggle.addEventListener('click', function () {
-			var open = masthead.classList.toggle('is-open');
-			toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (masthead.classList.contains('is-open')) { closeNav(); } else { openNav(); }
+		});
+	}
+	if (scrim) { scrim.addEventListener('click', closeNav); }
+	document.querySelectorAll('.mainnav__close, .megamenu__close').forEach(function (btn) {
+		btn.addEventListener('click', closeNav);
+	});
+	var megaBack = document.querySelector('.megamenu__back');
+	if (megaBack) { megaBack.addEventListener('click', closeCats); }
+	document.addEventListener('keydown', function (e) {
+		if (e.key !== 'Escape' || !masthead || !masthead.classList.contains('is-open')) { return; }
+		if (mega && mega.classList.contains('is-open')) { closeCats(); } else { closeNav(); }
+	});
+
+	// "Prodavnica" label links to the shop; its caret opens the category panel.
+	if (shopCaret && mega) {
+		shopCaret.addEventListener('click', function () {
+			shopCaret.setAttribute('aria-expanded', mega.classList.toggle('is-open') ? 'true' : 'false');
+		});
+	}
+	// Each category label links to its page; its caret opens its subcategory list.
+	document.querySelectorAll('.megacat__caret').forEach(function (caret) {
+		caret.addEventListener('click', function () {
+			var cat = caret.closest('.megacat--has-sub');
+			if (!cat) { return; }
+			caret.setAttribute('aria-expanded', cat.classList.toggle('is-open') ? 'true' : 'false');
+		});
+	});
+
+	// Header search button reveals the util bar's existing search field (no duplicate input,
+	// so the live-search typeahead keeps working) and focuses it.
+	var mobSearch = document.querySelector('.mobsearch');
+	var siteHeader = document.querySelector('.siteheader');
+	if (mobSearch && siteHeader) {
+		mobSearch.addEventListener('click', function () {
+			var open = siteHeader.classList.toggle('is-searching');
+			mobSearch.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (open) {
+				var input = siteHeader.querySelector('.searchbar input');
+				if (input) { input.focus(); }
+			}
 		});
 	}
 })();

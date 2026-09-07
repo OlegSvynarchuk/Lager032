@@ -90,8 +90,9 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$link = get_term_link( $term );
 						if ( ! is_wp_error( $link ) ) {
+							// Homepage cards go straight to the shop (category archive),
+							// not to the category guide post. See inc/category-guides.php.
 							$url = $link;
-							if ( function_exists( 'lager_category_guide_url' ) && ( $lg = lager_category_guide_url( $term->term_id ) ) ) { $url = $lg; }
 						}
 					}
 					$tile_fallback = $home_img . '/catimg-' . $img . '.jpg?v=' . (int) @filemtime( get_template_directory() . '/assets/img/home/catimg-' . $img . '.jpg' );
@@ -203,7 +204,7 @@ $shop_url = function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 
 					array( 'pin', 'Adresa', 'Kneza Miloša 100, 32000 Čačak, Srbija' ),
 					array( 'phone', 'Telefon', '+381 32 342 281 · +381 63 109 31 99' ),
 					array( 'mail', 'Email', 'lager032@gmail.com' ),
-					array( 'clock', 'Radno vreme', 'Pon–Pet: 08:00–16:00 · Sub: 08:00–13:00' ),
+					array( 'clock', 'Radno vreme', 'Radnim danima do 15:30' ),
 				);
 				foreach ( $info as $i ) {
 					printf(

@@ -25,6 +25,7 @@ require_once get_template_directory() . '/inc/emails.php';
 require_once get_template_directory() . '/inc/admin-orders.php';
 require_once get_template_directory() . '/inc/category-guides.php';
 require_once get_template_directory() . '/inc/category-tile-image.php';
+require_once get_template_directory() . '/inc/category-seo-text.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
 /**
@@ -151,4 +152,21 @@ function lager_product_primary_category_name( $product_id ) {
 		}
 	}
 	return $cats[0]->name;
+}
+
+/**
+ * ORDER BY expression for the catalog's "Naziv" order: titles that start with a digit come
+ * first, ascending by that number (6203 → 22208 → 81108); titles that start with a letter
+ * follow, ascending by the letter part only, so the digits after it never outrank the letters
+ * (AS 2035 → KR 47 → T 126). Numbers break ties inside one letter prefix, the full title last
+ * so the order is stable across pages. Needs MySQL 8 / MariaDB 10.0.5+ (REGEXP_SUBSTR).
+ *
+ * @param string $col Fully-qualified post_title column, e.g. "wp_posts.post_title".
+ * @return string ORDER BY list (without the ORDER BY keyword).
+ */
+function lager_title_order_sql( $col ) {
+	return "( $col REGEXP '^[0-9]' ) DESC, "
+		. "REGEXP_SUBSTR( $col, '^[^0-9]+' ) ASC, "
+		. "CAST( REGEXP_SUBSTR( $col, '[0-9]+' ) AS UNSIGNED ) ASC, "
+		. "$col ASC";
 }

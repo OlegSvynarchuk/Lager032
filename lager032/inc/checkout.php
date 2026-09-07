@@ -232,3 +232,96 @@ add_filter( 'gettext', function ( $translated, $text, $domain ) {
 	}
 	return isset( $map[ $text ] ) ? $map[ $text ] : $translated;
 }, 10, 3 );
+
+/**
+ * Add-to-cart notice. WooCommerce assembles it from _n()/__() calls, so the gettext map
+ * above can't reach it cleanly (the plural form never matches a single lookup). Replacing
+ * the finished message via WooCommerce's own filter is simpler and survives updates.
+ */
+add_filter( 'wc_add_to_cart_message_html', function ( $message, $products ) {
+	$titles = array();
+	foreach ( (array) $products as $product_id => $qty ) {
+		$title = wp_strip_all_tags( get_the_title( $product_id ) );
+		if ( $title ) {
+			$titles[] = $title;
+		}
+	}
+	$names = implode( ', ', $titles );
+	$text  = $names
+		? sprintf( ( count( $titles ) > 1 ? '„%s“ su dodati u korpu.' : '„%s“ je dodat u korpu.' ), $names )
+		: 'Proizvod je dodat u korpu.';
+
+	return sprintf(
+		'%1$s <a href="%2$s" class="button wc-forward">%3$s</a>',
+		esc_html( $text ),
+		// This site treats /korpa/ (checkout) as the cart — same target as the header cart
+		// button, the tab bar and the mini-cart. wc_get_cart_url() would point at the unused /cart/.
+		esc_url( function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : wc_get_cart_url() ),
+		esc_html( 'Pogledaj korpu' )
+	);
+}, 10, 2 );
+
+/**
+ * Checkout privacy notice in Serbian.
+ *
+ * WooCommerce reads this from an option and falls back to an English default, so the
+ * gettext map above can't reliably reach it. This supplies a Serbian default but stands
+ * aside the moment someone fills in WooCommerce → Settings → Accounts & Privacy, so the
+ * admin setting always wins. `[privacy_policy]` is WooCommerce's own placeholder and is
+ * swapped for a link to the privacy page.
+ */
+add_filter( 'woocommerce_get_privacy_policy_text', function ( $text, $type ) {
+	// Only replace WooCommerce's English boilerplate. Checking whether the option is empty
+	// is not enough: the setup wizard writes that default INTO the option, so it is never
+	// empty. Matching the wording means any custom text set in the admin is left untouched.
+	if ( ! in_array( $type, array( 'checkout', 'registration' ), true )
+		|| false === stripos( $text, 'Your personal data will be used' ) ) {
+		return $text;
+	}
+
+	return 'checkout' === $type
+		? 'Vaši lični podaci biće korišćeni za obradu Vaše porudžbine, poboljšanje iskustva na ovom sajtu i u druge svrhe opisane u našoj [privacy_policy].'
+		: 'Vaši lični podaci biće korišćeni za poboljšanje iskustva na ovom sajtu, upravljanje pristupom Vašem nalogu i u druge svrhe opisane u našoj [privacy_policy].';
+}, 10, 2 );
+
+/**
+ * Remove WooCommerce's privacy notice from the checkout.
+ *
+ * Removing the action (rather than filtering the text to an empty string) also drops the
+ * wrapper div, so no empty box is left in the payment panel. The registration variant is
+ * untouched, and the Serbian text above still applies wherever it does render.
+ */
+add_action( 'init', function () {
+	remove_action( 'woocommerce_checkout_terms_and_conditions', 'wc_checkout_privacy_policy_text', 20 );
+} );
+
+/**
+ * Mirror the delivery address into the order's shipping fields.
+ *
+ * The checkout deliberately collects ONE address (Podaci za dostavu) into billing_*, and
+ * the separate shipping step is switched off (see woocommerce_cart_needs_shipping_address
+ * above). The consequence was that WooCommerce's "Dostava" panel — and anything built from
+ * it, like a courier label or a shipping export — stayed empty even though the customer had
+ * typed an address.
+ *
+ * Runs at priority 20, after the extra fields are written at 10, so the house number is
+ * available and can be folded into the street line the way a Serbian address reads
+ * ("Gračanička 2") rather than landing on its own line.
+ */
+add_action( 'woocommerce_checkout_create_order', function ( $order ) {
+	$street = trim( (string) $order->get_billing_address_1() );
+	if ( '' === $street ) {
+		return;
+	}
+	$house = trim( (string) $order->get_meta( '_billing_house_no' ) );
+
+	$order->set_shipping_first_name( $order->get_billing_first_name() );
+	$order->set_shipping_last_name( $order->get_billing_last_name() );
+	$order->set_shipping_address_1( $house ? $street . ' ' . $house : $street );
+	$order->set_shipping_city( $order->get_billing_city() );
+	$order->set_shipping_postcode( $order->get_billing_postcode() );
+	$order->set_shipping_country( $order->get_billing_country() );
+	if ( method_exists( $order, 'set_shipping_phone' ) ) {
+		$order->set_shipping_phone( $order->get_billing_phone() );
+	}
+}, 20 );

@@ -42,7 +42,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 			</div>
 
 			<div class="util-bar__tools">
-				<form class="searchbar" role="search" method="get" action="<?php echo esc_url( $shop_url ); ?>">
+				<form class="searchbar" id="header-search" role="search" method="get" action="<?php echo esc_url( $shop_url ); ?>">
 					<?php lager032_icon( 'search' ); ?>
 					<input type="search" name="q" value="<?php echo isset( $_GET['q'] ) ? esc_attr( sanitize_text_field( wp_unslash( $_GET['q'] ) ) ) : ''; ?>"
 						placeholder="<?php esc_attr_e( 'Pretraži artikle...', 'lager032' ); ?>"
@@ -70,7 +70,25 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 				<span></span><span></span><span></span>
 			</button>
 
+			<?php // Mobile only (design: 56px bar — burger left, logo centred, search + cart right).
+			// The search button reveals the util bar's existing search field, so the live-search
+			// typeahead keeps working instead of being duplicated. ?>
+			<div class="mobtools">
+				<button type="button" class="mobtools__btn mobsearch" aria-expanded="false" aria-controls="header-search"
+					aria-label="<?php esc_attr_e( 'Pretraga', 'lager032' ); ?>"><?php lager032_icon( 'search' ); ?></button>
+				<a class="mobtools__btn mobcart" href="<?php echo esc_url( $cart_url ); ?>" aria-label="<?php esc_attr_e( 'Korpa', 'lager032' ); ?>">
+					<?php lager032_icon( 'cart' ); ?>
+					<span class="cartbtn__count"<?php echo $cc ? '' : ' hidden'; ?>><?php echo esc_html( $cc ); ?></span>
+				</a>
+			</div>
+
 			<nav class="mainnav" aria-label="<?php esc_attr_e( 'Glavni meni', 'lager032' ); ?>">
+				<?php // Drawer head — mobile only; on desktop .mainnav is just the inline link row. ?>
+				<div class="mainnav__head">
+					<img class="mainnav__logo" src="<?php echo esc_url( lager_site_image( 'lager_logo', lager_theme_img( '/assets/img/logo.png' ) ) ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>">
+					<button type="button" class="mainnav__close" aria-label="<?php esc_attr_e( 'Zatvori meni', 'lager032' ); ?>"><?php lager032_icon( 'close' ); ?></button>
+				</div>
+
 				<ul class="mainnav__list">
 					<li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Početna', 'lager032' ); ?></a></li>
 					<li><a href="<?php echo esc_url( home_url( '/o-nama/' ) ); ?>"><?php esc_html_e( 'O nama', 'lager032' ); ?></a></li>
@@ -83,8 +101,8 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 				// those with product_cat children get a subcategory flyout on hover).
 				$mega = array(
 					array( 'Ležajevi', 'Kuglični, valjkasti, aksijalni, konični', 'lezaj' ),
-					array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'semering' ),
 					array( 'Remenje', 'Klinasti, rebrasti, zupčasti', 'remen' ),
+					array( 'Semerinzi', 'NBR, FKM, PTFE zaptivke', 'semering' ),
 					array( 'Segeri', 'Unutrašnji i spoljašnji DIN 471/472', 'seger' ),
 					array( 'Krstovi Kardana', 'Kardanski krstovi svih dimenzija', 'krst-kardana' ),
 					array( 'Masti', 'Litijumske, EP, visokotemperaturne', 'masti' ),
@@ -101,13 +119,19 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 						<span><?php esc_html_e( 'Prodavnica', 'lager032' ); ?></span>
 						<?php lager032_icon( 'chevron' ); ?>
 					</a>
+					<?php // Mobile only: the label above is a plain link to the shop, this caret opens the
+					// category list inline (main.js). Hidden on desktop, where the dropdown opens on hover. ?>
+					<button type="button" class="shopcats__caret" aria-expanded="false" aria-controls="shopcats-menu"
+						aria-label="<?php esc_attr_e( 'Kategorije proizvoda', 'lager032' ); ?>"><?php lager032_icon( 'chevron' ); ?></button>
 
-					<div class="megamenu" role="menu">
+					<div class="megamenu" id="shopcats-menu" role="menu">
 						<div class="megamenu__head">
+							<button type="button" class="megamenu__back" aria-label="<?php esc_attr_e( 'Nazad na meni', 'lager032' ); ?>"><?php lager032_icon( 'back' ); ?></button>
 							<span class="megamenu__title"><?php esc_html_e( 'Kategorije proizvoda', 'lager032' ); ?></span>
 							<a class="megamenu__all" href="<?php echo esc_url( $shop_url ); ?>">
 								<?php esc_html_e( 'Sve kategorije', 'lager032' ); ?><?php lager032_icon( 'arrow' ); ?>
 							</a>
+							<button type="button" class="megamenu__close" aria-label="<?php esc_attr_e( 'Zatvori meni', 'lager032' ); ?>"><?php lager032_icon( 'close' ); ?></button>
 						</div>
 						<div class="megamenu__grid">
 							<?php
@@ -137,6 +161,15 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 										esc_html( $label ),
 										esc_html( $sub )
 									);
+									// Mobile: the label above links to the category page, this caret opens the
+									// subcategory list inline (main.js). Hidden on desktop, which uses the hover flyout.
+									printf(
+										'<button type="button" class="megacat__caret" aria-expanded="false" aria-label="%s">',
+										/* translators: %s: category name. */
+										esc_attr( sprintf( __( 'Potkategorije: %s', 'lager032' ), $label ) )
+									);
+									lager032_icon( 'chevron' );
+									echo '</button>';
 									// Long subcategory lists (e.g. Ležaj ~22) wrap into 2 columns so the flyout isn't excessively tall.
 									$submenu_cls = ( count( $kids ) > 8 ) ? ' submenu--cols' : '';
 									printf( '<div class="submenu%s" role="menu">', esc_attr( $submenu_cls ) );
@@ -168,9 +201,21 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 						</div>
 					</div>
 				</div>
+
+				<?php // Drawer foot — mobile only; the contacts that the navy util bar carries on desktop. ?>
+				<div class="mainnav__contact">
+					<span class="mainnav__contact-title"><?php esc_html_e( 'Kontakt', 'lager032' ); ?></span>
+					<a href="tel:+38132342281"><?php lager032_icon( 'phone' ); ?>+381 32 342 281</a>
+					<a href="tel:+381631093199"><?php lager032_icon( 'phone' ); ?>+381 63 109 31 99</a>
+					<a href="mailto:lager032@gmail.com"><?php lager032_icon( 'mail' ); ?>lager032@gmail.com</a>
+					<span><?php lager032_icon( 'pin' ); ?><span><?php esc_html_e( 'Kneza Miloša 100, 32000 Čačak', 'lager032' ); ?></span></span>
+				</div>
 			</nav>
 		</div>
 	</header>
+
+	<?php // Scrim behind the mobile drawer (tap to close). ?>
+	<div class="navscrim" hidden></div>
 
 </div><!-- .siteheader -->
 

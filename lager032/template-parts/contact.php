@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					array( 'pin', 'Adresa', 'Kneza Miloša 100, 32000 Čačak, Srbija' ),
 					array( 'phone', 'Telefon', '+381 32 342 281 · +381 63 109 31 99' ),
 					array( 'mail', 'Email', 'lager032@gmail.com' ),
-					array( 'clock', 'Radno vreme', 'Pon–Pet: 08:00–16:00 · Sub: 08:00–13:00' ),
+					array( 'clock', 'Radno vreme', 'Radnim danima do 15:30' ),
 				);
 				foreach ( $info as $i ) {
 					printf(
@@ -41,17 +41,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 
 			<div class="contact__form-wrap">
-				<?php
-				$kontakt = isset( $_GET['kontakt'] ) ? sanitize_key( $_GET['kontakt'] ) : '';
-				if ( 'ok' === $kontakt ) {
-					echo '<p class="formmsg formmsg--ok">' . esc_html__( 'Hvala! Vaša poruka je poslata. Javićemo se uskoro.', 'lager032' ) . '</p>';
-				} elseif ( 'greska' === $kontakt ) {
-					echo '<p class="formmsg formmsg--err">' . esc_html__( 'Došlo je do greške. Proverite podatke i pokušajte ponovo.', 'lager032' ) . '</p>';
-				}
-				?>
+				<?php lager_contact_notice(); ?>
 				<form class="cform" method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 					<input type="hidden" name="action" value="lager_contact">
-					<?php wp_nonce_field( 'lager_contact', 'lager_contact_nonce' ); ?>
+					<?php lager_contact_fields(); // nonce + honeypot + signed timestamp ?>
 					<div class="cform__row">
 						<label><span><?php esc_html_e( 'Ime i prezime', 'lager032' ); ?> *</span><input type="text" name="ime" required></label>
 						<label><span><?php esc_html_e( 'Telefon', 'lager032' ); ?></span><input type="tel" name="telefon"></label>
