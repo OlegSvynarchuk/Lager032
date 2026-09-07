@@ -4,6 +4,19 @@ A simple, reliable workflow for deploying the **Lager032** WordPress/WooCommerce
 
 > **This site is remote-only.** WordPress and the database live exclusively on the server. The local workspace (`Local Sites/lager`) holds only the custom theme source, which is pushed up with `rsync`. There is no local DB to export, so the database flow below is **remote → local** (backups), not local → remote.
 
+> ### ⚠️ Read first — three corrections to the commands below (verified 2026-09-07)
+>
+> 1. **The key is `~/.ssh/devkey2`, not `devkey`.** The original `devkey`'s passphrase was lost
+>    (RSA passphrases are unrecoverable). `devkey2` replaced it and is authorized in cPanel.
+>    Older `devkey` examples further down are kept for historical context — substitute `devkey2`.
+> 2. **There is no `wp` command on the server.** WP-CLI 2.12.0 exists only as `~/bin/wp-cli.phar`.
+>    Every `wp ...` in this document must be run as `php ~/bin/wp-cli.phar ...` or it fails with
+>    `bash: wp: command not found`.
+> 3. **On Windows, call the system OpenSSH explicitly:** `C:\WINDOWS\System32\OpenSSH\ssh.exe`.
+>    Git Bash bundles its own OpenSSH that cannot reach the Windows ssh-agent's named pipe, so a
+>    bare `ssh`/`rsync` from Git Bash stalls on a passphrase prompt. For rsync:
+>    `-e "/c/WINDOWS/System32/OpenSSH/ssh.exe"`.
+
 ---
 
 ## Table of Contents
@@ -95,8 +108,12 @@ Host lager032
     HostName 162.55.0.170
     Port 22222
     User pixelspi
-    IdentityFile ~/.ssh/devkey
+    IdentityFile ~/.ssh/devkey2
+    IdentitiesOnly yes
+    ServerAliveInterval 60
 ```
+
+This is already in place on the current laptop (`C:\Users\djord\.ssh\config`).
 
 Now you can connect simply with:
 
@@ -106,12 +123,18 @@ ssh lager032
 
 ### Method C: Using Key with Passphrase
 
-```bash
-# Add key to SSH agent (prompts for passphrase once)
-ssh-add ~/.ssh/devkey
+This is the method actually in use — `devkey2` has a passphrase.
 
-# Then connect without specifying key
-ssh -p 22222 pixelspi@162.55.0.170
+```powershell
+# Windows: add to the ssh-agent service (prompts once, survives reboots).
+# Run in PowerShell, NOT Git Bash — Git Bash's ssh-add targets a different agent.
+ssh-add $env:USERPROFILE\.ssh\devkey2
+
+# Verify it loaded
+ssh-add -l
+
+# Then connect without specifying the key
+ssh lager032
 ```
 
 ---
@@ -121,10 +144,11 @@ ssh -p 22222 pixelspi@162.55.0.170
 ```markdown
 ## Server Details
 
-- **Server IP/Host:** 162.55.0.170
+- **Server IP/Host:** 162.55.0.170 (hostname `benz.dnsserve.rs`)
 - **SSH Port:** 22222
 - **Username:** pixelspi
-- **SSH Key:** ~/.ssh/devkey
+- **SSH Key:** ~/.ssh/devkey2  (passphrase-protected; loaded in the Windows ssh-agent)
+- **PHP:** 8.2.33 · **WP-CLI:** 2.12.0 at `~/bin/wp-cli.phar` (no `wp` on PATH)
 
 ## WordPress Installation
 
@@ -139,7 +163,8 @@ Host lager032
 HostName 162.55.0.170
 Port 22222
 User pixelspi
-IdentityFile ~/.ssh/devkey
+IdentityFile ~/.ssh/devkey2
+IdentitiesOnly yes
 ```
 
 ---

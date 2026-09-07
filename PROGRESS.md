@@ -13,7 +13,7 @@ site. Product list (with prices) was exported from Croonus to Excel, converted t
 [products.json](products.json), and imported into WordPress.
 
 - **Site:** https://lager032.pixels2pixels.ch — **remote-only** (WordPress + DB live on the server)
-- **Server:** `pixelspi@162.55.0.170` port `22222`, key `~/.ssh/devkey`
+- **Server:** `pixelspi@162.55.0.170` port `22222`, key `~/.ssh/devkey2` (was `devkey` — see §8)
 - **Remote path:** `/home/pixelspi/public_html/lager032.pixels2pixels.ch`
 - **WP:** core 7.0 · WP-CLI 2.12.0 · WooCommerce 10.8.1 · currency RSD, PDV 20%
 
@@ -84,17 +84,18 @@ Both deployed to the server and PHP-lint clean.
 No automated sync yet. After editing a file locally, upload it:
 
 ```powershell
-scp -i "$env:USERPROFILE\.ssh\devkey" -P 22222 `
-  "lager-auto-reprice.php" `
+scp -P 22222 "lager-auto-reprice.php" `
   "pixelspi@162.55.0.170:/home/pixelspi/public_html/lager032.pixels2pixels.ch/wp-content/mu-plugins/"
 ```
 
 Then lint on the server:
 
 ```powershell
-ssh -i "$env:USERPROFILE\.ssh\devkey" -p 22222 pixelspi@162.55.0.170 `
+ssh lager032 `
   "php -l /home/pixelspi/public_html/lager032.pixels2pixels.ch/wp-content/mu-plugins/lager-auto-reprice.php"
 ```
+
+(`-i`/`-p` are no longer needed — the `lager032` alias in `~/.ssh/config` supplies host, port and key.)
 
 ---
 
@@ -109,10 +110,19 @@ ssh -i "$env:USERPROFILE\.ssh\devkey" -p 22222 pixelspi@162.55.0.170 `
 
 ## 8. Laptop / environment notes
 
-- **SSH key** `~/.ssh/devkey` must exist on each laptop (it is NOT in this repo — keep it out of git).
-- Local root differs per machine. Current laptop: `C:\Users\Pixels2Pixels\Projects\lager`
-  (old laptop was `C:\Users\Harmonity\Local Sites\lager`). [workflow.md](workflow.md) paths are
-  set to the current laptop.
+- **SSH key** must exist on each laptop (it is NOT in this repo — keep it out of git).
+  - **2026-09-07:** the original `~/.ssh/devkey` is **dead** — its passphrase was lost, and RSA
+    passphrases cannot be recovered. Replaced by **`~/.ssh/devkey2`** (RSA 4096, passphrase-protected),
+    imported and authorized via cPanel → SSH Access → Manage SSH Keys. Any laptop still carrying the
+    old `devkey` should switch. The old key is still authorized server-side and should be revoked.
+  - `devkey2` is loaded into the **Windows ssh-agent service** (`ssh-add $env:USERPROFILE\.ssh\devkey2`,
+    run from PowerShell — Git Bash's `ssh-add` targets a different agent).
+- **No `wp` on the server.** WP-CLI 2.12.0 lives at `~/bin/wp-cli.phar`; run `php ~/bin/wp-cli.phar ...`.
+  Every bare `wp ...` example in [workflow.md](workflow.md) needs this substitution.
+- **From Git Bash, use `C:\WINDOWS\System32\OpenSSH\ssh.exe` explicitly.** Git Bash's bundled OpenSSH
+  can't reach the Windows agent's named pipe. For rsync: `-e "/c/WINDOWS/System32/OpenSSH/ssh.exe"`.
+- Local root differs per machine. Current laptop: `C:\Users\djord\projects\lager`
+  (earlier laptops: `C:\Users\Pixels2Pixels\Projects\lager`, `C:\Users\Harmonity\Local Sites\lager`).
 - This folder holds the migration scripts only — there is no local WordPress/`wp-content` tree.
 
 ---
@@ -779,3 +789,90 @@ content yet; per-category "Preuzmi katalog" CTAs also intentionally inert).
 - **Sertifikati** page (still `#`, on hold) · real **bank account #** + PIB/Matični broj · roll navy/red
   tokens fully site-wide · **mobile QA pass** (designs were desktop-only 1440 — mobile is best-judgment) ·
   go-live (indexing off, 301 old URLs).
+
+---
+
+## Session log — 2026-09-07 — admin restructure, marža reliability, security
+
+New laptop set up (clone from GitHub). Old `~/.ssh/devkey` passphrase was lost and is unrecoverable —
+replaced with **`~/.ssh/devkey2`**, authorized in cPanel, loaded into the Windows ssh-agent. See §8.
+
+### New file: [lager-admin.php](lager-admin.php) (mu-plugin)
+All admin/dashboard restructuring lives here, in 11 numbered sections.
+
+**Products list** — columns rebuilt to `Šifra · Naziv · Kategorija · VP · Marža · Neto cena · Cena · Zalihe`
+(Cyrillic headers). Dropped: image (0 of 5,073 products have one), Oznake (`product_tag` = 0 terms),
+Istaknuto (0 featured), Datum (all share the import date), Brendovi (`product_brand` = 0 terms). Added VP +
+Marža so the whole pricing chain reads in one row; VP sortable. Money columns right-aligned — note WP ships
+`.widefat th{text-align:left}`, which outranks a bare `.column-x` rule, so headers need `th.column-x`.
+Hidden: Uvezi/Izvezi buttons (CSS — they are injected from localized JS, no PHP hook), product-type and brand
+filter dropdowns (both removed via `woocommerce_products_admin_list_table_filters`). "Bulk edit" relabelled.
+
+**Stock views** — `Нема на залихама (151)` and `Ниске залихе (2.411)` links above the Products list.
+Replaces WooCommerce's low-stock e-mails, now **disabled**: 2,411 of 5,073 products sit at 1–2 units, so the
+alert fired on nearly every order. Stock deliberately never blocks a sale (`inc/cart.php` forces in-stock +
+backorders), so the client reorders from their supplier — these views are the signal, pull instead of push.
+
+**Menu** — **Наруџбине promoted to top level** (position 55.4, above WooCommerce) with the processing-count
+bubble. ⚠️ Do NOT `remove_submenu_page('woocommerce','wc-orders')`: WP derives the page hook name by finding
+the slug's parent in `$submenu`, so deleting that entry 403s the orders screen. The duplicate is hidden with
+CSS instead. Hidden: Komentari, Kategorije info (`cat_guide` — 1 published guide, ID 5020, still editable by
+direct URL), Brendovi, Oznake, Atributi, Recenzije.
+
+**Orders list** — Croonus layout: `Р.бр. · # · Име · Презиме · Е-пошта · Телефон · Град · Број артикала ·
+Укупно · Датум · Статус`. Order number split from the buyer name via `woocommerce_admin_order_buyer_name`
+(keeps the edit link + Preview button). Порекло removed — note it is registered on `manage_{screen}_columns`,
+*after* `woocommerce_shop_order_list_table_columns`, so it must be unset on the later hook. Sales-channel and
+registered-customer filter dropdowns removed.
+
+**Single order** — Custom Fields and Order attribution meta boxes removed; Refund button hidden;
+**line items now show the category image** via `woocommerce_admin_order_item_thumbnail` +
+`lager_product_category_image_id()`, matching the storefront (no product has its own photo).
+
+### [lager-auto-reprice.php](lager-auto-reprice.php) — marža reliability
+Category marža → price recalculation was silent for large categories: ≤50 products runs synchronously
+(35 of 50 categories), >50 is queued to Action Scheduler (15 categories — Semering 1,406, Ležaj 611,
+Remen 417). The manager saw old prices and re-saved, stacking a second full run.
+
+- Per-category AS groups (`lager-reprice-{term_id}`) + `as_unschedule_all_actions()` before enqueueing, so a
+  re-save **cancels** outstanding batches instead of duplicating them.
+- Job tracking in `lager_reprice_jobs` (non-autoloaded) → progress banner in lager-admin.php,
+  "преостало N од M производа", polling every 10s.
+- **Verified live** with marža unchanged (no price moved): 15 batches complete, 15 canceled (dedupe), 0 failed.
+- **Full test** on `Remen - varijator` via the real `acf/save_post` hook: marža 50→55, VP 5400 → net 8100→8370,
+  `_price`, marža snapshot, `wc_product_meta_lookup` and PDV display all correct, frontend HTML showed 10.044;
+  reverted, all six fields restored exactly. No caching layer exists (no page cache, no object cache), so
+  writes are visible immediately — the gap was the queue, not caching.
+
+### Data integrity checks (read-only)
+- **Croonus ↔ site**: all 49 categories match exactly on šifra, title and marža. Diff clean.
+- **Excel `Lager za web 27-Avg-26.xlsx`**: 4,925 rows, 0 duplicate SKUs, 0 blanks, 0 bad VP/stock, all 47
+  category codes known. **0 VP changes** — the file is already imported.
+- **148 products on site are absent from that Excel** (discontinued). The importer sets them to stock 0, but
+  `inc/cart.php` forces everything in stock, so they stay orderable. **Awaiting client decision.**
+- All 10 orders are **test orders** (store/dev e-mails). Deleted 3 abandoned `checkout-draft` orders
+  (#4950–4952) from the block-checkout era and their nameless "Гост" rows in `wc_customer_lookup`.
+
+### Security review
+Already good: HTTPS + HSTS, full security headers, xmlrpc 403, WP 7.1 + all plugins current,
+`DISALLOW_FILE_EDIT`, `WP_DEBUG` off, wp-config 0600, custom DB prefix, order REST endpoints 401.
+
+Fixed this session:
+- **User enumeration blocked** — `/wp-json/wp/v2/users` and `?author=N` leaked `admin_0k0gk07x`; both now 404.
+- **Login rate limiting** — Limit Login Attempts Reloaded, 4 tries → 20 min lockout, 4 lockouts → 24h.
+  Pinned to `REMOTE_ADDR` (no proxy in front; trusting `X-Forwarded-For` would be spoofable). Lockout verified.
+- **System cron added** — lager032 was the only site of 5 without one, so WP-Cron only fired on visitor
+  traffic. Now `5,20,35,50 * * * *` (~0.4s per run). Guarantees the reprice queue drains.
+  Crontab backup: `~/crontab.backup.20260907-142828`.
+
+### Open / next
+- **Product images** — 0 of 5,073. Largest go-live gap; storefront shows category images as fallback.
+- **Backups** — one manual DB dump (2026-08-27), no files, no automation. Decision deferred.
+- **shop_manager account** for the client (needs their e-mail) — `lager-upload.php` already gates on
+  `manage_woocommerce`. Admin is currently a single shared administrator with no 2FA.
+- **Store address empty**; order e-mails send from `zhelibon@gmail.com` (personal Gmail).
+- **BACS disabled** — only COD is enabled, so every order arrives as *У обради*. If bank transfer is wanted at
+  launch, real account details + the `customer_invoice` e-mail (currently off) are both needed.
+- **148 discontinued products** — awaiting client.
+- Remove `Нацрт` from the order status dropdown (it is hand-selectable and silently hides a sale).
+- Wipe test orders before go-live.

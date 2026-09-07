@@ -75,6 +75,66 @@ function lager_reprice_product( $product_id ) {
 	}
 }
 
+/**
+ * Action Scheduler group for one category's batches. Giving every category its
+ * own group is what makes de-duplication possible: we can cancel all outstanding
+ * work for a category without touching any other category's queue.
+ */
+function lager_reprice_group( $term_id ) {
+	return 'lager-reprice-' . (int) $term_id;
+}
+
+/* ---- Progress tracking -------------------------------------------------- *
+ * A background reprice is invisible by default: the manager saves a marža, the
+ * page reloads showing the old prices, and nothing says work is still running.
+ * These three helpers keep a small job record so the admin can show progress.
+ * Stored non-autoloaded — it is only read on admin screens.
+ */
+
+function lager_reprice_jobs_get() {
+	$jobs = get_option( 'lager_reprice_jobs', array() );
+	if ( ! is_array( $jobs ) ) {
+		return array();
+	}
+	// Drop anything stale so a failed queue can't pin a banner on screen forever.
+	foreach ( $jobs as $tid => $job ) {
+		if ( empty( $job['started'] ) || ( time() - (int) $job['started'] ) > 2 * HOUR_IN_SECONDS ) {
+			unset( $jobs[ $tid ] );
+		}
+	}
+	return $jobs;
+}
+
+function lager_reprice_job_start( $term_id, $total ) {
+	$jobs = lager_reprice_jobs_get();
+	$term = get_term( $term_id );
+
+	$jobs[ (int) $term_id ] = array(
+		'name'      => ( $term && ! is_wp_error( $term ) ) ? $term->name : '#' . (int) $term_id,
+		'total'     => (int) $total,
+		'remaining' => (int) $total,
+		'started'   => time(),
+	);
+	update_option( 'lager_reprice_jobs', $jobs, false );
+}
+
+function lager_reprice_job_advance( $term_id, $done ) {
+	$jobs   = lager_reprice_jobs_get();
+	$term_id = (int) $term_id;
+
+	if ( ! isset( $jobs[ $term_id ] ) ) {
+		return;
+	}
+
+	$jobs[ $term_id ]['remaining'] = max( 0, (int) $jobs[ $term_id ]['remaining'] - (int) $done );
+
+	if ( 0 === $jobs[ $term_id ]['remaining'] ) {
+		unset( $jobs[ $term_id ] );
+	}
+
+	update_option( 'lager_reprice_jobs', $jobs, false );
+}
+
 /** Reprice every product in a category (background-batched when large). */
 function lager_reprice_category( $term_id ) {
 	if ( '' === get_term_meta( $term_id, 'marza', true ) ) {
@@ -99,8 +159,23 @@ function lager_reprice_category( $term_id ) {
 	}
 
 	if ( function_exists( 'as_enqueue_async_action' ) && count( $ids ) > 50 ) {
+
+		$group = lager_reprice_group( $term_id );
+
+		/*
+		 * Cancel any batches still queued for this category before adding new
+		 * ones. Without this, a manager who saves the marža twice (or who saves
+		 * again because the prices "didn't change yet") stacks a second full run
+		 * of the category on top of the first — 15 more batches for Semering.
+		 */
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( 'lager_reprice_batch', null, $group );
+		}
+
+		lager_reprice_job_start( $term_id, count( $ids ) );
+
 		foreach ( array_chunk( $ids, 100 ) as $batch ) {
-			as_enqueue_async_action( 'lager_reprice_batch', array( $batch ), 'lager' );
+			as_enqueue_async_action( 'lager_reprice_batch', array( $batch, (int) $term_id ), $group );
 		}
 	} else {
 		foreach ( $ids as $id ) {
@@ -109,11 +184,17 @@ function lager_reprice_category( $term_id ) {
 	}
 }
 
-add_action( 'lager_reprice_batch', function ( $ids ) {
-	foreach ( (array) $ids as $id ) {
+add_action( 'lager_reprice_batch', function ( $ids, $term_id = 0 ) {
+	$ids = (array) $ids;
+
+	foreach ( $ids as $id ) {
 		lager_reprice_product( $id );
 	}
-} );
+
+	if ( $term_id ) {
+		lager_reprice_job_advance( $term_id, count( $ids ) );
+	}
+}, 10, 2 );
 
 /**
  * Trigger on ACF save:
