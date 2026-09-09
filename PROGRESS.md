@@ -876,3 +876,33 @@ Fixed this session:
 - **148 discontinued products** — awaiting client.
 - Remove `Нацрт` from the order status dropdown (it is hand-selectable and silently hides a sale).
 - Wipe test orders before go-live.
+
+---
+
+## Session log — 2026-09-09 — import: delete-not-in-file, category auto-create
+
+Client meeting: the Excel should be the single source of truth. Two changes to
+[lager-upload.php](mu-plugins/lager-upload.php).
+
+**Artikli van fajla se sada trajno brišu** (were: set to stock 0, which did nothing because
+`inc/cart.php` forces everything in stock). This also settles the 148 discontinued products.
+Deletion is permanent — product ID, URL, images and the link from past orders go with it —
+so three guards were added:
+- The preview states the exact number and colours it red.
+- A confirmation checkbox must be ticked before *Primeni izmene* enables at all.
+- **Server-side threshold**: the finish endpoint refuses outright if the file would delete more
+  than 30% of the catalogue without explicit confirmation. This is the important one — a partial
+  export (one category exported by mistake) would otherwise wipe the rest silently. Measured:
+  the full 27-Avg file deletes 148 (2.9%, allowed); a 600-row partial would delete 4,473 (88%, blocked).
+- Deletion runs 100 per request, the browser loops; each call recomputes what is left, so it self-corrects.
+
+**New categories** were already created with title + šifra. Added: the parent is now derived from
+the code (`01.23` → child of Ležaj, `02.11` → child of Remen), and **products in a category with no
+marža import as drafts**. Without that they went live with an empty price — orderable at 0 RSD,
+because `lager_reprice_product()` returns early when marža is null.
+
+**Latent bug found and fixed**: category lookup by šifra never worked. `get_terms()` with the
+`meta_key`/`meta_value` shorthand silently returns an empty array for term queries on WP 7.1, so every
+code lookup fell through to matching by name. Renaming a category in WordPress would have made the next
+import create a duplicate rather than update it. Now goes through `lager_uvoz_term_by_sifra()` using a
+proper `meta_query`. Verified: 01.00 → Ležaj, 03.00 → Semering, 26.00 → Iglice.

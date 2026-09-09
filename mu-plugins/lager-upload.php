@@ -3,8 +3,8 @@
  * Plugin Name: Lager — Uvoz cenovnika (Excel)
  * Description: Admin alat za uvoz/ažuriranje kataloga proizvoda iz .xlsx fajla.
  *              Uparuje po šifri (SKU), kategorije po šifri kategorije (marža se čuva),
- *              računa neto cenu preko lager_reprice_product(), a nedostajuće artikle
- *              stavlja na stanje 0. Mesto: Proizvodi → Uvoz cenovnika.
+ *              računa neto cenu preko lager_reprice_product(), a artikle kojih nema u fajlu
+ *              trajno briše. Mesto: Proizvodi → Uvoz cenovnika.
  *
  * @package Lager032
  */
@@ -168,9 +168,43 @@ function lager_uvoz_parse( $raw ) {
  * ------------------------------------------------------------------ */
 
 /**
+ * Look up a product_cat by its Croonus code (term meta `sifra`).
+ *
+ * Deliberately a meta_query and not the `meta_key`/`meta_value` shorthand: on
+ * WP 7.1 that shorthand silently returns an empty array for term queries, so
+ * every code lookup here failed and fell through to matching by name. That is
+ * why renaming a category in WordPress used to make the next import create a
+ * duplicate instead of updating the existing one.
+ *
+ * @param string $code e.g. "01.15"
+ * @return int Term ID, or 0 when no category carries that code.
+ */
+function lager_uvoz_term_by_sifra( $code ) {
+	if ( '' === (string) $code ) {
+		return 0;
+	}
+
+	$found = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'hide_empty' => false,
+		'number'     => 1,
+		'fields'     => 'ids',
+		'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery
+			array(
+				'key'     => 'sifra',
+				'value'   => (string) $code,
+				'compare' => '=',
+			),
+		),
+	) );
+
+	return ( ! is_wp_error( $found ) && $found ) ? (int) $found[0] : 0;
+}
+
+/**
  * Find (or create) a product_cat by its code (term meta `sifra`). New categories
- * are created flat with an empty marža (flagged for manual entry). Marža is never
- * overwritten. Returns [term_id, is_new] or null.
+ * are created under the parent implied by their code, with an empty marža (their
+ * products import as drafts). Marža is never overwritten. Returns [term_id, is_new] or null.
  */
 function lager_uvoz_category( $code, $name, &$new_cats ) {
 	static $cache = array();
@@ -181,16 +215,9 @@ function lager_uvoz_category( $code, $name, &$new_cats ) {
 	$term_id = 0;
 
 	if ( '' !== $code ) {
-		$found = get_terms( array(
-			'taxonomy'   => 'product_cat',
-			'hide_empty' => false,
-			'number'     => 1,
-			'meta_key'   => 'sifra',   // phpcs:ignore WordPress.DB.SlowDBQuery
-			'meta_value' => $code,     // phpcs:ignore WordPress.DB.SlowDBQuery
-			'fields'     => 'ids',
-		) );
-		if ( ! is_wp_error( $found ) && $found ) {
-			$term_id = (int) $found[0];
+		$found = lager_uvoz_term_by_sifra( $code );
+		if ( $found ) {
+			$term_id = $found;
 		}
 	}
 	if ( ! $term_id && '' !== $name ) {
@@ -203,7 +230,21 @@ function lager_uvoz_category( $code, $name, &$new_cats ) {
 		}
 	}
 	if ( ! $term_id ) {
-		$res = wp_insert_term( $name ? $name : ( 'Kategorija ' . $code ), 'product_cat' );
+		/*
+		 * Croonus codes carry the hierarchy: 01.15 belongs under 01.00. Created
+		 * flat, a new subcategory lands at the top level beside "Ležaj" instead
+		 * of inside it, and someone has to re-file it by hand afterwards.
+		 */
+		$parent = 0;
+		if ( preg_match( '/^(\d+)\.(\d+)$/', (string) $code, $m ) && '00' !== $m[2] ) {
+			$parent = lager_uvoz_term_by_sifra( $m[1] . '.00' );
+		}
+
+		$res = wp_insert_term(
+			$name ? $name : ( 'Kategorija ' . $code ),
+			'product_cat',
+			$parent ? array( 'parent' => $parent ) : array()
+		);
 		if ( is_wp_error( $res ) ) {
 			$cache[ $ck ] = null;
 			return null;
@@ -232,9 +273,18 @@ function lager_uvoz_product( $row, $term_id ) {
 			return 'error';
 		}
 	} else {
+		/*
+		 * A category with no marža cannot produce a price: lager_reprice_product()
+		 * returns early, and the product would go live with an empty price —
+		 * orderable for 0 RSD. New products in such a category start as drafts;
+		 * the preview lists the categories still waiting for a marža, and setting
+		 * it re-prices them (they still need publishing by hand, deliberately).
+		 */
+		$has_marza = $term_id && '' !== (string) get_term_meta( $term_id, 'marza', true );
+
 		$product = new WC_Product_Simple();
 		$product->set_sku( $row['sku'] );
-		$product->set_status( 'publish' );
+		$product->set_status( $has_marza ? 'publish' : 'draft' );
 	}
 	$product->set_name( $row['name'] );
 	$product->set_manage_stock( true );
@@ -334,23 +384,38 @@ function lager_uvoz_render() {
 						<tr><td>Redova u fajlu</td><td><strong><?php echo (int) $preview['total']; ?></strong></td></tr>
 						<tr><td>Novi proizvodi</td><td><strong><?php echo (int) $preview['new_products']; ?></strong></td></tr>
 						<tr><td>Ažuriraju se</td><td><strong><?php echo (int) $preview['upd_products']; ?></strong></td></tr>
-						<tr><td>Artikli van fajla → stanje 0</td><td><strong><?php echo (int) $preview['discontinued']; ?></strong></td></tr>
-						<tr><td>Nove kategorije (bez marže!)</td><td><strong><?php echo count( $preview['new_cats'] ); ?></strong></td></tr>
+						<tr><td style="color:#b00020;">Artikli van fajla → <strong>trajno se brišu</strong></td><td><strong style="color:#b00020;"><?php echo (int) $preview['discontinued']; ?></strong></td></tr>
+						<tr><td>Nove kategorije (proizvodi ostaju skice)</td><td><strong><?php echo count( $preview['new_cats'] ); ?></strong></td></tr>
 					</tbody>
 				</table>
 				<?php if ( $preview['new_cats'] ) : ?>
-					<p><strong>Nove kategorije kojima treba ručno postaviti maržu:</strong></p>
+					<p><strong>Nove kategorije kojima treba ručno postaviti maržu.</strong>
+					Njihovi proizvodi se uvoze kao <em>skice</em> (nisu vidljivi u prodavnici) jer bez marže
+					nemaju cenu. Postavite maržu, pa ih objavite:</p>
 					<ul style="list-style:disc;padding-left:22px;">
 						<?php foreach ( $preview['new_cats'] as $code => $cn ) : ?>
 							<li><?php echo esc_html( $cn . ( $code ? ' (' . $code . ')' : '' ) ); ?></li>
 						<?php endforeach; ?>
 					</ul>
 				<?php endif; ?>
-				<p style="color:#b00020;"><strong>Napomena:</strong> svi artikli kojih nema u fajlu biće postavljeni na stanje 0.
-				Marža postojećih kategorija se ne menja. Uverite se da je ovo <em>kompletan</em> katalog.</p>
+				<p style="color:#b00020;border-left:4px solid #b00020;padding:8px 12px;background:#fdf2f2;">
+					<strong>Pažnja — brisanje je trajno.</strong> Svaki artikal kojeg nema u fajlu biće obrisan
+					zajedno sa svojom adresom (URL), slikama i vezom ka ranijim porudžbinama. Ovo se ne može poništiti.
+					Uverite se da je ovo <em>kompletan</em> katalog, a ne delimičan izvoz.
+					Marža postojećih kategorija se ne menja.
+				</p>
+
+				<?php if ( (int) $preview['discontinued'] > 0 ) : ?>
+					<p style="background:#fff8e5;border-left:4px solid #dba617;padding:8px 12px;">
+						<label style="font-weight:600;">
+							<input type="checkbox" id="lager-uvoz-confirm">
+							Potvrđujem trajno brisanje <?php echo (int) $preview['discontinued']; ?> artikala kojih nema u fajlu.
+						</label>
+					</p>
+				<?php endif; ?>
 
 				<p>
-					<button type="button" class="button button-primary" id="lager-uvoz-apply">Primeni izmene</button>
+					<button type="button" class="button button-primary" id="lager-uvoz-apply"<?php echo (int) $preview['discontinued'] > 0 ? ' disabled' : ''; ?>>Primeni izmene</button>
 					<span id="lager-uvoz-status" style="margin-left:12px;"></span>
 				</p>
 				<div id="lager-uvoz-bar-wrap" style="display:none;background:#e4ecf8;border-radius:6px;height:18px;max-width:520px;overflow:hidden;">
@@ -371,7 +436,7 @@ function lager_uvoz_render() {
 				var barWrap = document.getElementById('lager-uvoz-bar-wrap');
 				var bar = document.getElementById('lager-uvoz-bar');
 				var log = document.getElementById('lager-uvoz-log');
-				var sums = { created:0, updated:0, errors:0, zeroed:0 };
+				var sums = { created:0, updated:0, errors:0, deleted:0 };
 				function post(data){
 					var body = new URLSearchParams(data);
 					return fetch(ajax, { method:'POST', body: body, credentials:'same-origin' }).then(function(r){ return r.json(); });
@@ -389,17 +454,37 @@ function lager_uvoz_render() {
 						return true;
 					});
 				}
+				// Deletion is permanent, so the button stays locked until the
+				// count has been explicitly acknowledged.
+				var confirmBox = document.getElementById('lager-uvoz-confirm');
+				if (confirmBox){
+					confirmBox.addEventListener('change', function(){ btn.disabled = !confirmBox.checked; });
+				}
+
+				// Delete in chunks; the server reports what is still outstanding.
+				function purge(){
+					return post({ action:'lager_uvoz_finish', nonce:nonce, confirm_delete: confirmBox && confirmBox.checked ? 1 : 0 })
+						.then(function(res){
+							if (!res || !res.success){ throw new Error(res && res.data ? res.data : 'Greška'); }
+							sums.deleted += res.data.deleted;
+							if (res.data.remaining > 0){
+								statusEl.textContent = 'Brisanje artikala van fajla... obrisano ' + sums.deleted + ', preostalo ' + res.data.remaining;
+								return purge();
+							}
+							return true;
+						});
+				}
+
 				btn.addEventListener('click', function(){
-					if (!confirm('Primeniti izmene na sve proizvode? Ovo menja bazu.')) return;
+					if (!confirm('Primeniti izmene? Artikli van fajla biće TRAJNO obrisani. Ovo se ne može poništiti.')) return;
 					btn.disabled = true; barWrap.style.display='block';
 					statusEl.textContent = 'Obrada...';
 					step(0).then(function(){
-						statusEl.textContent = 'Proizvodi gotovi. Postavljam stanje 0 za artikle van fajla...';
-						return post({ action:'lager_uvoz_finish', nonce:nonce });
-					}).then(function(res){
-						if (res && res.success){ sums.zeroed = res.data.zeroed; }
+						statusEl.textContent = 'Proizvodi gotovi. Brišem artikle van fajla...';
+						return purge();
+					}).then(function(){
 						bar.style.width='100%';
-						statusEl.innerHTML = '<strong style="color:#1a7a3c;">Uvoz završen.</strong> Novih ' + sums.created + ', ažurirano ' + sums.updated + ', na stanje 0 ' + sums.zeroed + (sums.errors? ', greške ' + sums.errors : '') + '.';
+						statusEl.innerHTML = '<strong style="color:#1a7a3c;">Uvoz završen.</strong> Novih ' + sums.created + ', ažurirano ' + sums.updated + ', obrisano ' + sums.deleted + (sums.errors? ', greške ' + sums.errors : '') + '.';
 						logline('Gotovo.');
 					}).catch(function(e){
 						statusEl.innerHTML = '<strong style="color:#b00020;">Greška:</strong> ' + e.message;
@@ -415,7 +500,7 @@ function lager_uvoz_render() {
 
 /**
  * Analyze parsed rows (no writes): counts of new/updated products, new categories,
- * and how many existing products would be zeroed (not in the file).
+ * and how many existing products would be deleted (not in the file).
  */
 function lager_uvoz_analyze( $rows ) {
 	global $wpdb;
@@ -518,20 +603,59 @@ add_action( 'wp_ajax_lager_uvoz_finish', function () {
 	foreach ( $rows as $r ) {
 		$file_skus[ (string) $r['sku'] ] = true;
 	}
+
 	global $wpdb;
-	$pairs = $wpdb->get_results( "SELECT p.ID, pm.meta_value AS sku FROM {$wpdb->posts} p INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = '_sku' WHERE p.post_type = 'product' AND p.post_status = 'publish'" );
-	$zeroed = 0;
+	$pairs = $wpdb->get_results(
+		"SELECT p.ID, pm.meta_value AS sku
+		   FROM {$wpdb->posts} p
+		   INNER JOIN {$wpdb->postmeta} pm ON pm.post_id = p.ID AND pm.meta_key = '_sku'
+		  WHERE p.post_type = 'product' AND p.post_status <> 'trash'"
+	);
+
+	$doomed = array();
 	foreach ( $pairs as $row ) {
 		if ( ! isset( $file_skus[ (string) $row->sku ] ) ) {
-			$product = wc_get_product( (int) $row->ID );
-			if ( $product && (float) $product->get_stock_quantity() !== 0.0 ) {
-				$product->set_manage_stock( true );
-				$product->set_stock_quantity( 0 );
-				$product->save();
-				$zeroed++;
-			}
+			$doomed[] = (int) $row->ID;
 		}
 	}
-	delete_transient( lager_uvoz_key() );
-	wp_send_json_success( array( 'zeroed' => $zeroed ) );
+
+	$total   = count( $pairs );
+	$confirm = ! empty( $_POST['confirm_delete'] );
+
+	/*
+	 * Refuse an implausible mass deletion unless it was explicitly confirmed.
+	 * The failure this guards against is a partial export — one category
+	 * exported by mistake, or a truncated file — which would otherwise wipe the
+	 * rest of the catalogue with no way back. Deletion is permanent: product
+	 * IDs, URLs, images and the links from past orders all go with it.
+	 */
+	if ( ! $confirm && $total > 0 && count( $doomed ) > ( $total * 0.30 ) ) {
+		wp_send_json_error( sprintf(
+			'Zaustavljeno radi sigurnosti: ovaj fajl bi trajno obrisao %d od %d proizvoda (preko 30%%). '
+			. 'Ako je fajl zaista kompletan katalog, označite potvrdu za brisanje i pokušajte ponovo.',
+			count( $doomed ),
+			$total
+		) );
+	}
+
+	// Deleting is far heavier than an update, so cap each call and let the
+	// browser loop; the next call recomputes what is left, so it self-corrects.
+	$deleted = 0;
+	foreach ( array_slice( $doomed, 0, 100 ) as $id ) {
+		$product = wc_get_product( $id );
+		if ( $product && $product->delete( true ) ) {
+			$deleted++;
+		}
+	}
+
+	$remaining = max( 0, count( $doomed ) - $deleted );
+
+	if ( 0 === $remaining ) {
+		delete_transient( lager_uvoz_key() );
+	}
+
+	wp_send_json_success( array(
+		'deleted'   => $deleted,
+		'remaining' => $remaining,
+	) );
 } );
