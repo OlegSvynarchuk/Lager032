@@ -994,3 +994,34 @@ suffixed slugs date from the original bulk imports (deletion first ran 2026-09-1
 matching names that legitimately end in digits. Conclusion: with fresh forward-moving price lists,
 plain deletion is correct and no archive/draft state is needed. The order-history risk is covered by
 the stored šifra.
+
+### Verification runs — 2026-09-10 (dev site, real client files)
+
+Four imports plus two targeted tests, each with a before/after integrity snapshot.
+
+| Run | File | Products | Created | Deleted | Price mismatches |
+|---|---|---|---|---|---|
+| 1 | 01-Sep | 5,073 → 4,916 | 4 | 161 | 0 |
+| 2 | 27-Avg | 4,916 → 4,925 | 18 | 9 | 0 |
+| 3 | 01-Sep | 4,925 → 4,916 | 9 | 18 | 0 |
+| 4 | test file | 4,916 → 4,919 | 3 | 0 | 0 |
+
+**~19,000 price checks, zero mismatches.** Every product satisfied `neto = VP × (1 + marža/100)`
+after every run, including the 25 whose VP changed in run 1.
+
+**New-category path proven end to end** (run 4). A generated .xlsx — the September list plus three rows
+in two unknown codes — was imported through the real admin screen:
+- `28.00 Test kategorija` created at top level; `01.23` created **under Ležaj**, parent derived from the code
+- both with marža 0 and no sličica, flagged in the preview
+- products published immediately and sold **at cost**: VP 1000 → 1200 sa PDV
+- setting marža 30 on the category recalculated them instantly: **1.200 → 1.560 RSD**, confirmed in the UI
+- test products and categories removed afterwards; category diff confirms the site is byte-identical to
+  its pre-test state
+
+**Large-category reprice proven** (Semering, 1,390 products, 14 batches):
+- marža 70 → 75: save returned immediately, banner showed `preostalo 1390 od 1390` and counted down
+  (1390 → 890 → 0), finished in under a minute, **0 failed batches, 1390/1390 repriced**
+- restored 75 → 70: again 1390/1390, sample `3064` back to exactly its baseline 232,99 / 280
+
+Untested still: the 30% deletion guard firing on a real partial file (verified by arithmetic only),
+and behaviour under concurrent live traffic.
