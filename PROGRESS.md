@@ -957,3 +957,40 @@ totals (rows / created / updated / deleted), shown above the upload form. Stored
 uploaded: an abandoned preview changed nothing, and listing it would claim the catalogue reflects a
 price list it does not. Answers "was today's file already imported?" — after an import the shop looks
 the same either way, and re-running is destructive now that it deletes.
+
+## Import test runs — 2026-09-10
+
+Two real imports on the dev site, with a full before/after integrity snapshot each
+(`snapshot.php` pattern: product counts, per-category marža, price-formula check on every product,
+orphans, order→product references, nav visibility).
+
+| | 01-Sep file | 27-Avg file |
+|---|---|---|
+| products | 5,073 → 4,916 | 4,916 → 4,925 |
+| created / deleted | 4 / 161 | 18 / 9 |
+| price mismatches | **0 of 4,916** | **0 of 4,925** |
+| categories created | 0 | 0 |
+
+**Every price still equals `VP × (1 + marža/100)` after both runs**, including the 25 products whose VP
+changed — the reprice fires correctly through the import path.
+
+### Two bugs found and fixed
+- **Order lines lose the šifra when a product is deleted.** A WooCommerce order line stores
+  `_product_id` and prices but *not* the SKU — it is resolved from the product at display time. Order
+  #5098 lost its šifra when article 9300 was deleted. Fixed in lager-admin.php §13: the šifra and
+  category are copied onto the line at checkout, and existing orders were backfilled (10/10 lines now
+  carry one). #5098's `9300` was recovered from the pre-import snapshot.
+  - **Hazard found while fixing:** `WC_Order_Item_Product::set_product_id()` rejects an ID whose post
+    is not a live product, so for a deleted product the object reports `product_id = 0` while the DB
+    still holds it. Calling `$item->save()` there would write that 0 back and destroy the last
+    pointer. The backfill writes meta directly with `wc_add_order_item_meta()` and never saves the item.
+- **Deletion count under-reported** (161 shown as 100). The browser posted `sums.deleted` as the
+  request was built, before the final batch's response was added. Now tallied server-side across the run.
+
+### Corrected earlier claims
+The "18 products re-created with new IDs" and "76 churned URLs" were **not** evidence of delete/recreate
+churn: the 18 returned only because the August file was imported over the September one, and the 76
+suffixed slugs date from the original bulk imports (deletion first ran 2026-09-10) with the regex also
+matching names that legitimately end in digits. Conclusion: with fresh forward-moving price lists,
+plain deletion is correct and no archive/draft state is needed. The order-history risk is covered by
+the stored šifra.

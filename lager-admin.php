@@ -21,6 +21,7 @@
  *  10. Products list — stock views
  *  11. Block user enumeration
  *  12. Order print view (Štampa)
+ *  13. Keep order history whole when products are deleted
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -1257,8 +1258,8 @@ function lager_render_order_print_sheet( $order ) {
 		<tbody>
 			<?php foreach ( $order->get_items() as $item ) : ?>
 				<?php
-				$product   = $item->get_product();
-				$sku       = $product ? $product->get_sku() : '';
+				// Stored šifra first, so a deleted product does not blank the column.
+				$sku       = function_exists( 'lager_order_item_sku' ) ? lager_order_item_sku( $item ) : '';
 				$line_sum  = (float) $order->get_line_subtotal( $item, true );
 				$quantity  = (int) $item->get_quantity();
 				// Unit price shown with PDV, so the figures match what the customer saw.
@@ -1315,4 +1316,133 @@ function lager_render_order_print_sheet( $order ) {
 </body>
 </html>
 	<?php
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * 13. Keep order history whole when products are deleted
+ * ---------------------------------------------------------------------------
+ *
+ * A WooCommerce order line stores _product_id, quantity and prices — but not the
+ * šifra. The SKU is looked up from the product every time it is displayed, so
+ * when the Excel import deletes an article the order keeps its name and totals
+ * but loses its šifra: the print sheet shows "-" and there is no way back to the
+ * catalogue entry. That happened to order #5098 on the 2026-09-10 import.
+ *
+ * Copying the šifra (and category) onto the line at checkout makes the order a
+ * self-contained record. Deleting a product then costs the order nothing.
+ *
+ * Keys are underscore-prefixed so WooCommerce keeps them out of the customer's
+ * order confirmation and the front-end order view.
+ */
+add_action( 'woocommerce_checkout_create_order_line_item', function ( $item, $cart_item_key, $values, $order ) {
+
+	$product = $item->get_product();
+	if ( ! $product ) {
+		return;
+	}
+
+	$sku = $product->get_sku();
+	if ( $sku ) {
+		$item->add_meta_data( '_lager_sku', $sku, true );
+	}
+
+	$cats = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) );
+	if ( $cats && ! is_wp_error( $cats ) ) {
+		$item->add_meta_data( '_lager_kategorija', implode( ' / ', $cats ), true );
+	}
+}, 10, 4 );
+
+/**
+ * The šifra for an order line: the stored copy first, the live product second.
+ *
+ * @param WC_Order_Item_Product $item Order line.
+ * @return string Šifra, or '' when neither source has one.
+ */
+function lager_order_item_sku( $item ) {
+
+	$stored = $item->get_meta( '_lager_sku', true );
+	if ( '' !== (string) $stored ) {
+		return (string) $stored;
+	}
+
+	$product = $item->get_product();
+
+	return $product ? (string) $product->get_sku() : '';
+}
+
+/**
+ * Backfill the stored šifra onto order lines that predate this change.
+ *
+ * Safe to run repeatedly: lines that already carry a šifra are skipped, and a
+ * line whose product has since been deleted is left alone rather than guessed at.
+ *
+ * @param array $recover Optional product_id => šifra for products already gone.
+ * @return array Counts: filled, recovered, skipped, unresolved.
+ */
+function lager_backfill_order_skus( $recover = array() ) {
+
+	$stats = array( 'filled' => 0, 'recovered' => 0, 'skipped' => 0, 'unresolved' => 0 );
+
+	$orders = wc_get_orders( array(
+		'limit'  => -1,
+		'status' => array_keys( wc_get_order_statuses() ),
+	) );
+
+	foreach ( $orders as $order ) {
+		foreach ( $order->get_items() as $item ) {
+
+			if ( '' !== (string) $item->get_meta( '_lager_sku', true ) ) {
+				$stats['skipped']++;
+				continue;
+			}
+
+			$item_id = $item->get_id();
+			$product = $item->get_product();
+
+			if ( $product && '' !== (string) $product->get_sku() ) {
+
+				/*
+				 * Written with wc_add_order_item_meta(), not $item->save().
+				 *
+				 * WC_Order_Item_Product::set_product_id() rejects an ID whose post
+				 * is not a live product, so for a line whose product was deleted
+				 * the object reports product_id 0 — and saving the object would
+				 * write that 0 back, destroying the only remaining pointer to the
+				 * catalogue. A direct meta write never touches the other columns.
+				 */
+				wc_add_order_item_meta( $item_id, '_lager_sku', $product->get_sku(), true );
+
+				$cats = wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) );
+				if ( $cats && ! is_wp_error( $cats ) ) {
+					wc_add_order_item_meta( $item_id, '_lager_kategorija', implode( ' / ', $cats ), true );
+				}
+
+				$stats['filled']++;
+				continue;
+			}
+
+			/*
+			 * Product gone. get_product_id() returns 0 here for the reason above,
+			 * so read the surviving _product_id straight from the item meta.
+			 */
+			global $wpdb;
+
+			$pid = (int) $wpdb->get_var( $wpdb->prepare(
+				"SELECT meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta
+				  WHERE order_item_id = %d AND meta_key = '_product_id'",
+				$item_id
+			) );
+
+			if ( $pid && isset( $recover[ $pid ] ) ) {
+				wc_add_order_item_meta( $item_id, '_lager_sku', (string) $recover[ $pid ], true );
+				$stats['recovered']++;
+				continue;
+			}
+
+			$stats['unresolved']++;
+		}
+	}
+
+	return $stats;
 }

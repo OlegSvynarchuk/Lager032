@@ -738,6 +738,18 @@ add_action( 'wp_ajax_lager_uvoz_finish', function () {
 
 	$remaining = max( 0, count( $doomed ) - $deleted );
 
+	/*
+	 * Count deletions on the server, across every batch of the run.
+	 *
+	 * The browser's own tally cannot be used for the stamp: it posts sums.deleted
+	 * as the request is built, before that batch's response has been added, so the
+	 * final call always reports one batch short (161 deletions were recorded as
+	 * 100 on the 2026-09-10 import).
+	 */
+	$tally_key   = 'lager_uvoz_deleted_' . get_current_user_id();
+	$deleted_run = (int) get_transient( $tally_key ) + $deleted;
+	set_transient( $tally_key, $deleted_run, 2 * HOUR_IN_SECONDS );
+
 	if ( 0 === $remaining ) {
 
 		// Stamp the completed import before clearing the session, so the page can
@@ -751,11 +763,12 @@ add_action( 'wp_ajax_lager_uvoz_finish', function () {
 			'rows'    => count( $rows ),
 			'created' => isset( $_POST['created'] ) ? absint( $_POST['created'] ) : 0,
 			'updated' => isset( $_POST['updated'] ) ? absint( $_POST['updated'] ) : 0,
-			'deleted' => isset( $_POST['deleted_total'] ) ? absint( $_POST['deleted_total'] ) : $deleted,
+			'deleted' => $deleted_run,
 		), false );
 
 		delete_transient( lager_uvoz_key() );
 		delete_transient( lager_uvoz_file_key() );
+		delete_transient( $tally_key );
 	}
 
 	wp_send_json_success( array(
