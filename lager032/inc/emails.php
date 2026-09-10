@@ -87,7 +87,22 @@ add_filter( 'gettext', function ( $translated, $text, $domain ) {
 	static $map = array(
 		'Hi %s,'           => 'Poštovani %s,',
 		'Hi,'              => 'Poštovani,',
-		'We’ve received your order and it’s currently on hold until we can confirm your payment has been processed.' => 'Primili smo Vašu porudžbinu. Trenutno je na čekanju dok ne potvrdimo da je uplata evidentirana.',
+		/*
+		 * "Na čekanju" means out of stock here, not awaiting payment.
+		 *
+		 * WooCommerce uses on-hold for bank transfers it has not seen arrive, and
+		 * both sentences below say so. This store sells cash on delivery: the
+		 * customer has paid nothing and owes nothing until the courier arrives,
+		 * so telling them their payment is being verified describes a step that
+		 * does not exist. The client sets this status when an article is not in
+		 * stock, and that is what the customer is told.
+		 *
+		 * Both variants are mapped — the template picks the second one when the
+		 * order has no line items to list, and an unmapped string falls through
+		 * to English.
+		 */
+		'We’ve received your order and it’s currently on hold until we can confirm your payment has been processed.' => 'Vaša porudžbina je primljena. Artikal trenutno nije na stanju — javićemo Vam čim bude spreman za slanje.',
+		'Thanks for your order. It’s on-hold until we confirm that payment has been received.' => 'Hvala na porudžbini. Artikal trenutno nije na stanju — javićemo Vam čim bude spreman za slanje.',
 		'Here’s a reminder of what you’ve ordered:' => 'Pregled Vaše porudžbine:',
 		// Body of the completed-order e-mail. "Completed" is used here to mean
 		// dispatched, not delivered — the courier hands over and collects payment.
