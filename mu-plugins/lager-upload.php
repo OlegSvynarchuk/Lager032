@@ -340,6 +340,25 @@ function lager_uvoz_key() {
 	return 'lager_uvoz_' . get_current_user_id();
 }
 
+/** Transient key for the file name behind those rows. */
+function lager_uvoz_file_key() {
+	return 'lager_uvoz_file_' . get_current_user_id();
+}
+
+/**
+ * The last import that actually completed.
+ *
+ * Recorded on completion rather than on upload: a file that was previewed and
+ * then abandoned never changed the catalogue, and showing it here would say the
+ * shop holds a price list it does not.
+ *
+ * @return array|null ['file','time','user','rows','created','updated','deleted']
+ */
+function lager_uvoz_last_import() {
+	$last = get_option( 'lager_uvoz_last_import' );
+	return is_array( $last ) ? $last : null;
+}
+
 function lager_uvoz_render() {
 	if ( ! current_user_can( 'manage_woocommerce' ) ) {
 		wp_die( 'Nemate dozvolu.' );
@@ -365,6 +384,7 @@ function lager_uvoz_render() {
 						$notice = '<div class="notice notice-error"><p>Fajl ne sadrži nijedan red sa šifrom.</p></div>';
 					} else {
 						set_transient( lager_uvoz_key(), $rows, 2 * HOUR_IN_SECONDS );
+						set_transient( lager_uvoz_file_key(), $name, 2 * HOUR_IN_SECONDS );
 						$preview = lager_uvoz_analyze( $rows );
 					}
 				}
@@ -383,6 +403,44 @@ function lager_uvoz_render() {
 	<div class="wrap">
 		<h1>Увоз ценовника (Excel)</h1>
 		<?php echo $notice; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+		<?php
+		/*
+		 * Which price list the catalogue currently reflects. Without this the
+		 * screen gives no way to tell whether today's file was already imported
+		 * or not — the shop looks identical either way, and the safe assumption
+		 * ("import it again") is the expensive one.
+		 */
+		$lager_last = lager_uvoz_last_import();
+		?>
+		<div class="card" style="max-width:820px;padding:14px 20px;margin-bottom:18px;border-left:4px solid #2271b1;">
+			<h2 style="margin:0 0 6px;font-size:14px;">Poslednja uvezena lista</h2>
+			<?php if ( $lager_last && ! empty( $lager_last['file'] ) ) : ?>
+				<p style="margin:0;font-size:15px;">
+					<strong><?php echo esc_html( $lager_last['file'] ); ?></strong><br>
+					<span style="color:#50575e;">
+						<?php // "\u" is escaped — bare u is PHP's microseconds token and prints 000000. ?>
+						Uvezeno: <strong><?php echo esc_html( date_i18n( 'd.m.Y. \u H:i', (int) $lager_last['time'] ) ); ?></strong>
+						<?php if ( ! empty( $lager_last['user'] ) ) : ?>
+							· <?php echo esc_html( $lager_last['user'] ); ?>
+						<?php endif; ?>
+					</span>
+				</p>
+				<p style="margin:6px 0 0;color:#50575e;">
+					<?php
+					printf(
+						'Redova u fajlu: %1$s · novih: %2$s · ažurirano: %3$s · obrisano: %4$s',
+						esc_html( number_format_i18n( (int) $lager_last['rows'] ) ),
+						esc_html( number_format_i18n( (int) $lager_last['created'] ) ),
+						esc_html( number_format_i18n( (int) $lager_last['updated'] ) ),
+						esc_html( number_format_i18n( (int) $lager_last['deleted'] ) )
+					);
+					?>
+				</p>
+			<?php else : ?>
+				<p style="margin:0;color:#50575e;">Još nije zabeležen nijedan završen uvoz.</p>
+			<?php endif; ?>
+		</div>
 
 		<div class="card" style="max-width:820px;padding:16px 20px;">
 			<h2 style="margin-top:0;">1. Izaberite .xlsx fajl</h2>
@@ -483,7 +541,17 @@ function lager_uvoz_render() {
 
 				// Delete in chunks; the server reports what is still outstanding.
 				function purge(){
-					return post({ action:'lager_uvoz_finish', nonce:nonce, confirm_delete: confirmBox && confirmBox.checked ? 1 : 0 })
+					return post({
+							action: 'lager_uvoz_finish',
+							nonce: nonce,
+							confirm_delete: confirmBox && confirmBox.checked ? 1 : 0,
+							// Carried so the finished import can be stamped with its
+							// totals; the batches run in the browser, so the server
+							// never sees them otherwise.
+							created: sums.created,
+							updated: sums.updated,
+							deleted_total: sums.deleted
+						})
 						.then(function(res){
 							if (!res || !res.success){ throw new Error(res && res.data ? res.data : 'Greška'); }
 							sums.deleted += res.data.deleted;
@@ -671,7 +739,23 @@ add_action( 'wp_ajax_lager_uvoz_finish', function () {
 	$remaining = max( 0, count( $doomed ) - $deleted );
 
 	if ( 0 === $remaining ) {
+
+		// Stamp the completed import before clearing the session, so the page can
+		// show which price list the catalogue currently reflects.
+		$user = wp_get_current_user();
+
+		update_option( 'lager_uvoz_last_import', array(
+			'file'    => (string) get_transient( lager_uvoz_file_key() ),
+			'time'    => time(),
+			'user'    => $user ? $user->display_name : '',
+			'rows'    => count( $rows ),
+			'created' => isset( $_POST['created'] ) ? absint( $_POST['created'] ) : 0,
+			'updated' => isset( $_POST['updated'] ) ? absint( $_POST['updated'] ) : 0,
+			'deleted' => isset( $_POST['deleted_total'] ) ? absint( $_POST['deleted_total'] ) : $deleted,
+		), false );
+
 		delete_transient( lager_uvoz_key() );
+		delete_transient( lager_uvoz_file_key() );
 	}
 
 	wp_send_json_success( array(

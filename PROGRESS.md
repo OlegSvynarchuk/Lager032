@@ -950,3 +950,10 @@ descendant does, so a parent whose products live only in its subcategories is ne
 what `hide_empty => true` would have done, taking the children with it). 50 terms → 47 in the nav;
 `Ležaj - igličasti jednosmerni`, `Remen - pljosnati` and `Uncategorized` are gone, parents intact.
 Matters more now that the import deletes discontinued articles — categories empty out over time.
+
+**Last-import panel on Uvoz cenovnika** (2026-09-10) — file name, date/time, who ran it, and the
+totals (rows / created / updated / deleted), shown above the upload form. Stored in the
+`lager_uvoz_last_import` option, written when the import *completes* rather than when a file is
+uploaded: an abandoned preview changed nothing, and listing it would claim the catalogue reflects a
+price list it does not. Answers "was today's file already imported?" — after an import the shop looks
+the same either way, and re-running is destructive now that it deletes.
