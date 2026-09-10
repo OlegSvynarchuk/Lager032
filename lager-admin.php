@@ -20,6 +20,7 @@
  *   9. Single order screen — declutter
  *  10. Products list — stock views
  *  11. Block user enumeration
+ *  12. Order print view (Štampa)
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -942,3 +943,376 @@ add_action( 'template_redirect', function () {
 	status_header( 404 );
 	nocache_headers();
 }, 0 );
+
+/**
+ * ---------------------------------------------------------------------------
+ * 12. Order print view (Štampa)
+ * ---------------------------------------------------------------------------
+ *
+ * An internal picking / delivery sheet: what goes in the box, or stays with the
+ * warehouse. Not a račun — it deliberately carries no seller identity block
+ * (PIB, matični broj, store address), because this is not a commercial document
+ * and the values on the site are mockup placeholders anyway (footer.php:96).
+ *
+ * Rendered as a print-styled HTML page rather than a generated PDF file:
+ *   - the browser's own Save as PDF produces the file, and direct-to-printer
+ *     works in one step, which is what "štampa" means day to day;
+ *   - no PDF library in mu-plugins to bundle, update or debug;
+ *   - Serbian diacritics render from system fonts instead of needing a font
+ *     embedded into a PDF, which is the usual source of ??? in generated output.
+ *
+ * Latin, per the client: the storefront, product names and customer e-mails are
+ * all Latin, so a document listing those products should match them.
+ */
+
+/** Signed URL for one order's print sheet. Guessing it is not enough; the nonce is checked too. */
+function lager_order_print_url( $order_id ) {
+	return wp_nonce_url(
+		admin_url( 'admin-post.php?action=lager_order_print&order_id=' . absint( $order_id ) ),
+		'lager_order_print_' . absint( $order_id )
+	);
+}
+
+/* ---- Entry point 1: the Radnje column in the orders list ---- */
+add_filter( 'woocommerce_admin_order_actions', function ( $actions, $order ) {
+
+	$actions['lager_print'] = array(
+		'url'    => lager_order_print_url( $order->get_id() ),
+		'name'   => 'Štampa',
+		'action' => 'lager-print',
+	);
+
+	return $actions;
+}, 10, 2 );
+
+/* ---- Entry point 2: the single order screen ---- */
+add_action( 'woocommerce_admin_order_data_after_order_details', function ( $order ) {
+
+	printf(
+		'<p class="form-field form-field-wide"><a href="%s" class="button" target="_blank" rel="noopener">%s</a></p>',
+		esc_url( lager_order_print_url( $order->get_id() ) ),
+		'Štampa naloga'
+	);
+} );
+
+/**
+ * Give the list-table action a printer icon. WooCommerce renders these as icon
+ * buttons whose glyph comes from CSS, so an unstyled custom action shows as an
+ * empty square.
+ */
+add_action( 'admin_head', function () {
+
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || 'woocommerce_page_wc-orders' !== $screen->id ) {
+		return;
+	}
+
+	echo '<style>
+		.wc-action-button-lager-print::after {
+			font-family: dashicons;
+			content: "\f193";
+		}
+	</style>';
+} );
+
+/**
+ * Render the sheet. Standalone HTML, no admin chrome, nothing to strip at print time.
+ */
+add_action( 'admin_post_lager_order_print', function () {
+
+	$order_id = isset( $_GET['order_id'] ) ? absint( $_GET['order_id'] ) : 0;
+
+	if ( ! $order_id || ! current_user_can( 'manage_woocommerce' ) ) {
+		wp_die( 'Nemate dozvolu za pregled ovog naloga.', 'Zabranjen pristup', array( 'response' => 403 ) );
+	}
+	if ( ! check_admin_referer( 'lager_order_print_' . $order_id ) ) {
+		wp_die( 'Neispravan zahtev.', 'Greška', array( 'response' => 403 ) );
+	}
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		wp_die( 'Narudžbina nije pronađena.', 'Greška', array( 'response' => 404 ) );
+	}
+
+	lager_render_order_print_sheet( $order );
+	exit;
+} );
+
+/** One "label: value" row, skipped entirely when the value is empty. */
+function lager_print_row( $label, $value ) {
+	$value = trim( (string) $value );
+	if ( '' === $value ) {
+		return '';
+	}
+	return '<tr><th>' . esc_html( $label ) . '</th><td>' . esc_html( $value ) . '</td></tr>';
+}
+
+function lager_render_order_print_sheet( $order ) {
+
+	/*
+	 * Status label in Latin, spelled out here rather than taken from
+	 * wc_get_order_statuses(). That function returns whatever the current user's
+	 * locale gives — Cyrillic for the manager, English on CLI — which would leave
+	 * one Cyrillic word in an otherwise Latin document.
+	 *
+	 * "Poslato" for completed, and "Nema na zalihama" for on-hold, follow how the
+	 * client actually uses those two statuses rather than WooCommerce's meaning.
+	 */
+	$status_labels = array(
+		'pending'        => 'Čeka plaćanje',
+		'processing'     => 'U obradi',
+		'on-hold'        => 'Na čekanju (nema na zalihama)',
+		'completed'      => 'Poslato',
+		'cancelled'      => 'Otkazano',
+		'refunded'       => 'Refundirano',
+		'failed'         => 'Neuspešno',
+		'checkout-draft' => 'Nacrt',
+	);
+
+	$slug   = $order->get_status();
+	$status = isset( $status_labels[ $slug ] ) ? $status_labels[ $slug ] : $slug;
+
+	// Checkout collects these separately; each appears only when filled.
+	$house     = $order->get_meta( '_billing_house_no' );
+	$floor     = $order->get_meta( '_billing_floor' );
+	$apartment = $order->get_meta( '_billing_apartment' );
+	$intercom  = $order->get_meta( '_billing_intercom' );
+	$phone2    = $order->get_meta( '_billing_phone2' );
+	$note      = $order->get_meta( '_billing_delivery_note' );
+
+	$street = trim( $order->get_billing_address_1() . ( $house ? ' ' . $house : '' ) );
+
+	$gross = (float) $order->get_total();
+	$tax   = (float) $order->get_total_tax();
+	$net   = $gross - $tax;
+
+	header( 'Content-Type: text/html; charset=utf-8' );
+	?>
+<!doctype html>
+<html lang="sr-Latn">
+<head>
+<meta charset="utf-8">
+<title>Nalog #<?php echo esc_html( $order->get_order_number() ); ?> - LAGER STR</title>
+<style>
+	@page { size: A4; margin: 14mm 12mm; }
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
+		font-size: 11pt;
+		line-height: 1.4;
+		color: #000;
+		background: #fff;
+	}
+
+	.sheet { max-width: 190mm; margin: 0 auto; padding: 8mm; }
+
+	header.head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 12mm;
+		border-bottom: 1.5pt solid #000;
+		padding-bottom: 3mm;
+		margin-bottom: 5mm;
+	}
+	.brand { font-size: 16pt; font-weight: 700; letter-spacing: .5pt; }
+	.brand small { display: block; font-size: 9pt; font-weight: 400; letter-spacing: 0; }
+	.docmeta { text-align: right; font-size: 10pt; }
+	.docmeta .no { font-size: 14pt; font-weight: 700; }
+
+	h2 {
+		font-size: 10pt;
+		text-transform: uppercase;
+		letter-spacing: .8pt;
+		margin: 6mm 0 2mm;
+		padding-bottom: 1mm;
+		border-bottom: .5pt solid #000;
+	}
+
+	table { width: 100%; border-collapse: collapse; }
+
+	.kv th {
+		text-align: left;
+		font-weight: 400;
+		color: #444;
+		width: 38mm;
+		padding: 1mm 3mm 1mm 0;
+		vertical-align: top;
+	}
+	.kv td { padding: 1mm 0; vertical-align: top; }
+
+	.cols { display: flex; gap: 10mm; }
+	.cols > div { flex: 1; }
+
+	.items { margin-top: 2mm; }
+	.items th {
+		text-align: left;
+		border-bottom: 1pt solid #000;
+		padding: 1.5mm 2mm;
+		font-size: 9.5pt;
+		text-transform: uppercase;
+		letter-spacing: .4pt;
+	}
+	.items td { padding: 1.5mm 2mm; border-bottom: .25pt solid #999; vertical-align: top; }
+	.items tr { page-break-inside: avoid; }
+	.items .num { text-align: right; white-space: nowrap; }
+	.items .qty { text-align: center; white-space: nowrap; }
+	.items tfoot td { border-bottom: 0; padding: 1mm 2mm; }
+	.items tfoot tr.grand td { border-top: 1pt solid #000; font-weight: 700; font-size: 12pt; }
+
+	.note {
+		margin-top: 4mm;
+		padding: 2mm 3mm;
+		border-left: 2pt solid #000;
+		font-size: 10pt;
+	}
+
+	.sign {
+		margin-top: 12mm;
+		display: flex;
+		justify-content: space-between;
+		gap: 20mm;
+		font-size: 9pt;
+	}
+	.sign div { flex: 1; border-top: .5pt solid #000; padding-top: 1.5mm; }
+
+	footer.foot {
+		margin-top: 8mm;
+		padding-top: 2mm;
+		border-top: .5pt solid #999;
+		font-size: 8.5pt;
+		color: #444;
+		display: flex;
+		justify-content: space-between;
+	}
+
+	.noprint { margin: 0 0 6mm; }
+	.noprint button { font: inherit; padding: 2mm 5mm; cursor: pointer; }
+	@media print { .noprint { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+	<div class="noprint">
+		<button type="button" onclick="window.print()">Štampaj</button>
+		<button type="button" onclick="window.close()">Zatvori</button>
+	</div>
+
+	<header class="head">
+		<div class="brand">
+			LAGER STR
+			<small>Interni nalog za pripremu i isporuku</small>
+		</div>
+		<div class="docmeta">
+			<div class="no">Nalog #<?php echo esc_html( $order->get_order_number() ); ?></div>
+			<div>Datum: <?php echo esc_html( wc_format_datetime( $order->get_date_created(), 'd.m.Y. H:i' ) ); ?></div>
+			<div>Status: <?php echo esc_html( $status ); ?></div>
+		</div>
+	</header>
+
+	<div class="cols">
+		<div>
+			<h2>Kupac</h2>
+			<table class="kv">
+				<?php
+				// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- lager_print_row() escapes.
+				echo lager_print_row( 'Ime i prezime', trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() ) );
+				echo lager_print_row( 'Mobilni telefon', $order->get_billing_phone() );
+				echo lager_print_row( 'Fiksni telefon', $phone2 );
+				echo lager_print_row( 'E-pošta', $order->get_billing_email() );
+				?>
+			</table>
+		</div>
+		<div>
+			<h2>Adresa za dostavu</h2>
+			<table class="kv">
+				<?php
+				echo lager_print_row( 'Ulica i broj', $street );
+				echo lager_print_row( 'Sprat', $floor );
+				echo lager_print_row( 'Stan', $apartment );
+				echo lager_print_row( 'Interfon', $intercom );
+				echo lager_print_row( 'Grad', $order->get_billing_city() );
+				echo lager_print_row( 'Način plaćanja', $order->get_payment_method_title() );
+				// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+				?>
+			</table>
+		</div>
+	</div>
+
+	<h2>Stavke</h2>
+	<table class="items">
+		<thead>
+			<tr>
+				<th style="width:26mm;">Šifra</th>
+				<th>Naziv artikla</th>
+				<th class="qty" style="width:18mm;">Količina</th>
+				<th class="num" style="width:28mm;">Cena</th>
+				<th class="num" style="width:30mm;">Ukupno</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach ( $order->get_items() as $item ) : ?>
+				<?php
+				$product   = $item->get_product();
+				$sku       = $product ? $product->get_sku() : '';
+				$line_sum  = (float) $order->get_line_subtotal( $item, true );
+				$quantity  = (int) $item->get_quantity();
+				// Unit price shown with PDV, so the figures match what the customer saw.
+				$unit      = $quantity ? ( $line_sum / $quantity ) : 0;
+				?>
+				<tr>
+					<td><?php echo esc_html( $sku ? $sku : '-' ); ?></td>
+					<td><?php echo esc_html( $item->get_name() ); ?></td>
+					<td class="qty"><?php echo esc_html( $quantity ); ?></td>
+					<td class="num"><?php echo esc_html( number_format( $unit, 2, ',', '.' ) ); ?></td>
+					<td class="num"><?php echo esc_html( number_format( $line_sum, 2, ',', '.' ) ); ?></td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+		<tfoot>
+			<tr>
+				<td colspan="3"></td>
+				<td class="num">Osnovica</td>
+				<td class="num"><?php echo esc_html( number_format( $net, 2, ',', '.' ) ); ?></td>
+			</tr>
+			<tr>
+				<td colspan="3"></td>
+				<td class="num">PDV 20%</td>
+				<td class="num"><?php echo esc_html( number_format( $tax, 2, ',', '.' ) ); ?></td>
+			</tr>
+			<tr class="grand">
+				<td colspan="3"></td>
+				<td class="num">Ukupno</td>
+				<td class="num"><?php echo esc_html( number_format( $gross, 2, ',', '.' ) . ' ' . get_woocommerce_currency() ); ?></td>
+			</tr>
+		</tfoot>
+	</table>
+
+	<?php if ( '' !== trim( (string) $note ) ) : ?>
+		<div class="note"><strong>Napomena za dostavu:</strong> <?php echo esc_html( $note ); ?></div>
+	<?php endif; ?>
+
+	<?php if ( $order->get_customer_note() ) : ?>
+		<div class="note"><strong>Napomena kupca:</strong> <?php echo esc_html( $order->get_customer_note() ); ?></div>
+	<?php endif; ?>
+
+	<div class="sign">
+		<div>Nalog pripremio</div>
+		<div>Preuzeo / kurir</div>
+	</div>
+
+	<footer class="foot">
+		<span>LAGER STR - interni dokument, nije račun</span>
+		<span>Štampano: <?php echo esc_html( date_i18n( 'd.m.Y. H:i' ) ); ?></span>
+	</footer>
+</div>
+
+<script>window.addEventListener('load', function () { window.print(); });</script>
+</body>
+</html>
+	<?php
+}

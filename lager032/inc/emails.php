@@ -32,7 +32,7 @@ $lager_email_subjects = array(
 	'failed_order'              => 'Neuspešna porudžbina #%s',
 	'customer_on_hold_order'    => 'Primili smo Vašu porudžbinu #%s',
 	'customer_processing_order' => 'Primili smo Vašu porudžbinu #%s',
-	'customer_completed_order'  => 'Vaša porudžbina #%s je isporučena',
+	'customer_completed_order'  => 'Vaša porudžbina #%s je poslata',
 	'customer_refunded_order'   => 'Povraćaj za porudžbinu #%s',
 );
 foreach ( $lager_email_subjects as $lager_eid => $lager_tpl ) {
@@ -53,7 +53,7 @@ $lager_email_headings = array(
 	'failed_order'              => 'Neuspešna porudžbina',
 	'customer_on_hold_order'    => 'Hvala na porudžbini',
 	'customer_processing_order' => 'Hvala na porudžbini',
-	'customer_completed_order'  => 'Vaša porudžbina je isporučena',
+	'customer_completed_order'  => 'Vaša porudžbina je poslata',
 );
 foreach ( $lager_email_headings as $lager_eid => $lager_h ) {
 	add_filter(
@@ -89,6 +89,9 @@ add_filter( 'gettext', function ( $translated, $text, $domain ) {
 		'Hi,'              => 'Poštovani,',
 		'We’ve received your order and it’s currently on hold until we can confirm your payment has been processed.' => 'Primili smo Vašu porudžbinu. Trenutno je na čekanju dok ne potvrdimo da je uplata evidentirana.',
 		'Here’s a reminder of what you’ve ordered:' => 'Pregled Vaše porudžbine:',
+		// Body of the completed-order e-mail. "Completed" is used here to mean
+		// dispatched, not delivered — the courier hands over and collects payment.
+		'We have finished processing your order.' => 'Vaša porudžbina je poslata.',
 		'Just to let you know &mdash; we’ve received your order, and it is now being processed.' => 'Obaveštavamo Vas da smo primili Vašu porudžbinu i da je u obradi.',
 		'You’ve received the following order from %s:' => 'Primili ste sledeću porudžbinu od %s:',
 		'You’ve received a new order from %s:' => 'Primili ste novu porudžbinu od %s:',

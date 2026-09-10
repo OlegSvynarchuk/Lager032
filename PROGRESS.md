@@ -906,3 +906,40 @@ because `lager_reprice_product()` returns early when marža is null.
 code lookup fell through to matching by name. Renaming a category in WordPress would have made the next
 import create a duplicate rather than update it. Now goes through `lager_uvoz_term_by_sifra()` using a
 proper `meta_query`. Verified: 01.00 → Ležaj, 03.00 → Semering, 26.00 → Iglice.
+
+---
+
+## Session log — 2026-09-10 — client meeting follow-ups
+
+Reconciled the client's 15-item task list against the code: several items marked *nije završeno*
+were already implemented (auto-create categories had worked since the import tool was built).
+
+- **Marža read-only on the product** ([lager-import-helpers.php](lager-import-helpers.php)) — it is a
+  snapshot of the category value and is overwritten on every save, so an editable field invited an
+  edit that silently did nothing. `readonly` not `disabled`, so the value still posts back.
+- **Customer e-mail** ([inc/emails.php](lager032/inc/emails.php)) — *isporučena* → **poslata** in subject
+  and heading, and `"We have finished processing your order."` added to the in-e-mail gettext map
+  (it was the one English sentence left in the body).
+- **Order print sheet** — [lager-admin.php](lager-admin.php) §12. A **Štampa** button in the orders-list
+  Radnje column and on the single order screen; opens a print-styled page in a new tab and fires the
+  print dialog. HTML print view rather than a generated PDF: the browser's Save as PDF produces the
+  file anyway, and it avoids bundling a PDF library plus an embedded font — the usual cause of `???`
+  for č/ć/š/ž/đ. Internal document, deliberately no seller identity block (the PIB/matični broj in
+  footer.php are mockup placeholders). Status labels are hardcoded Latin, because
+  `wc_get_order_statuses()` would return Cyrillic for the manager and leave one Cyrillic word in a
+  Latin document. `completed` prints as **Poslato**, matching how the client uses it.
+- **New categories now get marža 0** ([lager-upload.php](mu-plugins/lager-upload.php)) — client's
+  decision, replacing the draft approach. Products publish immediately, but at marža 0 the price
+  equals VP, so they **sell at cost** until the real marža is entered. Stored as `0` rather than left
+  empty on purpose: empty yields no price at all and the product would be orderable at 0 RSD. The
+  import preview now says this in red.
+
+### Noted, not changed
+- **Empty categories stay visible.** The theme passes `hide_empty => false` everywhere, so a category
+  whose products were all deleted still appears in the shop navigation and leads to an empty page.
+  Two already do (`Remen - pljosnati`, `Ležaj - igličasti jednosmerni`). With deletions now running on
+  every import, this will grow.
+- **On-hold e-mail still contradicts the new status meaning.** The client now uses *na čekanju* for
+  "nema na zalihama", but the e-mail tells the customer their payment is being verified.
+- Order notifications deliberately still go to `zhelibon@gmail.com`; switch to `lager032@gmail.com`
+  after go-live (WooCommerce → Podešavanja → E-poruke).

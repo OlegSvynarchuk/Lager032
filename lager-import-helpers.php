@@ -41,7 +41,21 @@ add_action( 'acf/init', function () {
 				'label'        => 'Marža (%)',
 				'name'         => 'marza',
 				'type'         => 'number',
-				'instructions' => 'Marža primenjena pri uvozu (iz kategorije). Net cena = VP × (1 + marža/100).',
+				/*
+				 * Read-only on purpose. Marža belongs to the category, not the
+				 * product: lager-auto-reprice.php overwrites this snapshot from
+				 * the category on every save, so anything typed here is silently
+				 * discarded. Showing it as editable invites the manager to change
+				 * a price here and watch nothing happen.
+				 *
+				 * 'readonly' (not 'disabled') — a readonly input is still posted
+				 * back, so the stored value survives a save untouched.
+				 */
+				'readonly'     => 1,
+				'instructions' => 'Preuzima se iz kategorije proizvoda i ne menja se ovde. '
+					. 'Da biste promenili maržu, izmenite je na stranici kategorije — '
+					. 'time se preračunavaju cene svih proizvoda te kategorije. '
+					. 'Neto cena = VP × (1 + marža/100).',
 				'append'       => '%',
 				'wrapper'      => array( 'width' => '30' ),
 			),

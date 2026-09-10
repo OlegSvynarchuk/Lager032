@@ -203,8 +203,8 @@ function lager_uvoz_term_by_sifra( $code ) {
 
 /**
  * Find (or create) a product_cat by its code (term meta `sifra`). New categories
- * are created under the parent implied by their code, with an empty marža (their
- * products import as drafts). Marža is never overwritten. Returns [term_id, is_new] or null.
+ * are created under the parent implied by their code, with marža 0 and no image
+ * (both set by hand afterwards). Marža is never overwritten. Returns [term_id, is_new] or null.
  */
 function lager_uvoz_category( $code, $name, &$new_cats ) {
 	static $cache = array();
@@ -253,7 +253,24 @@ function lager_uvoz_category( $code, $name, &$new_cats ) {
 		if ( '' !== $code ) {
 			update_term_meta( $term_id, 'sifra', $code );
 		}
-		$new_cats[ $code . '' ] = $name; // flag: needs marža
+
+		/*
+		 * Marža 0 on creation — the client's decision. It means the products go
+		 * on sale straight away rather than waiting for someone to notice them,
+		 * but at marža 0 the price equals VP, so they sell at cost until the real
+		 * marža is entered on the category. Entering it re-prices every product
+		 * in the category automatically (lager-auto-reprice.php).
+		 *
+		 * Stored as 0 rather than left empty deliberately: an empty marža yields
+		 * no price at all, and the product would be orderable at 0 RSD.
+		 *
+		 * These categories are listed in the import preview so they do not sit
+		 * unnoticed at zero margin.
+		 */
+		update_term_meta( $term_id, 'marza', 0 );
+
+		// No image either — the Excel carries none, so it is set by hand later.
+		$new_cats[ $code . '' ] = $name; // flag: needs marža + sličica
 		$cache[ $ck ] = array( $term_id, true );
 		return $cache[ $ck ];
 	}
@@ -385,13 +402,16 @@ function lager_uvoz_render() {
 						<tr><td>Novi proizvodi</td><td><strong><?php echo (int) $preview['new_products']; ?></strong></td></tr>
 						<tr><td>Ažuriraju se</td><td><strong><?php echo (int) $preview['upd_products']; ?></strong></td></tr>
 						<tr><td style="color:#b00020;">Artikli van fajla → <strong>trajno se brišu</strong></td><td><strong style="color:#b00020;"><?php echo (int) $preview['discontinued']; ?></strong></td></tr>
-						<tr><td>Nove kategorije (proizvodi ostaju skice)</td><td><strong><?php echo count( $preview['new_cats'] ); ?></strong></td></tr>
+						<tr><td>Nove kategorije (marža 0 — prodaja po nabavnoj ceni!)</td><td><strong><?php echo count( $preview['new_cats'] ); ?></strong></td></tr>
 					</tbody>
 				</table>
 				<?php if ( $preview['new_cats'] ) : ?>
-					<p><strong>Nove kategorije kojima treba ručno postaviti maržu.</strong>
-					Njihovi proizvodi se uvoze kao <em>skice</em> (nisu vidljivi u prodavnici) jer bez marže
-					nemaju cenu. Postavite maržu, pa ih objavite:</p>
+					<p style="background:#fff8e5;border-left:4px solid #dba617;padding:8px 12px;">
+					<strong>Nove kategorije se kreiraju sa maržom 0 i bez sličice.</strong>
+					Njihovi proizvodi su <em>odmah vidljivi</em> u prodavnici, ali se sa maržom 0
+					<strong>prodaju po nabavnoj ceni</strong> (cena = veleprodajna cena + PDV).
+					Postavite maržu na svakoj od ovih kategorija — cene svih njihovih proizvoda
+					se tada automatski preračunavaju:</p>
 					<ul style="list-style:disc;padding-left:22px;">
 						<?php foreach ( $preview['new_cats'] as $code => $cn ) : ?>
 							<li><?php echo esc_html( $cn . ( $code ? ' (' . $code . ')' : '' ) ); ?></li>
