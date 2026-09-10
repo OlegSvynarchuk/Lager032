@@ -943,3 +943,10 @@ were already implemented (auto-create categories had worked since the import too
   "nema na zalihama", but the e-mail tells the customer their payment is being verified.
 - Order notifications deliberately still go to `zhelibon@gmail.com`; switch to `lager032@gmail.com`
   after go-live (WooCommerce → Podešavanja → E-poruke).
+
+**Empty categories hidden from storefront navigation** (2026-09-10) — `lager_filter_empty_cats()` in
+functions.php, applied in header.php and archive-product.php. Keeps a term when it has products OR any
+descendant does, so a parent whose products live only in its subcategories is never dropped (which is
+what `hide_empty => true` would have done, taking the children with it). 50 terms → 47 in the nav;
+`Ležaj - igličasti jednosmerni`, `Remen - pljosnati` and `Uncategorized` are gone, parents intact.
+Matters more now that the import deletes discontinued articles — categories empty out over time.

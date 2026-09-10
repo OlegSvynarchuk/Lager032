@@ -122,7 +122,7 @@ $cart_url = function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : h
 										if ( ! is_wp_error( $link ) ) {
 											$url = $link;
 										}
-										$kids = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $term->term_id, 'hide_empty' => false ) );
+										$kids = lager_filter_empty_cats( get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $term->term_id, 'hide_empty' => false ) ) );
 										if ( is_wp_error( $kids ) ) {
 											$kids = array();
 										}

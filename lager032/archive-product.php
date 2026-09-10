@@ -310,7 +310,7 @@ if ( $search ) {
 						$open_id = (int) end( $anc ); // top-level ancestor → that branch opens
 					}
 				}
-				$parents = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => 0, 'hide_empty' => false ) );
+				$parents = lager_filter_empty_cats( get_terms( array( 'taxonomy' => 'product_cat', 'parent' => 0, 'hide_empty' => false ) ) );
 				?>
 				<nav class="catnav" aria-label="<?php esc_attr_e( 'Kategorije', 'lager032' ); ?>">
 					<span class="catnav__title"><?php esc_html_e( 'Kategorije', 'lager032' ); ?></span>
@@ -328,7 +328,7 @@ if ( $search ) {
 								$p_active = ( $pid === $cur_id );
 								$p_link   = get_term_link( $p );
 								$p_url    = is_wp_error( $p_link ) ? $shop_link : $p_link;
-								$kids     = get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $pid, 'hide_empty' => false ) );
+								$kids     = lager_filter_empty_cats( get_terms( array( 'taxonomy' => 'product_cat', 'parent' => $pid, 'hide_empty' => false ) ) );
 								$has_kids = ( $kids && ! is_wp_error( $kids ) );
 								$item     = sprintf(
 									'<a class="catnav__item%1$s" href="%2$s"%3$s><span>%4$s</span><em>%5$d</em></a>',

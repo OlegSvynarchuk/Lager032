@@ -152,3 +152,54 @@ function lager_product_primary_category_name( $product_id ) {
 	}
 	return $cats[0]->name;
 }
+
+/**
+ * Drop categories with nothing to show from a term list.
+ *
+ * The storefront navigation deliberately queries with hide_empty => false, so
+ * that a parent whose own products sit in its subcategories still appears. The
+ * cost was that a genuinely empty category stayed in the menu and led to a page
+ * with no products — and since the Excel import now deletes discontinued
+ * articles, categories empty out on their own over time.
+ *
+ * This keeps a term when it holds products itself OR any descendant does, so the
+ * hierarchy never loses a branch. Relying on hide_empty => true instead would
+ * filter on the raw count and hide a parent whose products live only in its
+ * children, taking the children with it.
+ *
+ * @param array $terms Terms from get_terms().
+ * @return array Terms worth linking to.
+ */
+function lager_filter_empty_cats( $terms ) {
+
+	if ( ! $terms || is_wp_error( $terms ) ) {
+		return array();
+	}
+
+	$kept = array();
+
+	foreach ( $terms as $term ) {
+
+		if ( (int) $term->count > 0 ) {
+			$kept[] = $term;
+			continue;
+		}
+
+		// No products of its own — keep it only if a descendant has some.
+		$children = get_term_children( (int) $term->term_id, 'product_cat' );
+
+		if ( is_wp_error( $children ) || ! $children ) {
+			continue;
+		}
+
+		foreach ( $children as $child_id ) {
+			$child = get_term( $child_id, 'product_cat' );
+			if ( $child && ! is_wp_error( $child ) && (int) $child->count > 0 ) {
+				$kept[] = $term;
+				break;
+			}
+		}
+	}
+
+	return $kept;
+}
