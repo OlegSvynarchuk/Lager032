@@ -1033,6 +1033,45 @@ dedicated `lager_print` column, placed after Status and not hidden by default. D
 unhiding *Radnje*: that column also carries Woo's Obradi / Završi buttons, one misclick from changing an
 order's status.
 
-**Client account created** (2026-09-10) — Duško Injac, `lager032@gmail.com`, username `lager_dusko_7k2m`,
+**Client account created** (2026-09-10) — Duško Injac, `lager032@gmail.com`, username `dusko_injac` (renamed from the generated one at client request),
 role **administrator** (client's choice over shop_manager), panel locale `sr_RS`. No notification e-mail
 sent; credentials handed over directly. Note this is now a second full-control account with no 2FA.
+
+---
+
+## Pick up here — state as of 2026-09-10
+
+**Site:** 4,916 products, 50 categories (47 in shop nav), 10 test orders. Catalogue reflects
+`test-nova-kategorija.xlsx` (= the 01-Sep list plus 3 test rows since removed), so prices are the
+September ones. Re-import `Lager za web 01-Sep-26.xlsx` if the panel should name a real client file.
+
+**Everything in the client's task list is done and verified.** Four imports, a new-category test and a
+1,390-product reprice, all on the dev site — see the verification table above.
+
+### Working on this from another machine
+- Clone, then `~/.ssh/config` needs a `lager032` host (HostName 162.55.0.170, User pixelspi, Port 22222)
+  and a key authorized in cPanel. On Windows use `C:\WINDOWS\System32\OpenSSH\ssh.exe` — Git Bash's own
+  OpenSSH cannot reach the Windows ssh-agent.
+- WP-CLI on the server is `php ~/bin/wp-cli.phar` (no `wp` on PATH). `wp db query` does not work —
+  `proc_open` is disabled; use `wp eval` with `$wpdb`.
+- mu-plugins deploy with `scp` to `wp-content/mu-plugins/`; theme files to
+  `wp-content/themes/lager032/`. Always `php -l` on the server afterwards.
+- Latest DB backup: `~/backups/lager032-pre-import-20260910-093003.sql.gz` (verified complete).
+
+### Blocked on other people
+- Client's remaining 4–5 test Excel files.
+- Store address, terms page (Uslovi prodaje), real PIB / matični broj — footer values are still the
+  mockup placeholders from footer.php:96.
+- Whether product photos are uploaded before launch, or the category-image fallback is accepted.
+
+### Go-live, in order
+1. Store address · terms page · automated backups
+2. Wipe the 10 test orders
+3. 2FA on **both** administrator accounts (there are now two with full control, neither protected)
+4. Order notifications → `lager032@gmail.com` (WooCommerce → Podešavanja → E-poruke; currently the dev
+   address on purpose)
+5. Walk the storefront once as a customer, desktop and phone
+6. Confirm the SSL certificate auto-renews (expires 2026-11-06)
+7. **Flip `blog_public` on last** — the site is `noindex` today, which is correct for dev
+
+Client login credentials are held outside the repo — ask Đorđe.
