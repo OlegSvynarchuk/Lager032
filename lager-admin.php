@@ -489,6 +489,14 @@ add_filter( 'woocommerce_shop_order_list_table_columns', function ( $columns ) {
 	$columns['lager_city']  = 'Град';
 	$columns['lager_items'] = 'Број артикала';
 
+	/*
+	 * Štampa gets a column of its own rather than riding in WooCommerce's
+	 * "Radnje" column: that one is in default_hidden_columns(), so the button was
+	 * registered but invisible. Unhiding it would also expose Woo's Obradi /
+	 * Završi buttons, which are one misclick away from changing an order's status.
+	 */
+	$columns['lager_print'] = 'Štampa';
+
 	$order = array(
 		'cb',
 		'lager_row',
@@ -502,6 +510,7 @@ add_filter( 'woocommerce_shop_order_list_table_columns', function ( $columns ) {
 		'order_total',
 		'order_date',
 		'order_status',
+		'lager_print',
 	);
 
 	$sorted = array();
@@ -664,8 +673,32 @@ add_action( 'woocommerce_shop_order_list_table_custom_column', function ( $colum
 				echo '—';
 			}
 			break;
+
+		case 'lager_print':
+			printf(
+				'<a href="%s" class="button lager-print-btn" target="_blank" rel="noopener" title="%s"><span class="dashicons dashicons-printer"></span></a>',
+				esc_url( lager_order_print_url( $order->get_id() ) ),
+				esc_attr( 'Štampaj nalog #' . $order->get_order_number() )
+			);
+			break;
 	}
 }, 10, 2 );
+
+/** Keep the print column narrow and the button tidy. */
+add_action( 'admin_head', function () {
+
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || 'woocommerce_page_wc-orders' !== $screen->id ) {
+		return;
+	}
+
+	echo '<style>
+		table.wp-list-table th.column-lager_print,
+		table.wp-list-table td.column-lager_print { width: 60px; text-align: center; }
+		.lager-print-btn { padding: 0 6px !important; line-height: 26px !important; height: 28px; }
+		.lager-print-btn .dashicons { font-size: 17px; width: 17px; height: 17px; line-height: 26px; vertical-align: middle; }
+	</style>';
+} );
 
 /**
  * ---------------------------------------------------------------------------

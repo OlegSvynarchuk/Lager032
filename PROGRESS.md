@@ -1025,3 +1025,14 @@ in two unknown codes — was imported through the real admin screen:
 
 Untested still: the 30% deletion guard firing on a real partial file (verified by arithmetic only),
 and behaviour under concurrent live traffic.
+
+**Štampa column on the orders list** (2026-09-10) — the button was originally registered through
+`woocommerce_admin_order_actions`, which renders into the *Radnje* column; WooCommerce lists that column
+in `default_hidden_columns()`, so it was invisible unless someone enabled it in Screen Options. Now a
+dedicated `lager_print` column, placed after Status and not hidden by default. Deliberately not just
+unhiding *Radnje*: that column also carries Woo's Obradi / Završi buttons, one misclick from changing an
+order's status.
+
+**Client account created** (2026-09-10) — Duško Injac, `lager032@gmail.com`, username `lager_dusko_7k2m`,
+role **administrator** (client's choice over shop_manager), panel locale `sr_RS`. No notification e-mail
+sent; credentials handed over directly. Note this is now a second full-control account with no 2FA.
